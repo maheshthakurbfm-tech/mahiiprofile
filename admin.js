@@ -281,6 +281,334 @@ function playClickSFX() {
   }
 }
 
+/* ─── VISUAL EDITOR CONTROLLER ─── */
+let activeVeLayer = 'subject';
+const veHistoryStack = [];
+let veHistoryIndex = -1;
+
+const DEFAULT_DESIGN_SCHEMA = {
+  hero: {
+    subject: { x: 0, y: 0, scale: 1.0, opacity: 1.0, zIndex: 3, locked: true },
+    bgText: {
+      content: 'PORTFOLIO',
+      x: 0,
+      y: 0,
+      scale: 1.0,
+      opacity: 0.085,
+      zIndex: 1,
+      mouseParallax: { enabled: true, speedX: -14, speedY: -7 },
+      scrollMotion: { exitXPercent: 35, fadeOnScroll: true }
+    }
+  }
+};
+
+function initVisualEditor() {
+  const d = getSiteData();
+  if (!d.design) {
+    d.design = JSON.parse(JSON.stringify(DEFAULT_DESIGN_SCHEMA));
+    saveSiteData(d);
+  }
+  pushVeHistory(d.design);
+
+  // Device switcher
+  document.querySelectorAll('.ve-device-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.ve-device-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const frame = document.getElementById('ve-canvas-frame');
+      if (frame) frame.setAttribute('data-device', btn.getAttribute('data-device'));
+      updateVeTransformBox();
+      playClickSFX();
+    });
+  });
+
+  // Layer tabs
+  document.querySelectorAll('.ve-layer-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.ve-layer-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      activeVeLayer = tab.getAttribute('data-target-layer');
+      loadVeInspectorProps();
+      updateVeTransformBox();
+      playClickSFX();
+    });
+  });
+
+  // Canvas layer click selection
+  document.querySelectorAll('.ve-layer').forEach(layerEl => {
+    layerEl.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const layerName = layerEl.getAttribute('data-layer');
+      if (layerName) {
+        const tab = document.querySelector(`.ve-layer-tab[data-target-layer="${layerName}"]`);
+        if (tab) tab.click();
+      }
+    });
+  });
+
+  // Dragging logic
+  initVeCanvasDragging();
+
+  // Bi-directional Inspector Inputs
+  bindVeInputPairs('ve-slider-x', 've-num-x', (val) => updateActiveVeProp('x', parseFloat(val)));
+  bindVeInputPairs('ve-slider-y', 've-num-y', (val) => updateActiveVeProp('y', parseFloat(val)));
+  bindVeInputPairs('ve-slider-scale', 've-num-scale', (val) => updateActiveVeProp('scale', parseFloat(val)));
+  bindVeInputPairs('ve-slider-opacity', 've-num-opacity', (val) => updateActiveVeProp('opacity', parseFloat(val)));
+
+  document.getElementById('ve-num-zindex')?.addEventListener('input', (e) => {
+    updateActiveVeProp('zIndex', parseInt(e.target.value) || 1);
+  });
+
+  document.getElementById('ve-prop-locked')?.addEventListener('change', (e) => {
+    updateActiveVeProp('locked', e.target.checked);
+  });
+
+  // Watermark Specific Motion inputs
+  document.getElementById('ve-prop-textcontent')?.addEventListener('input', (e) => {
+    const d = getSiteData();
+    d.design.hero.bgText.content = e.target.value || 'PORTFOLIO';
+    saveSiteData(d);
+    renderVeCanvas();
+    refreshSiteUI();
+  });
+
+  document.getElementById('ve-prop-parallax-enabled')?.addEventListener('change', (e) => {
+    const d = getSiteData();
+    d.design.hero.bgText.mouseParallax.enabled = e.target.checked;
+    saveSiteData(d);
+    refreshSiteUI();
+  });
+
+  bindVeInputPairs('ve-slider-parallax-x', 've-num-parallax-x', (val) => {
+    const d = getSiteData();
+    d.design.hero.bgText.mouseParallax.speedX = parseFloat(val);
+    saveSiteData(d);
+    refreshSiteUI();
+  });
+
+  bindVeInputPairs('ve-slider-parallax-y', 've-num-parallax-y', (val) => {
+    const d = getSiteData();
+    d.design.hero.bgText.mouseParallax.speedY = parseFloat(val);
+    saveSiteData(d);
+    refreshSiteUI();
+  });
+
+  bindVeInputPairs('ve-slider-scrollexit', 've-num-scrollexit', (val) => {
+    const d = getSiteData();
+    d.design.hero.bgText.scrollMotion.exitXPercent = parseFloat(val);
+    saveSiteData(d);
+    refreshSiteUI();
+  });
+
+  // History / Reset
+  document.getElementById('ve-undo-btn')?.addEventListener('click', veUndo);
+  document.getElementById('ve-redo-btn')?.addEventListener('click', veRedo);
+  document.getElementById('ve-reset-btn')?.addEventListener('click', veResetToDefault);
+
+  // Initial Load into Canvas
+  loadVeInspectorProps();
+  renderVeCanvas();
+}
+
+function renderVeCanvas() {
+  const d = getSiteData();
+  const design = d.design?.hero || DEFAULT_DESIGN_SCHEMA.hero;
+
+  const subjEl = document.getElementById('ve-layer-subject');
+  if (subjEl) {
+    const s = design.subject;
+    subjEl.style.transform = `translate(${s.x}px, ${s.y}px) scale(${s.scale})`;
+    subjEl.style.opacity = s.opacity;
+    subjEl.style.zIndex = s.zIndex;
+  }
+
+  const bgTextEl = document.getElementById('ve-layer-bgText');
+  const bgTextRender = document.getElementById('ve-canvas-bgtext-render');
+  if (bgTextEl) {
+    const b = design.bgText;
+    bgTextEl.style.transform = `translate(${b.x}px, ${b.y}px) scale(${b.scale})`;
+    bgTextEl.style.opacity = b.opacity;
+    bgTextEl.style.zIndex = b.zIndex;
+    if (bgTextRender) bgTextRender.textContent = b.content || 'PORTFOLIO';
+  }
+
+  updateVeTransformBox();
+}
+
+function updateVeTransformBox() {
+  const activeLayerEl = document.getElementById(`ve-layer-${activeVeLayer}`);
+  const box = document.getElementById('ve-transform-box');
+  const frame = document.getElementById('ve-canvas-frame');
+  if (!activeLayerEl || !box || !frame) return;
+
+  const layerRect = activeLayerEl.getBoundingClientRect();
+  const frameRect = frame.getBoundingClientRect();
+
+  box.style.left = `${layerRect.left - frameRect.left - 2}px`;
+  box.style.top = `${layerRect.top - frameRect.top - 2}px`;
+  box.style.width = `${layerRect.width + 4}px`;
+  box.style.height = `${layerRect.height + 4}px`;
+  box.classList.add('visible');
+}
+
+function loadVeInspectorProps() {
+  const d = getSiteData();
+  const heroDesign = d.design?.hero || DEFAULT_DESIGN_SCHEMA.hero;
+  const targetProps = heroDesign[activeVeLayer] || DEFAULT_DESIGN_SCHEMA.hero[activeVeLayer];
+
+  setVeInputPair('ve-slider-x', 've-num-x', targetProps.x || 0);
+  setVeInputPair('ve-slider-y', 've-num-y', targetProps.y || 0);
+  setVeInputPair('ve-slider-scale', 've-num-scale', targetProps.scale ?? 1.0);
+  setVeInputPair('ve-slider-opacity', 've-num-opacity', targetProps.opacity ?? 1.0);
+
+  const zIndexInput = document.getElementById('ve-num-zindex');
+  if (zIndexInput) zIndexInput.value = targetProps.zIndex || 1;
+
+  const lockedCheckbox = document.getElementById('ve-prop-locked');
+  if (lockedCheckbox) lockedCheckbox.checked = !!targetProps.locked;
+
+  const motionGroup = document.getElementById('ve-motion-group');
+  if (motionGroup) {
+    if (activeVeLayer === 'bgText') {
+      motionGroup.style.display = 'flex';
+      const b = heroDesign.bgText;
+      const contentInput = document.getElementById('ve-prop-textcontent');
+      if (contentInput) contentInput.value = b.content || 'PORTFOLIO';
+
+      const parallaxCheckbox = document.getElementById('ve-prop-parallax-enabled');
+      if (parallaxCheckbox) parallaxCheckbox.checked = b.mouseParallax?.enabled !== false;
+
+      setVeInputPair('ve-slider-parallax-x', 've-num-parallax-x', b.mouseParallax?.speedX ?? -14);
+      setVeInputPair('ve-slider-parallax-y', 've-num-parallax-y', b.mouseParallax?.speedY ?? -7);
+      setVeInputPair('ve-slider-scrollexit', 've-num-scrollexit', b.scrollMotion?.exitXPercent ?? 35);
+    } else {
+      motionGroup.style.display = 'none';
+    }
+  }
+}
+
+function updateActiveVeProp(key, val) {
+  const d = getSiteData();
+  if (!d.design) d.design = JSON.parse(JSON.stringify(DEFAULT_DESIGN_SCHEMA));
+  d.design.hero[activeVeLayer][key] = val;
+  saveSiteData(d);
+  pushVeHistory(d.design);
+  renderVeCanvas();
+  refreshSiteUI();
+}
+
+function bindVeInputPairs(sliderId, numId, onChange) {
+  const slider = document.getElementById(sliderId);
+  const num = document.getElementById(numId);
+  if (!slider || !num) return;
+
+  const update = (val) => {
+    slider.value = val;
+    num.value = val;
+    onChange(val);
+  };
+
+  slider.addEventListener('input', (e) => update(e.target.value));
+  num.addEventListener('input', (e) => update(e.target.value));
+}
+
+function setVeInputPair(sliderId, numId, val) {
+  const slider = document.getElementById(sliderId);
+  const num = document.getElementById(numId);
+  if (slider) slider.value = val;
+  if (num) num.value = val;
+}
+
+function initVeCanvasDragging() {
+  let isDragging = false;
+  let startX = 0, startY = 0;
+  let initialPropX = 0, initialPropY = 0;
+
+  const frame = document.getElementById('ve-canvas-frame');
+  if (!frame) return;
+
+  frame.addEventListener('mousedown', (e) => {
+    const d = getSiteData();
+    const layerProp = d.design?.hero?.[activeVeLayer];
+    if (layerProp?.locked) return; // Prevent dragging locked elements
+
+    isDragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    initialPropX = layerProp.x || 0;
+    initialPropY = layerProp.y || 0;
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+
+    const newX = Math.round(initialPropX + dx);
+    const newY = Math.round(initialPropY + dy);
+
+    setVeInputPair('ve-slider-x', 've-num-x', newX);
+    setVeInputPair('ve-slider-y', 've-num-y', newY);
+    updateActiveVeProp('x', newX);
+    updateActiveVeProp('y', newY);
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (isDragging) {
+      isDragging = false;
+    }
+  });
+}
+
+function pushVeHistory(designObj) {
+  if (veHistoryIndex < veHistoryStack.length - 1) {
+    veHistoryStack.splice(veHistoryIndex + 1);
+  }
+  veHistoryStack.push(JSON.parse(JSON.stringify(designObj)));
+  veHistoryIndex = veHistoryStack.length - 1;
+}
+
+function veUndo() {
+  if (veHistoryIndex > 0) {
+    veHistoryIndex--;
+    applyVeHistoryState();
+    showToast('Undo applied');
+    playClickSFX();
+  }
+}
+
+function veRedo() {
+  if (veHistoryIndex < veHistoryStack.length - 1) {
+    veHistoryIndex++;
+    applyVeHistoryState();
+    showToast('Redo applied');
+    playClickSFX();
+  }
+}
+
+function applyVeHistoryState() {
+  const d = getSiteData();
+  d.design = JSON.parse(JSON.stringify(veHistoryStack[veHistoryIndex]));
+  saveSiteData(d);
+  loadVeInspectorProps();
+  renderVeCanvas();
+  refreshSiteUI();
+}
+
+function veResetToDefault() {
+  if (confirm('Reset visual layout to baseline defaults?')) {
+    const d = getSiteData();
+    d.design = JSON.parse(JSON.stringify(DEFAULT_DESIGN_SCHEMA));
+    saveSiteData(d);
+    pushVeHistory(d.design);
+    loadVeInspectorProps();
+    renderVeCanvas();
+    refreshSiteUI();
+    showToast('Visual layout reset to defaults!');
+    playClickSFX();
+  }
+}
+
 /* ─── INIT ─── */
 function initAdmin() {
   initPasswordGate();
@@ -288,6 +616,7 @@ function initAdmin() {
   initAddProject();
   initSaveButton();
   initExport();
+  initVisualEditor();
 }
 
 if (document.readyState === 'loading') {

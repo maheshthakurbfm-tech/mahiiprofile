@@ -352,14 +352,35 @@ function initHeroAnimations() {
   const heroLeft = document.getElementById('hero-left');
   const heroCenter = document.getElementById('hero-center');
   const heroRight = document.getElementById('hero-right');
+  const portraitImg = document.querySelector('.portrait-img');
+
+  // Dynamically Hydrate Visual & Motion Settings from siteData.design
+  const design = siteData?.design?.hero || {
+    subject: { x: 0, y: 0, scale: 1.0, opacity: 1.0, zIndex: 3 },
+    bgText: { content: 'PORTFOLIO', x: 0, y: 0, scale: 1.0, opacity: 0.085, zIndex: 1, mouseParallax: { enabled: true, speedX: -14, speedY: -7 }, scrollMotion: { exitXPercent: 35 } }
+  };
+
+  if (portraitImg && design.subject) {
+    portraitImg.style.transform = `translate(${design.subject.x || 0}px, ${design.subject.y || 0}px) scale(${design.subject.scale ?? 1})`;
+    portraitImg.style.opacity = design.subject.opacity ?? 1;
+  }
+  if (heroCenter && design.subject) {
+    heroCenter.style.zIndex = design.subject.zIndex || 3;
+  }
+
+  if (bgText && design.bgText) {
+    bgText.textContent = design.bgText.content || 'PORTFOLIO';
+    bgText.style.zIndex = design.bgText.zIndex || 1;
+  }
 
   // Load sequence
   const tl = gsap.timeline({ delay: 0.2 });
 
-  // 1. BG watermark — RIGHT TO LEFT
+  // 1. BG watermark — Centered directly behind person on load
+  const targetBgOpacity = design.bgText?.opacity ?? 0.085;
   tl.fromTo(bgText,
-    { x: '180px', opacity: 0 },
-    { x: '0px', opacity: 0.9, duration: 2.2, ease: 'power4.out' },
+    { opacity: 0, scale: design.bgText?.scale ?? 1 },
+    { opacity: targetBgOpacity, scale: design.bgText?.scale ?? 1, duration: 1.8, ease: 'power3.out' },
     0
   );
 
@@ -389,44 +410,57 @@ function initHeroAnimations() {
   if (typeof ScrollTrigger !== 'undefined') {
     gsap.registerPlugin(ScrollTrigger);
 
-    // BG text LEFT drift on scroll
-    gsap.to(bgText, {
-      xPercent: -15,
-      yPercent: -20,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: '#hero',
-        start: 'top top',
-        end: 'bottom top',
-        scrub: 1.2,
-      }
-    });
+    const exitXPercent = design.bgText?.scrollMotion?.exitXPercent ?? 35;
 
-    // Left bio lifts UP
-    gsap.to(heroLeft, {
-      yPercent: -35,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: '#hero',
-        start: 'top top',
-        end: 'bottom top',
-        scrub: 1.0,
+    // BG text on scroll down: moves smoothly towards the RIGHT and fades out.
+    // On scroll back up: comes from the right back to center and fades in.
+    gsap.fromTo(bgText,
+      { opacity: targetBgOpacity, xPercent: 0 },
+      {
+        xPercent: exitXPercent,
+        opacity: 0,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '#hero',
+          start: '20% top',
+          end: '80% top',
+          scrub: 1.0,
+        }
       }
-    });
+    );
 
-    // Portrait scale down + fade
-    gsap.to(heroCenter, {
-      scale: 0.92,
-      yPercent: 12,
-      opacity: 0.05,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: '#hero',
-        start: 'top top',
-        end: 'bottom top',
-        scrub: 1.4,
+    // Left bio lifts UP (fades out down, fades back in on scroll up)
+    gsap.fromTo(heroLeft,
+      { opacity: 1, yPercent: 0 },
+      {
+        yPercent: -30,
+        opacity: 0,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '#hero',
+          start: '25% top',
+          end: '85% top',
+          scrub: 1.0,
+        }
       }
-    });
+    );
+
+    // Portrait scale down + fade (fades out on scroll down, fades back in to 1.0 on scroll up to top)
+    gsap.fromTo(heroCenter,
+      { opacity: 1, scale: 1, yPercent: 0 },
+      {
+        scale: 0.92,
+        yPercent: 15,
+        opacity: 0,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '#hero',
+          start: '30% top',
+          end: '85% top',
+          scrub: 1.0,
+        }
+      }
+    );
 
     // Section reveals
     gsap.utils.toArray('.reveal-up').forEach((el) => {
@@ -455,16 +489,24 @@ function initHeroAnimations() {
     });
   }
 
-  // ── MOUSE PARALLAX for hero bg text ──
+  // ── MOUSE PARALLAX (ONLY PORTFOLIO TEXT RESPONDS IF ENABLED) ──
   document.addEventListener('mousemove', (e) => {
     if (!bgText) return;
+    if (window.innerWidth <= 768) return;
+
+    const p = siteData?.design?.hero?.bgText?.mouseParallax || { enabled: true, speedX: -14, speedY: -7 };
+    if (p.enabled === false) return;
+
     const cx = window.innerWidth / 2;
     const cy = window.innerHeight / 2;
     const dx = (e.clientX - cx) / cx;
     const dy = (e.clientY - cy) / cy;
+
+    // Watermark text receives customizable mouse-based wiggle
     gsap.to(bgText, {
-      x: `+=${dx * -40}`,
-      duration: 1.8,
+      x: (design.bgText?.x || 0) + dx * (p.speedX ?? -14),
+      y: (design.bgText?.y || 0) + dy * (p.speedY ?? -7),
+      duration: 1.6,
       ease: 'power2.out',
       overwrite: 'auto',
     });

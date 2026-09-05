@@ -309,15 +309,131 @@
         </div>
 
         <div class="admin-tabs">
-          <button class="admin-tab active" data-tab="hero">Hero</button>
+          <button class="admin-tab active" data-tab="visual-editor">🎨 Visual Editor</button>
+          <button class="admin-tab" data-tab="hero">Hero Content</button>
           <button class="admin-tab" data-tab="projects">Projects</button>
           <button class="admin-tab" data-tab="contact">Contact</button>
         </div>
 
         <div class="admin-body">
 
-          <!-- TAB: HERO -->
-          <div class="admin-tab-content active" id="tab-hero">
+          <!-- TAB: VISUAL EDITOR (CANVA-LIKE EDITOR) -->
+          <div class="admin-tab-content active" id="tab-visual-editor">
+            <!-- Toolbar -->
+            <div class="ve-toolbar">
+              <div class="ve-device-selector">
+                <button class="ve-device-btn active" data-device="desktop" title="Desktop View">🖥️ Desktop</button>
+                <button class="ve-device-btn" data-device="tablet" title="Tablet View">📱 Tablet</button>
+                <button class="ve-device-btn" data-device="mobile" title="Mobile View">📲 Mobile</button>
+              </div>
+              <div class="ve-history-controls">
+                <button class="ve-btn" id="ve-undo-btn" title="Undo (Ctrl+Z)">↩️ Undo</button>
+                <button class="ve-btn" id="ve-redo-btn" title="Redo (Ctrl+Y)">↪️ Redo</button>
+                <button class="ve-btn danger" id="ve-reset-btn" title="Reset to Baseline Defaults">🔄 Reset</button>
+              </div>
+            </div>
+
+            <!-- Editor Split Container -->
+            <div class="ve-workspace">
+              <!-- Live Interactive Canvas -->
+              <div class="ve-canvas-wrapper" id="ve-canvas-wrapper">
+                <div class="ve-canvas-frame" id="ve-canvas-frame">
+                  <!-- Canvas Layers -->
+                  <div class="ve-layer" id="ve-layer-bgText" data-layer="bgText">
+                    <span id="ve-canvas-bgtext-render">PORTFOLIO</span>
+                  </div>
+                  <div class="ve-layer" id="ve-layer-subject" data-layer="subject">
+                    <img src="assets/hero.png" alt="Hero Subject" id="ve-canvas-subject-img" />
+                  </div>
+
+                  <!-- Active Selection Box / Handles -->
+                  <div class="ve-transform-box" id="ve-transform-box">
+                    <div class="ve-handle ve-handle-tl" data-handle="tl"></div>
+                    <div class="ve-handle ve-handle-tr" data-handle="tr"></div>
+                    <div class="ve-handle ve-handle-bl" data-handle="bl"></div>
+                    <div class="ve-handle ve-handle-br" data-handle="br"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Inspector Panel Sidebar -->
+              <div class="ve-inspector">
+                <div class="ve-inspector-header">
+                  <h3>Layer Inspector</h3>
+                  <div class="ve-layer-selector-group">
+                    <button class="ve-layer-tab active" data-target-layer="subject">👤 Hero Subject</button>
+                    <button class="ve-layer-tab" data-target-layer="bgText">🔤 Watermark Text</button>
+                  </div>
+                </div>
+
+                <!-- Properties Form -->
+                <div class="ve-props-body">
+                  <div class="ve-prop-row">
+                    <label>Lock Layer Position</label>
+                    <input type="checkbox" id="ve-prop-locked" />
+                  </div>
+
+                  <!-- Transform Section -->
+                  <div class="ve-prop-group">
+                    <div class="ve-group-title">Layout & Position</div>
+                    <div class="ve-prop-row">
+                      <label>Offset X (px)</label>
+                      <input type="range" id="ve-slider-x" min="-250" max="250" value="0" />
+                      <input type="number" id="ve-num-x" min="-500" max="500" value="0" />
+                    </div>
+                    <div class="ve-prop-row">
+                      <label>Offset Y (px)</label>
+                      <input type="range" id="ve-slider-y" min="-250" max="250" value="0" />
+                      <input type="number" id="ve-num-y" min="-500" max="500" value="0" />
+                    </div>
+                    <div class="ve-prop-row">
+                      <label>Scale Factor</label>
+                      <input type="range" id="ve-slider-scale" min="0.4" max="2.5" step="0.05" value="1.0" />
+                      <input type="number" id="ve-num-scale" min="0.1" max="5.0" step="0.05" value="1.0" />
+                    </div>
+                    <div class="ve-prop-row">
+                      <label>Opacity</label>
+                      <input type="range" id="ve-slider-opacity" min="0" max="1" step="0.01" value="1.0" />
+                      <input type="number" id="ve-num-opacity" min="0" max="1" step="0.01" value="1.0" />
+                    </div>
+                    <div class="ve-prop-row">
+                      <label>Layer Order (Z-Index)</label>
+                      <input type="number" id="ve-num-zindex" min="0" max="10" value="3" />
+                    </div>
+                  </div>
+
+                  <!-- Watermark / Motion Specific Group (Shown for bgText) -->
+                  <div class="ve-prop-group" id="ve-motion-group" style="display:none;">
+                    <div class="ve-group-title">Motion & Parallax</div>
+                    <div class="ve-prop-row">
+                      <label>Watermark Text</label>
+                      <input type="text" id="ve-prop-textcontent" value="PORTFOLIO" style="width:110px;" />
+                    </div>
+                    <div class="ve-prop-row">
+                      <label>Mouse Parallax</label>
+                      <input type="checkbox" id="ve-prop-parallax-enabled" checked />
+                    </div>
+                    <div class="ve-prop-row">
+                      <label>Mouse Speed X</label>
+                      <input type="range" id="ve-slider-parallax-x" min="-50" max="50" value="-14" />
+                      <input type="number" id="ve-num-parallax-x" min="-100" max="100" value="-14" />
+                    </div>
+                    <div class="ve-prop-row">
+                      <label>Mouse Speed Y</label>
+                      <input type="range" id="ve-slider-parallax-y" min="-50" max="50" value="-7" />
+                      <input type="number" id="ve-num-parallax-y" min="-100" max="100" value="-7" />
+                    </div>
+                    <div class="ve-prop-row">
+                      <label>Scroll Exit Slide (% X)</label>
+                      <input type="range" id="ve-slider-scrollexit" min="-100" max="100" value="35" />
+                      <input type="number" id="ve-num-scrollexit" min="-200" max="200" value="35" />
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
             <div class="form-group">
               <label>First Name (blue)</label>
               <input type="text" id="edit-firstName" />

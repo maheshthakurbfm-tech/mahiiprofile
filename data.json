@@ -71,5 +71,34 @@
     { "name": "Blender", "icon": "🔷", "level": 65 },
     { "name": "Photoshop", "icon": "🖼️", "level": 85 },
     { "name": "Audition", "icon": "🔊", "level": 82 }
-  ]
+  ],
+  "design": {
+    "hero": {
+      "subject": {
+        "x": 0,
+        "y": 0,
+        "scale": 1.0,
+        "opacity": 1.0,
+        "zIndex": 3,
+        "locked": true
+      },
+      "bgText": {
+        "content": "PORTFOLIO",
+        "x": 0,
+        "y": 0,
+        "scale": 1.0,
+        "opacity": 0.085,
+        "zIndex": 1,
+        "mouseParallax": {
+          "enabled": true,
+          "speedX": -14,
+          "speedY": -7
+        },
+        "scrollMotion": {
+          "exitXPercent": 35,
+          "fadeOnScroll": true
+        }
+      }
+    }
+  }
 }
