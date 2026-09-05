@@ -11,16 +11,35 @@ let audioEnabled = true;
 let audioCtx = null;
 let lenis = null;
 
-/* ─── AUDIO ENGINE (Web Audio API) ─── */
-function getAudioCtx() {
-  if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+/* ─── MECHANICAL GEAR SFX ENGINE (Web Audio API) ─── */
+let gearAudioCtx = null;
+let isUserInteracted = false;
+
+// Enable audio context after first user gesture (respecting browser autoplay rules)
+function unlockAudioContext() {
+  if (!isUserInteracted) {
+    isUserInteracted = true;
+    if (gearAudioCtx && gearAudioCtx.state === 'suspended') {
+      gearAudioCtx.resume();
+    }
   }
-  return audioCtx;
+}
+window.addEventListener('pointerdown', unlockAudioContext, { once: true, passive: true });
+window.addEventListener('keydown', unlockAudioContext, { once: true, passive: true });
+window.addEventListener('scroll', unlockAudioContext, { once: true, passive: true });
+
+function getAudioCtx() {
+  if (!gearAudioCtx) {
+    gearAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (gearAudioCtx.state === 'suspended' && isUserInteracted) {
+    gearAudioCtx.resume();
+  }
+  return gearAudioCtx;
 }
 
 function playClickSFX() {
-  if (!audioEnabled) return;
+  if (!audioEnabled || !isUserInteracted) return;
   try {
     const ctx = getAudioCtx();
     const osc = ctx.createOscillator();
@@ -37,21 +56,82 @@ function playClickSFX() {
   } catch (_) {}
 }
 
-function playScrollTick() {
-  if (!audioEnabled) return;
+/**
+ * Crisp, Dry, Metallic Mechanical Gear Ratchet Sound ("chak-chak-chak")
+ * Synthesizes a physical metal gear tooth engagement transient.
+ * @param {number} velocity - Current scroll speed (positive = DOWN, negative = UP)
+ */
+function playGearTick(velocity = 0) {
+  if (!audioEnabled || !isUserInteracted) return;
   try {
     const ctx = getAudioCtx();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(150, ctx.currentTime);
-    gain.gain.setValueAtTime(0.06, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.015);
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 0.015);
+    if (ctx.state !== 'running') return;
+
+    const absVel = Math.abs(velocity);
+    const isScrollUp = velocity < 0;
+    const now = ctx.currentTime;
+    const tickDuration = 0.007; // 7ms ultra-tight mechanical tooth impact
+
+    // 1. HARD METALLIC TRANSIENT NOISE (The "Chak" tooth impact)
+    // Short burst of high-frequency white noise filtered into a dry metal click
+    const bufferSize = Math.floor(ctx.sampleRate * tickDuration);
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      // Exponential decay on noise burst for ultra-sharp mechanical snap
+      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.25));
+    }
+
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+
+    // Bandpass filter centered at metallic resonance (2.4kHz - 3.8kHz)
+    const bandpass = ctx.createBiquadFilter();
+    bandpass.type = 'bandpass';
+    bandpass.frequency.setValueAtTime(isScrollUp ? 3600 : 2800, now);
+    bandpass.Q.setValueAtTime(4.5, now);
+
+    // Highpass to eliminate any muddy low-end "scroll rumbling"
+    const highpass = ctx.createBiquadFilter();
+    highpass.type = 'highpass';
+    highpass.frequency.setValueAtTime(1400, now);
+
+    // 2. METALLIC GEAR TOOTH TINK / RING
+    // Very short metallic resonance of the tooth striking the ratchet pawl
+    const metalPing = ctx.createOscillator();
+    const pingGain = ctx.createGain();
+    const pingFreq = isScrollUp ? 1850 : 1420;
+    
+    metalPing.type = 'triangle';
+    metalPing.frequency.setValueAtTime(pingFreq, now);
+    metalPing.frequency.exponentialRampToValueAtTime(pingFreq * 0.65, now + 0.008);
+
+    pingGain.gain.setValueAtTime(0.04, now);
+    pingGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.008);
+
+    metalPing.connect(pingGain);
+
+    // Noise gain stage
+    const noiseGain = ctx.createGain();
+    const vol = Math.min(0.045 + Math.min(absVel * 0.01, 0.045), 0.08);
+    noiseGain.gain.setValueAtTime(vol, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + tickDuration);
+
+    noise.connect(bandpass);
+    bandpass.connect(highpass);
+    highpass.connect(noiseGain);
+
+    noiseGain.connect(ctx.destination);
+    pingGain.connect(ctx.destination);
+
+    noise.start(now);
+    metalPing.start(now);
+    metalPing.stop(now + 0.008);
   } catch (_) {}
+}
+
+function playScrollTick() {
+  playGearTick(2);
 }
 
 /* ─── SOUND TOGGLE ─── */
@@ -266,25 +346,41 @@ function renderAccordion() {
     </div>
   `).join('');
 
-  // Bind toggle
-  wrap.querySelectorAll('.accordion-trigger').forEach((trigger) => {
-    trigger.addEventListener('click', () => {
-      const item = trigger.closest('.accordion-item');
-      const isOpen = item.classList.contains('is-open');
-
-      wrap.querySelectorAll('.accordion-item').forEach(el => {
-        el.classList.remove('is-open');
-        el.querySelector('.accordion-trigger').setAttribute('aria-expanded', 'false');
-      });
-
-      if (!isOpen) {
-        item.classList.add('is-open');
-        trigger.setAttribute('aria-expanded', 'true');
-        playScrollTick();
-      } else {
-        playClickSFX();
-      }
+  // Helper function to open a specific accordion item
+  const openItem = (item) => {
+    if (item.classList.contains('is-open')) return;
+    wrap.querySelectorAll('.accordion-item').forEach(el => {
+      el.classList.remove('is-open');
+      const tr = el.querySelector('.accordion-trigger');
+      if (tr) tr.setAttribute('aria-expanded', 'false');
     });
+    item.classList.add('is-open');
+    const trigger = item.querySelector('.accordion-trigger');
+    if (trigger) trigger.setAttribute('aria-expanded', 'true');
+    playScrollTick();
+  };
+
+  // Bind hover (mouseenter) and click on each item
+  wrap.querySelectorAll('.accordion-item').forEach((item) => {
+    // Hover auto-open
+    item.addEventListener('mouseenter', () => {
+      openItem(item);
+    });
+
+    // Click toggle fallback
+    const trigger = item.querySelector('.accordion-trigger');
+    if (trigger) {
+      trigger.addEventListener('click', () => {
+        const isOpen = item.classList.contains('is-open');
+        if (!isOpen) {
+          openItem(item);
+        } else {
+          item.classList.remove('is-open');
+          trigger.setAttribute('aria-expanded', 'false');
+          playClickSFX();
+        }
+      });
+    }
   });
 }
 
@@ -630,13 +726,162 @@ function initHeroAnimations() {
     window.addEventListener('blur', springReturnToHome);
     window.addEventListener('resize', springReturnToHome);
   }
+
+  // ------------------------------------------------------------
+  // ABOUT BG WATERMARK MOTION (ABOUT)
+  // Replicating exact PORTFOLIO watermark (#hero-bg-text) scroll logic
+  // ------------------------------------------------------------
+  const aboutBgText = document.getElementById('about-bg-text');
+  if (aboutBgText && typeof ScrollTrigger !== 'undefined') {
+    gsap.registerPlugin(ScrollTrigger);
+
+    const targetAboutOpacity = 0.35;
+    const exitXPercent = 35; // Matches PORTFOLIO exitXPercent
+    const scrollState = { x: 0, opacity: targetAboutOpacity };
+
+    // Initial base state
+    aboutBgText.style.setProperty('--scroll-x', '0vw');
+    aboutBgText.style.opacity = targetAboutOpacity;
+
+    gsap.to(scrollState, {
+      x: exitXPercent,
+      opacity: 0,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '#about',
+        start: 'top top',
+        end: '85% top',
+        scrub: 0.35,
+        invalidateOnRefresh: true,
+        onUpdate: () => {
+          aboutBgText.style.setProperty('--scroll-x', `${scrollState.x}vw`);
+          aboutBgText.style.opacity = scrollState.opacity;
+        },
+        onLeaveBack: () => {
+          // Hard reset to canonical state at the top of section
+          scrollState.x = 0;
+          scrollState.opacity = targetAboutOpacity;
+          aboutBgText.style.setProperty('--scroll-x', '0vw');
+          aboutBgText.style.opacity = targetAboutOpacity;
+        }
+      }
+    });
+
+    const mouseObj = { x: 0, y: 0 };
+    let mouseTween = null;
+    document.addEventListener('mousemove', (e) => {
+      if (window.innerWidth <= 768) return;
+      const aboutSec = document.getElementById('about');
+      if (!aboutSec) return;
+      const rect = aboutSec.getBoundingClientRect();
+      if (e.clientY < rect.top || e.clientY > rect.bottom) return;
+
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      const dx = Math.max(-1, Math.min(1, (e.clientX - cx) / cx));
+      const dy = Math.max(-1, Math.min(1, (e.clientY - cy) / cy));
+
+      if (mouseTween) mouseTween.kill();
+      mouseTween = gsap.to(mouseObj, {
+        x: dx * 8.0,
+        y: dy * 4.5,
+        duration: 0.25,
+        ease: 'power2.out',
+        onUpdate: () => {
+          aboutBgText.style.setProperty('--mouse-x', `${mouseObj.x}px`);
+          aboutBgText.style.setProperty('--mouse-y', `${mouseObj.y}px`);
+        }
+      });
+    }, { passive: true });
+  }
+
+  // ------------------------------------------------------------
+  // PASSIONS BG WATERMARK MOTION (INTERESTS)
+  // ------------------------------------------------------------
+  const interestsBgText = document.getElementById('interests-bg-text');
+  if (interestsBgText && typeof ScrollTrigger !== 'undefined') {
+    const targetPassionsOpacity = 0.35;
+    const exitXPercent = 35;
+    const scrollState = { x: 0, opacity: targetPassionsOpacity };
+
+    interestsBgText.style.setProperty('--scroll-x', '0vw');
+    interestsBgText.style.opacity = targetPassionsOpacity;
+
+    gsap.to(scrollState, {
+      x: exitXPercent,
+      opacity: 0,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '#interests',
+        start: 'top top',
+        end: '85% top',
+        scrub: 0.35,
+        invalidateOnRefresh: true,
+        onUpdate: () => {
+          interestsBgText.style.setProperty('--scroll-x', `${scrollState.x}vw`);
+          interestsBgText.style.opacity = scrollState.opacity;
+        },
+        onLeaveBack: () => {
+          scrollState.x = 0;
+          scrollState.opacity = targetPassionsOpacity;
+          interestsBgText.style.setProperty('--scroll-x', '0vw');
+          interestsBgText.style.opacity = targetPassionsOpacity;
+        }
+      }
+    });
+
+    const mouseObjPassions = { x: 0, y: 0 };
+    let mouseTweenPassions = null;
+    document.addEventListener('mousemove', (e) => {
+      if (window.innerWidth <= 768) return;
+      const interestsSec = document.getElementById('interests');
+      if (!interestsSec) return;
+      const rect = interestsSec.getBoundingClientRect();
+      if (e.clientY < rect.top || e.clientY > rect.bottom) return;
+
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      const dx = Math.max(-1, Math.min(1, (e.clientX - cx) / cx));
+      const dy = Math.max(-1, Math.min(1, (e.clientY - cy) / cy));
+
+      if (mouseTweenPassions) mouseTweenPassions.kill();
+      mouseTweenPassions = gsap.to(mouseObjPassions, {
+        x: dx * 8.0,
+        y: dy * 4.5,
+        duration: 0.25,
+        ease: 'power2.out',
+        onUpdate: () => {
+          interestsBgText.style.setProperty('--mouse-x', `${mouseObjPassions.x}px`);
+          interestsBgText.style.setProperty('--mouse-y', `${mouseObjPassions.y}px`);
+        }
+      });
+    }, { passive: true });
+  }
+
+  // ------------------------------------------------------------
+  // PASSIONS HORIZONTAL ACCORDION INTERACTION
+  // ------------------------------------------------------------
+  const passionCards = document.querySelectorAll('.passion-card');
+  if (passionCards.length) {
+    passionCards.forEach(card => {
+      const activateCard = () => {
+        passionCards.forEach(c => c.classList.remove('is-active'));
+        card.classList.add('is-active');
+        playScrollTick();
+      };
+      card.addEventListener('mouseenter', activateCard);
+      card.addEventListener('click', activateCard);
+    });
+  }
 }
 
 /* ─── STAT COUNTER ─── */
 function initStatCounters() {
   if (typeof ScrollTrigger === 'undefined') return;
   document.querySelectorAll('.stat-value[data-count]').forEach(el => {
-    const target = parseInt(el.getAttribute('data-count'), 10);
+    const rawCount = el.getAttribute('data-count');
+    if (!rawCount || isNaN(parseInt(rawCount, 10))) return;
+    const target = parseInt(rawCount, 10);
     const suffix = el.getAttribute('data-suffix') || '';
     ScrollTrigger.create({
       trigger: el,
@@ -681,24 +926,64 @@ function initNavbar() {
   }, { passive: true });
 }
 
-/* ─── SMOOTH SCROLL (Lenis) ─── */
+/* ─── SMOOTH SCROLL (Lenis) + GEAR SFX SYNCHRONIZATION ─── */
 function initLenis() {
-  if (typeof Lenis === 'undefined') return;
-  lenis = new Lenis({ duration: 1.2, easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
+  let accumulatedScrollDistance = 0;
 
-  function raf(time) {
-    lenis.raf(time);
-    if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.update();
+  const handleScrollVelocity = (velocity) => {
+    if (!audioEnabled || !isUserInteracted) return;
+    const absVel = Math.abs(velocity);
+    if (absVel < 0.05) return;
+
+    // Accumulate scroll displacement
+    accumulatedScrollDistance += absVel;
+
+    // Gear tooth distance threshold: lower threshold at higher speed for natural gear teeth engagement rhythm
+    // Slow scroll: tick every ~18px
+    // Fast scroll: tick every ~10px
+    const tickInterval = Math.max(10, 22 - Math.min(absVel * 3, 12));
+
+    if (accumulatedScrollDistance >= tickInterval) {
+      accumulatedScrollDistance = 0;
+      playGearTick(velocity);
+    }
+  };
+
+  if (typeof Lenis !== 'undefined') {
+    lenis = new Lenis({ duration: 1.2, easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
+
+    lenis.on('scroll', (e) => {
+      // e.velocity gives direction and speed (positive = DOWN, negative = UP)
+      handleScrollVelocity(e.velocity);
+    });
+
+    function raf(time) {
+      lenis.raf(time);
+      if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.update();
+      requestAnimationFrame(raf);
+    }
     requestAnimationFrame(raf);
+  } else {
+    // Native scroll fallback
+    let lastY = window.scrollY;
+    window.addEventListener('scroll', () => {
+      const currentY = window.scrollY;
+      const delta = currentY - lastY;
+      lastY = currentY;
+      handleScrollVelocity(delta * 0.1);
+    }, { passive: true });
   }
-  requestAnimationFrame(raf);
 
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', (e) => {
       const target = document.querySelector(anchor.getAttribute('href'));
       if (target) {
         e.preventDefault();
-        lenis.scrollTo(target, { offset: -80 });
+        if (lenis) {
+          lenis.scrollTo(target, { offset: -80 });
+        } else {
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
         playClickSFX();
       }
     });

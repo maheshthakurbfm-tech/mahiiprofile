@@ -7,12 +7,12 @@
     "roles": ["VIDEO EDITOR", "MOTION DESIGNER", "COLORIST", "VISUAL STORYTELLER"]
   },
   "about": {
-    "bio": "I'm Mahesh Thakur, a Video Editor & Motion Graphics Specialist based in India. With 5+ years of experience, I craft retention-driven edits, stunning motion sequences, and cinematic color grades that keep audiences hooked. I've worked across commercial, short-form, and long-form content — always leading with storytelling.",
+    "bio": "I'm Mahesh Thakur, a Video Editor from India with 2.5+ years of experience. I work across video editing, motion graphics, color grading, and sound, with a focus on clean work, strong pacing, and attention to detail. I'm looking for a team where I can put my skills to their best use, keep learning, take on new challenges, and contribute to the growth of the work and the company along the way.",
     "stats": [
-      { "value": 100, "suffix": "+", "label": "Videos Edited" },
-      { "value": 5, "suffix": "+", "label": "Years Experience" },
-      { "value": 50, "suffix": "M+", "label": "Views Generated" },
-      { "value": 100, "suffix": "%", "label": "Client Satisfaction" }
+      { "value": "100+", "label": "Videos Edited" },
+      { "value": "2.5+", "label": "Years Experience" },
+      { "value": "MULTIPLE", "label": "Projects Delivered" },
+      { "value": "100%", "label": "Client Satisfaction" }
     ]
   },
   "projects": [
@@ -66,11 +66,14 @@
     { "name": "Premiere Pro", "icon": "assets/icons/premiere.svg", "level": 95 },
     { "name": "After Effects", "icon": "assets/icons/aftereffects.svg", "level": 92 },
     { "name": "DaVinci Resolve", "icon": "assets/icons/davinci.svg", "level": 88 },
-    { "name": "Final Cut Pro", "icon": "assets/icons/finalcutpro.svg", "level": 80 },
-    { "name": "Cinema 4D", "icon": "assets/icons/cinema4d.svg", "level": 70 },
-    { "name": "Blender", "icon": "assets/icons/blender.svg", "level": 65 },
+    { "name": "Lightroom", "icon": "assets/icons/lightroom.svg", "level": 85 },
+    { "name": "CapCut", "icon": "assets/icons/capcut.png", "level": 90 },
+    { "name": "CorelDRAW", "icon": "assets/icons/coreldraw.png", "level": 80 },
+    { "name": "Illustrator", "icon": "assets/icons/illustrator.svg", "level": 88 },
+    { "name": "Inkscape", "icon": "assets/icons/inkscape.png", "level": 78 },
+    { "name": "Blender", "icon": "assets/icons/blender.png", "level": 65 },
     { "name": "Photoshop", "icon": "assets/icons/photoshop.svg", "level": 85 },
-    { "name": "Audition", "icon": "assets/icons/audition.svg", "level": 82 }
+    { "name": "Canva", "icon": "assets/icons/canva.png", "level": 90 }
   ],
   "design": {
     "hero": {

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <rect width="512" height="512" rx="110" fill="#141416"/>
+  <rect x="24" y="24" width="464" height="464" rx="90" fill="none" stroke="#252528" stroke-width="12"/>
+  <g transform="translate(256, 256) scale(1.1)">
+    <!-- Top Red petal -->
+    <path d="M0 0 L-65 -150 A100 100 0 0 1 65 -150 Z" fill="#ff3838"/>
+    <!-- Right Green petal -->
+    <path d="M0 0 L150 -55 A100 100 0 0 1 110 115 Z" fill="#2ed573"/>
+    <!-- Bottom/Left Blue petal -->
+    <path d="M0 0 L-110 115 A100 100 0 0 1 -150 -55 Z" fill="#1e90ff"/>
+    <!-- Inner ring overlap / core -->
+    <circle cx="0" cy="0" r="48" fill="#09090b"/>
+  </g>
+</svg>
