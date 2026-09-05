@@ -254,18 +254,21 @@ rgba(60, 2, 101, 0.055) 0%,
   left: 50%;
   transform: translate(calc(-50% + var(--mouse-x) + var(--scroll-x)), calc(-50% + var(--mouse-y)));
   font-family: var(--font-display);
-  font-size: clamp(120px, 20vw, 280px);
-  font-weight: 1000;
-  letter-spacing: -0.04em;
+  font-size: clamp(120px, 90vw, 260px);
+  font-weight: 900;
+  letter-spacing: -0.03em;
 background: linear-gradient(
   to bottom,
-  rgba(255, 255, 255, 0.16) 0%,
-  rgba(255, 255, 255, 0.10) 45%,
-  rgba(255, 255, 255, 0) 100%
-);
--webkit-background-clip: text;
-background-clip: text;
--webkit-text-fill-color: transparent;  -webkit-text-stroke: none;
+  rgba(255, 255, 255, 1) 0%,
+  rgba(255, 255, 255, 0.9) 25%,
+  rgba(255, 255, 255, 0.695) 50%,
+  rgba(255, 255, 255, 0.25) 75%,
+   rgba(255, 255, 255, 0.079) 90%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: none;
   white-space: nowrap;
   pointer-events: none;
   user-select: none;
@@ -284,29 +287,37 @@ background-clip: text;
 }
 
 .hero-greeting {
-  font-size: 0.9rem;
-  font-weight: 500;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--electric-blue);
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 2px;
 }
 .hero-greeting::before {
-  content: '';
-  display: block;
-  width: 28px;
-  height: 1px;
-  background: var(--electric-blue);
+  display: none;
+}
+.greet-bold {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 4.5vw, 3.8rem);
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.greet-thin {
+  font-family: var(--font-body);
+  font-size: clamp(2.2rem, 4.2vw, 3.5rem);
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.75);
+  letter-spacing: -0.01em;
+  line-height: 1;
 }
 
 .hero-name {
   font-family: var(--font-display);
-  font-size: clamp(2.4rem, 5vw, 4.2rem);
+  font-size: clamp(2.9rem, 6vw, 5.0rem);
   font-weight: 800;
   line-height: 1.05;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.09em;
 }
 .hero-name .first { color: var(--electric-blue); }
 .hero-name .last { color: var(--text-primary); }
@@ -915,8 +926,21 @@ section {
 
 .software-icon {
   font-size: 2.2rem;
-  margin-bottom: 12px;
-  display: block;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+}
+.software-icon-img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
+  transition: transform 0.3s var(--ease-smooth);
+}
+.software-card:hover .software-icon-img {
+  transform: scale(1.1);
 }
 .software-name {
   font-family: var(--font-display);

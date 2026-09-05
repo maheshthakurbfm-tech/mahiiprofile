@@ -225,15 +225,10 @@ function initExport() {
 
 /* ─── DATA HELPERS ─── */
 function getSiteData() {
-  try {
-    const stored = localStorage.getItem('mt-portfolio-data');
-    if (stored) return JSON.parse(stored);
-  } catch (_) {}
   return window.siteData || null;
 }
 
 function saveSiteData(data) {
-  localStorage.setItem('mt-portfolio-data', JSON.stringify(data));
   window.siteData = data;
 }
 
@@ -367,6 +362,8 @@ function initVisualEditor() {
   // Watermark Specific Motion & Typography inputs
   document.getElementById('ve-prop-fontfamily')?.addEventListener('change', (e) => {
     const d = getSiteData();
+    if (!d.design) d.design = JSON.parse(JSON.stringify(DEFAULT_DESIGN_SCHEMA));
+    if (!d.design.hero) d.design.hero = JSON.parse(JSON.stringify(DEFAULT_DESIGN_SCHEMA.hero));
     d.design.hero.bgText.fontFamily = e.target.value;
     saveSiteData(d);
     renderVeCanvas();
@@ -375,6 +372,8 @@ function initVisualEditor() {
 
   document.getElementById('ve-prop-textcontent')?.addEventListener('input', (e) => {
     const d = getSiteData();
+    if (!d.design) d.design = JSON.parse(JSON.stringify(DEFAULT_DESIGN_SCHEMA));
+    if (!d.design.hero) d.design.hero = JSON.parse(JSON.stringify(DEFAULT_DESIGN_SCHEMA.hero));
     d.design.hero.bgText.content = e.target.value || 'PORTFOLIO';
     saveSiteData(d);
     renderVeCanvas();
@@ -438,7 +437,10 @@ function renderVeCanvas() {
     bgTextEl.style.transform = `translate(${b.x}px, ${b.y}px) scale(${b.scale})`;
     bgTextEl.style.opacity = b.opacity;
     bgTextEl.style.zIndex = b.zIndex;
-    if (b.fontFamily) bgTextEl.style.fontFamily = b.fontFamily;
+    if (b.fontFamily) {
+      bgTextEl.style.fontFamily = b.fontFamily;
+      if (bgTextRender) bgTextRender.style.fontFamily = b.fontFamily;
+    }
     if (bgTextRender) bgTextRender.textContent = b.content || 'PORTFOLIO';
   }
 

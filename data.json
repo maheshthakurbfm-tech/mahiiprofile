@@ -63,14 +63,14 @@
     "instagram": "https://www.instagram.com/motion.mogrt"
   },
   "software": [
-    { "name": "Premiere Pro", "icon": "🎬", "level": 95 },
-    { "name": "After Effects", "icon": "⚡", "level": 92 },
-    { "name": "DaVinci Resolve", "icon": "🎨", "level": 88 },
-    { "name": "Final Cut Pro", "icon": "✂️", "level": 80 },
-    { "name": "Cinema 4D", "icon": "🌐", "level": 70 },
-    { "name": "Blender", "icon": "🔷", "level": 65 },
-    { "name": "Photoshop", "icon": "🖼️", "level": 85 },
-    { "name": "Audition", "icon": "🔊", "level": 82 }
+    { "name": "Premiere Pro", "icon": "assets/icons/premiere.svg", "level": 95 },
+    { "name": "After Effects", "icon": "assets/icons/aftereffects.svg", "level": 92 },
+    { "name": "DaVinci Resolve", "icon": "assets/icons/davinci.svg", "level": 88 },
+    { "name": "Final Cut Pro", "icon": "assets/icons/finalcutpro.svg", "level": 80 },
+    { "name": "Cinema 4D", "icon": "assets/icons/cinema4d.svg", "level": 70 },
+    { "name": "Blender", "icon": "assets/icons/blender.svg", "level": 65 },
+    { "name": "Photoshop", "icon": "assets/icons/photoshop.svg", "level": 85 },
+    { "name": "Audition", "icon": "assets/icons/audition.svg", "level": 82 }
   ],
   "design": {
     "hero": {
@@ -91,8 +91,8 @@
         "zIndex": 1,
         "mouseParallax": {
           "enabled": true,
-          "speedX": -14,
-          "speedY": -7
+          "speedX": -15.0,
+          "speedY": -7.5
         },
         "scrollMotion": {
           "exitXPercent": 35,

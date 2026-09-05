@@ -206,13 +206,8 @@ function initMagneticGrid() {
 /* ─── LOAD DATA ─── */
 async function loadData() {
   try {
-    const stored = localStorage.getItem('mt-portfolio-data');
-    if (stored) {
-      siteData = JSON.parse(stored);
-    } else {
-      const res = await fetch('data.json');
-      siteData = await res.json();
-    }
+    const res = await fetch('data.json');
+    siteData = await res.json();
   } catch (_) {
     siteData = getFallbackData();
   }
@@ -312,15 +307,21 @@ function renderVideoArea(p) {
 function renderSoftware() {
   const grid = document.getElementById('software-grid');
   if (!grid || !siteData) return;
-  grid.innerHTML = siteData.software.map(s => `
-    <div class="software-card glass-card reveal-up">
-      <span class="software-icon">${s.icon}</span>
-      <div class="software-name">${escHtml(s.name)}</div>
-      <div class="skill-bar">
-        <div class="skill-bar-fill" data-level="${s.level}"></div>
+  grid.innerHTML = siteData.software.map(s => {
+    const isImg = s.icon && (s.icon.includes('/') || s.icon.endsWith('.svg') || s.icon.endsWith('.png'));
+    const iconMarkup = isImg
+      ? `<img class="software-icon-img" src="${escAttr(s.icon)}" alt="${escAttr(s.name)}" />`
+      : s.icon;
+    return `
+      <div class="software-card glass-card reveal-up">
+        <span class="software-icon">${iconMarkup}</span>
+        <div class="software-name">${escHtml(s.name)}</div>
+        <div class="skill-bar">
+          <div class="skill-bar-fill" data-level="${s.level}"></div>
+        </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 /* ─── UPDATE HERO FROM DATA ─── */
@@ -334,7 +335,14 @@ function applyHeroData() {
   if (fn) fn.textContent = h.firstName;
   if (ln) ln.textContent = h.lastName;
   if (bio) bio.textContent = h.bio;
-  if (greet) greet.textContent = h.greeting;
+  if (greet) {
+    const rawGreeting = h.greeting || "Hi I'm";
+    if (rawGreeting.trim().toLowerCase().startsWith("hi i'm") || rawGreeting.trim().toLowerCase().startsWith("hi, i'm")) {
+      greet.innerHTML = `<span class="greet-bold">Hi</span> <span class="greet-thin">I'm</span>`;
+    } else {
+      greet.textContent = rawGreeting;
+    }
+  }
 
   // Contact
   const emailLinks = document.querySelectorAll('.contact-email, [href^="mailto:"]');
@@ -598,9 +606,9 @@ function initHeroAnimations() {
       const dx = Math.max(-1, Math.min(1, (e.clientX - cx) / cx));
       const dy = Math.max(-1, Math.min(1, (e.clientY - cy) / cy));
 
-      // Elastic pull away from home anchor: max 2–5px
-      const targetX = dx * 3.5;
-      const targetY = dy * 2.0;
+      // Elastic pull away from home anchor: max 2–5px (+7% boost)
+      const targetX = dx * 3.75;
+      const targetY = dy * 2.14;
 
       if (mouseTween) mouseTween.kill();
       mouseTween = gsap.to(mouseObj, {
