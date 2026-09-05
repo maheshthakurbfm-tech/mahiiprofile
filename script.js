@@ -353,6 +353,7 @@ function initHeroAnimations() {
   const heroCenter = document.getElementById('hero-center');
   const heroRight = document.getElementById('hero-right');
   const portraitImg = document.querySelector('.portrait-img');
+  const scrollHint = document.querySelector('.hero-scroll-hint');
 
   const design = siteData?.design?.hero || {
     subject: { x: 0, y: 0, scale: 1, opacity: 1, zIndex: 3, locked: true },
@@ -461,6 +462,56 @@ function initHeroAnimations() {
         }
       }
     });
+
+    const subjectOpacity = design.subject?.opacity ?? 1;
+    const createSideExitConfig = () => ({
+        y: -120,
+        opacity: 0,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '#hero',
+          start: 'top top',
+          end: '35% top',
+          scrub: 0.35,
+          invalidateOnRefresh: true
+        }
+      });
+
+    if (heroLeft) {
+      gsap.fromTo(heroLeft, { y: 0, opacity: 1 }, createSideExitConfig());
+    }
+
+    if (heroRight) {
+      gsap.fromTo(heroRight, { y: 0, opacity: 1 }, createSideExitConfig());
+    }
+
+    if (portraitImg) {
+      gsap.fromTo(portraitImg, { opacity: subjectOpacity }, {
+        opacity: 0,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '#hero',
+          start: 'top top',
+          end: '85% top',
+          scrub: 0.35,
+          invalidateOnRefresh: true
+        }
+      });
+    }
+
+    if (scrollHint) {
+      gsap.fromTo(scrollHint, { autoAlpha: 1 }, {
+        autoAlpha: 0,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '#hero',
+          start: 'top top',
+          end: '25% top',
+          scrub: 0.35,
+          invalidateOnRefresh: true
+        }
+      });
+    }
 
     // Section reveals are independent from the hero composition.
     gsap.utils.toArray('.reveal-up').forEach((el) => {
