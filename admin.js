@@ -242,6 +242,7 @@ function refreshSiteUI() {
   if (typeof renderAccordion === 'function') renderAccordion();
   if (typeof renderSoftware === 'function') renderSoftware();
   if (typeof applyHeroData === 'function') applyHeroData();
+  if (typeof initHeroAnimations === 'function') initHeroAnimations();
 
   // Re-bind GSAP skill bars
   if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
@@ -363,7 +364,15 @@ function initVisualEditor() {
     updateActiveVeProp('locked', e.target.checked);
   });
 
-  // Watermark Specific Motion inputs
+  // Watermark Specific Motion & Typography inputs
+  document.getElementById('ve-prop-fontfamily')?.addEventListener('change', (e) => {
+    const d = getSiteData();
+    d.design.hero.bgText.fontFamily = e.target.value;
+    saveSiteData(d);
+    renderVeCanvas();
+    refreshSiteUI();
+  });
+
   document.getElementById('ve-prop-textcontent')?.addEventListener('input', (e) => {
     const d = getSiteData();
     d.design.hero.bgText.content = e.target.value || 'PORTFOLIO';
@@ -429,6 +438,7 @@ function renderVeCanvas() {
     bgTextEl.style.transform = `translate(${b.x}px, ${b.y}px) scale(${b.scale})`;
     bgTextEl.style.opacity = b.opacity;
     bgTextEl.style.zIndex = b.zIndex;
+    if (b.fontFamily) bgTextEl.style.fontFamily = b.fontFamily;
     if (bgTextRender) bgTextRender.textContent = b.content || 'PORTFOLIO';
   }
 
@@ -472,6 +482,9 @@ function loadVeInspectorProps() {
     if (activeVeLayer === 'bgText') {
       motionGroup.style.display = 'flex';
       const b = heroDesign.bgText;
+      const fontSelect = document.getElementById('ve-prop-fontfamily');
+      if (fontSelect && b.fontFamily) fontSelect.value = b.fontFamily;
+
       const contentInput = document.getElementById('ve-prop-textcontent');
       if (contentInput) contentInput.value = b.content || 'PORTFOLIO';
 

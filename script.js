@@ -354,115 +354,115 @@ function initHeroAnimations() {
   const heroRight = document.getElementById('hero-right');
   const portraitImg = document.querySelector('.portrait-img');
 
-  // Dynamically Hydrate Visual & Motion Settings from siteData.design
   const design = siteData?.design?.hero || {
-    subject: { x: 0, y: 0, scale: 1.0, opacity: 1.0, zIndex: 3 },
-    bgText: { content: 'PORTFOLIO', x: 0, y: 0, scale: 1.0, opacity: 0.085, zIndex: 1, mouseParallax: { enabled: true, speedX: -14, speedY: -7 }, scrollMotion: { exitXPercent: 35 } }
+    subject: { x: 0, y: 0, scale: 1, opacity: 1, zIndex: 3, locked: true },
+    bgText: {
+      content: 'PORTFOLIO', x: 0, y: 0, scale: 1, opacity: 0.085, zIndex: 1,
+      mouseParallax: { enabled: true, speedX: -3, speedY: -2 },
+      scrollMotion: { exitXPercent: 35 }
+    }
   };
 
+  // ------------------------------------------------------------
+  // CANONICAL BASE STATE
+  // The subject and the hero columns NEVER participate in scroll
+  // animation. Their position is owned by CSS/layout only.
+  // ------------------------------------------------------------
   if (portraitImg && design.subject) {
     portraitImg.style.transform = `translate(${design.subject.x || 0}px, ${design.subject.y || 0}px) scale(${design.subject.scale ?? 1})`;
     portraitImg.style.opacity = design.subject.opacity ?? 1;
   }
-  if (heroCenter && design.subject) {
-    heroCenter.style.zIndex = design.subject.zIndex || 3;
-  }
+  if (heroCenter && design.subject) heroCenter.style.zIndex = design.subject.zIndex || 3;
+  if (heroCenter) gsap.set(heroCenter, { clearProps: 'transform,opacity' });
+  if (heroLeft) gsap.set(heroLeft, { clearProps: 'transform,opacity' });
+  if (heroRight) gsap.set(heroRight, { clearProps: 'transform,opacity' });
 
   if (bgText && design.bgText) {
     bgText.textContent = design.bgText.content || 'PORTFOLIO';
     bgText.style.zIndex = design.bgText.zIndex || 1;
+    if (design.bgText.fontFamily) bgText.style.fontFamily = design.bgText.fontFamily;
+    bgText.style.setProperty('--mouse-x', '0px');
+    bgText.style.setProperty('--mouse-y', '0px');
+    bgText.style.setProperty('--scroll-x', '0vw');
+    bgText.style.opacity = design.bgText.opacity ?? 0.085;
+    gsap.set(bgText, { clearProps: 'transform' });
   }
 
-  // Load sequence
-  const tl = gsap.timeline({ delay: 0.2 });
+  // Entry animation only. Once complete, transforms are cleared.
+  const tl = gsap.timeline({
+    delay: 0.1,
+    onComplete: () => {
+      if (heroLeft) gsap.set(heroLeft, { clearProps: 'transform' });
+      if (heroCenter) gsap.set(heroCenter, { clearProps: 'transform' });
+      if (heroRight) gsap.set(heroRight, { clearProps: 'transform' });
+    }
+  });
 
-  // 1. BG watermark — Centered directly behind person on load
   const targetBgOpacity = design.bgText?.opacity ?? 0.085;
-  tl.fromTo(bgText,
-    { opacity: 0, scale: design.bgText?.scale ?? 1 },
-    { opacity: targetBgOpacity, scale: design.bgText?.scale ?? 1, duration: 1.8, ease: 'power3.out' },
-    0
-  );
 
-  // 2. Left bio & text — BOTTOM TO TOP
-  tl.fromTo(heroLeft,
-    { y: '50px', opacity: 0 },
-    { y: '0px', opacity: 1, duration: 1.4, ease: 'power3.out' },
-    0.3
-  );
+  if (bgText) {
+    tl.fromTo(bgText, { opacity: 0 }, {
+      opacity: targetBgOpacity,
+      duration: 1.0,
+      ease: 'power3.out'
+    }, 0);
+  }
 
-  // 3. Center portrait — BOTTOM TO TOP with slight scale
-  tl.fromTo(heroCenter,
-    { y: '40px', opacity: 0, scale: 0.96 },
-    { y: '0px', opacity: 1, scale: 1, duration: 1.5, ease: 'power3.out' },
-    0.5
-  );
+  if (heroLeft) {
+    tl.fromTo(heroLeft, { y: 20 }, {
+      y: 0, duration: 0.8, ease: 'power3.out'
+    }, 0.15);
+  }
 
-  // 4. Right pills — BOTTOM TO TOP stagger
+  if (heroCenter) {
+    tl.fromTo(heroCenter, { y: 20 }, {
+      y: 0, duration: 0.8, ease: 'power3.out'
+    }, 0.2);
+  }
+
   const pills = document.querySelectorAll('.role-pill');
-  tl.fromTo(pills,
-    { y: '30px', opacity: 0 },
-    { y: '0px', opacity: 1, duration: 1.0, stagger: 0.12, ease: 'power3.out' },
-    0.6
-  );
+  if (pills.length) {
+    tl.fromTo(pills, { y: 12 }, {
+      y: 0, duration: 0.65, stagger: 0.08, ease: 'power3.out'
+    }, 0.25);
+  }
 
-  // ── SCROLL PARALLAX ──
-  if (typeof ScrollTrigger !== 'undefined') {
+  // ------------------------------------------------------------
+  // PORTFOLIO SCROLL MOTION ONLY
+  // The scroll animation writes ONLY CSS variables on bgText.
+  // No hero/image transform is touched here.
+  // ------------------------------------------------------------
+  if (typeof ScrollTrigger !== 'undefined' && bgText) {
     gsap.registerPlugin(ScrollTrigger);
 
     const exitXPercent = design.bgText?.scrollMotion?.exitXPercent ?? 35;
+    const scrollState = { x: 0, opacity: targetBgOpacity };
 
-    // BG text on scroll down: moves smoothly towards the RIGHT and fades out.
-    // On scroll back up: comes from the right back to center and fades in.
-    gsap.fromTo(bgText,
-      { opacity: targetBgOpacity, xPercent: 0 },
-      {
-        xPercent: exitXPercent,
-        opacity: 0,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: '#hero',
-          start: '20% top',
-          end: '80% top',
-          scrub: 1.0,
+    gsap.to(scrollState, {
+      x: exitXPercent,
+      opacity: 0,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '#hero',
+        start: 'top top',
+        end: '85% top',
+        scrub: 0.35,
+        invalidateOnRefresh: true,
+        onUpdate: () => {
+          bgText.style.setProperty('--scroll-x', `${scrollState.x}vw`);
+          bgText.style.opacity = scrollState.opacity;
+        },
+        onLeaveBack: () => {
+          // Hard reset to canonical state at the top.
+          scrollState.x = 0;
+          scrollState.opacity = targetBgOpacity;
+          bgText.style.setProperty('--scroll-x', '0vw');
+          bgText.style.opacity = targetBgOpacity;
         }
       }
-    );
+    });
 
-    // Left bio lifts UP (fades out down, fades back in on scroll up)
-    gsap.fromTo(heroLeft,
-      { opacity: 1, yPercent: 0 },
-      {
-        yPercent: -30,
-        opacity: 0,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: '#hero',
-          start: '25% top',
-          end: '85% top',
-          scrub: 1.0,
-        }
-      }
-    );
-
-    // Portrait scale down + fade (fades out on scroll down, fades back in to 1.0 on scroll up to top)
-    gsap.fromTo(heroCenter,
-      { opacity: 1, scale: 1, yPercent: 0 },
-      {
-        scale: 0.92,
-        yPercent: 15,
-        opacity: 0,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: '#hero',
-          start: '30% top',
-          end: '85% top',
-          scrub: 1.0,
-        }
-      }
-    );
-
-    // Section reveals
+    // Section reveals are independent from the hero composition.
     gsap.utils.toArray('.reveal-up').forEach((el) => {
       gsap.fromTo(el,
         { y: 48, opacity: 0 },
@@ -471,46 +471,106 @@ function initHeroAnimations() {
           scrollTrigger: {
             trigger: el,
             start: 'top 88%',
-            toggleActions: 'play none none reverse',
+            toggleActions: 'play none none reverse'
           }
         }
       );
     });
 
-    // Skill bar fills
     document.querySelectorAll('.skill-bar-fill').forEach(bar => {
       const level = bar.getAttribute('data-level');
       ScrollTrigger.create({
         trigger: bar,
         start: 'top 90%',
         onEnter: () => gsap.to(bar, { width: level + '%', duration: 1.2, ease: 'power2.out' }),
-        once: true,
+        once: true
       });
     });
   }
 
-  // ── MOUSE PARALLAX (ONLY PORTFOLIO TEXT RESPONDS IF ENABLED) ──
-  document.addEventListener('mousemove', (e) => {
-    if (!bgText) return;
-    if (window.innerWidth <= 768) return;
+  // ------------------------------------------------------------
+  // PORTFOLIO MOUSE WIGGLE ONLY
+  // Absolute offset from the center; never accumulates.
+  // Subject, left content and right pills are untouched.
+  // ------------------------------------------------------------
+  if (bgText) {
+    const mouseObj = { x: 0, y: 0 };
+    let mouseTween = null;
+    let idleTimer = null;
+    let lastInsideHero = false;
 
-    const p = siteData?.design?.hero?.bgText?.mouseParallax || { enabled: true, speedX: -14, speedY: -7 };
-    if (p.enabled === false) return;
+    const setMouseVars = () => {
+      bgText.style.setProperty('--mouse-x', `${mouseObj.x}px`);
+      bgText.style.setProperty('--mouse-y', `${mouseObj.y}px`);
+    };
 
-    const cx = window.innerWidth / 2;
-    const cy = window.innerHeight / 2;
-    const dx = (e.clientX - cx) / cx;
-    const dy = (e.clientY - cy) / cy;
+    const springReturnToHome = () => {
+      if (mouseTween) mouseTween.kill();
+      mouseTween = gsap.to(mouseObj, {
+        x: 0,
+        y: 0,
+        duration: 0.8,
+        ease: 'elastic.out(1, 0.4)',
+        overwrite: 'auto',
+        onUpdate: setMouseVars,
+        onComplete: () => {
+          mouseObj.x = 0;
+          mouseObj.y = 0;
+          setMouseVars();
+        }
+      });
+    };
 
-    // Watermark text receives customizable mouse-based wiggle
-    gsap.to(bgText, {
-      x: (design.bgText?.x || 0) + dx * (p.speedX ?? -14),
-      y: (design.bgText?.y || 0) + dy * (p.speedY ?? -7),
-      duration: 1.6,
-      ease: 'power2.out',
-      overwrite: 'auto',
-    });
-  });
+    document.addEventListener('mousemove', (e) => {
+      if (window.innerWidth <= 768) return;
+
+      const hero = document.getElementById('hero');
+      if (!hero) return;
+      const rect = hero.getBoundingClientRect();
+      const insideHero = e.clientY >= rect.top && e.clientY <= rect.bottom;
+
+      if (!insideHero) {
+        if (lastInsideHero) springReturnToHome();
+        lastInsideHero = false;
+        return;
+      }
+      lastInsideHero = true;
+
+      const p = siteData?.design?.hero?.bgText?.mouseParallax || {};
+      if (p.enabled === false) {
+        springReturnToHome();
+        return;
+      }
+
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      const dx = Math.max(-1, Math.min(1, (e.clientX - cx) / cx));
+      const dy = Math.max(-1, Math.min(1, (e.clientY - cy) / cy));
+
+      // Elastic pull away from home anchor: max 2–5px
+      const targetX = dx * 3.5;
+      const targetY = dy * 2.0;
+
+      if (mouseTween) mouseTween.kill();
+      mouseTween = gsap.to(mouseObj, {
+        x: targetX,
+        y: targetY,
+        duration: 0.25,
+        ease: 'power2.out',
+        overwrite: 'auto',
+        onUpdate: setMouseVars
+      });
+
+      // Elastic spring back to home anchor when mouse pauses
+      if (idleTimer) clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => {
+        springReturnToHome();
+      }, 150);
+    }, { passive: true });
+
+    window.addEventListener('blur', springReturnToHome);
+    window.addEventListener('resize', springReturnToHome);
+  }
 }
 
 /* ─── STAT COUNTER ─── */

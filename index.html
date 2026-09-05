@@ -45,6 +45,7 @@
     <a href="#hero" class="nav-logo">M<span>.</span>Thakur</a>
 
     <ul class="nav-links">
+      <li><a href="#hero">Home</a></li>
       <li><a href="#about">About</a></li>
       <li><a href="#projects">Work</a></li>
       <li><a href="#software">Skills</a></li>
@@ -97,15 +98,12 @@
       <!-- CENTER: PORTRAIT -->
       <div class="hero-center" id="hero-center">
         <div class="portrait-wrapper">
-          <div class="portrait-glow"></div>
-          <div class="portrait-arc"></div>
           <img
             class="portrait-img"
-            src="https://i.ibb.co/ZpZzzh/image.jpg"
-            onerror="this.style.background='linear-gradient(135deg,#00A8FF22,#00F5FF11)';this.style.border='1.5px solid rgba(0,168,255,0.3)';this.src=''"
+            src="assets/hero.png"
+            loading="eager"
             alt="Mahesh Thakur — Video Editor & Motion Designer"
           />
-          <div class="portrait-base-ring"></div>
         </div>
       </div>
 
@@ -404,10 +402,22 @@
 
                   <!-- Watermark / Motion Specific Group (Shown for bgText) -->
                   <div class="ve-prop-group" id="ve-motion-group" style="display:none;">
-                    <div class="ve-group-title">Motion & Parallax</div>
+                    <div class="ve-group-title">Typography & Motion</div>
+                    <div class="ve-prop-row">
+                      <label>Font Family</label>
+                      <select id="ve-prop-fontfamily" style="width:130px;padding:4px;background:var(--surface-2);border:1px solid var(--glass-border);border-radius:6px;color:var(--text-primary);font-size:0.75rem;">
+                        <option value="'Space Grotesk', sans-serif">Space Grotesk (Default)</option>
+                        <option value="'Inter', sans-serif">Inter (Clean)</option>
+                        <option value="system-ui, -apple-system, sans-serif">System UI / Apple</option>
+                        <option value="'Georgia', serif">Georgia (Serif)</option>
+                        <option value="'Courier New', monospace">Courier (Monospace)</option>
+                        <option value="'Impact', sans-serif">Impact (Bold Display)</option>
+                        <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+                      </select>
+                    </div>
                     <div class="ve-prop-row">
                       <label>Watermark Text</label>
-                      <input type="text" id="ve-prop-textcontent" value="PORTFOLIO" style="width:110px;" />
+                      <input type="text" id="ve-prop-textcontent" value="PORTFOLIO" style="width:130px;" />
                     </div>
                     <div class="ve-prop-row">
                       <label>Mouse Parallax</label>
