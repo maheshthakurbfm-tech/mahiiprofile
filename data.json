@@ -1,0 +1,75 @@
+{
+  "hero": {
+    "greeting": "Hi I'm",
+    "firstName": "Mahesh",
+    "lastName": "Thakur",
+    "bio": "Retention-focused video edits, After Effects MOGRTs, color grading, sound design — crafting visuals that move people.",
+    "roles": ["VIDEO EDITOR", "MOTION DESIGNER", "COLORIST", "VISUAL STORYTELLER"]
+  },
+  "about": {
+    "bio": "I'm Mahesh Thakur, a Video Editor & Motion Graphics Specialist based in India. With 5+ years of experience, I craft retention-driven edits, stunning motion sequences, and cinematic color grades that keep audiences hooked. I've worked across commercial, short-form, and long-form content — always leading with storytelling.",
+    "stats": [
+      { "value": 100, "suffix": "+", "label": "Videos Edited" },
+      { "value": 5, "suffix": "+", "label": "Years Experience" },
+      { "value": 50, "suffix": "M+", "label": "Views Generated" },
+      { "value": 100, "suffix": "%", "label": "Client Satisfaction" }
+    ]
+  },
+  "projects": [
+    {
+      "id": 1,
+      "title": "Commercial & Brand Ads",
+      "description": "High-impact commercial edits for brands — fast cuts, motion graphics overlays, and product storytelling.",
+      "tools": ["Premiere Pro", "After Effects", "DaVinci Resolve"],
+      "embedUrl": "",
+      "thumbnail": ""
+    },
+    {
+      "id": 2,
+      "title": "Motion Graphics & MOGRT Packs",
+      "description": "Kinetic typography, animated lower thirds, logo reveals, and custom MOGRT templates for Adobe Premiere.",
+      "tools": ["After Effects", "Premiere Pro", "Illustrator"],
+      "embedUrl": "",
+      "thumbnail": ""
+    },
+    {
+      "id": 3,
+      "title": "YouTube & Long-Form Edits",
+      "description": "Narrative documentary-style long-form content with retention-driven pacing and dynamic B-roll structure.",
+      "tools": ["Premiere Pro", "After Effects", "Audition"],
+      "embedUrl": "",
+      "thumbnail": ""
+    },
+    {
+      "id": 4,
+      "title": "Reels & Short-Form Content",
+      "description": "Beat-synced, high-energy short-form edits for Instagram Reels, YouTube Shorts, and TikTok.",
+      "tools": ["Premiere Pro", "After Effects", "CapCut"],
+      "embedUrl": "",
+      "thumbnail": ""
+    },
+    {
+      "id": 5,
+      "title": "Cinematic Short Film / Music Video",
+      "description": "Cinematic storytelling with color-graded Log footage, foley integration, and immersive soundscapes.",
+      "tools": ["DaVinci Resolve", "After Effects", "Audition"],
+      "embedUrl": "",
+      "thumbnail": ""
+    }
+  ],
+  "contact": {
+    "email": "maheshthakurbfm@gmail.com",
+    "linkedin": "https://www.linkedin.com/in/mahesh-thakur-317872277/",
+    "instagram": "https://www.instagram.com/motion.mogrt"
+  },
+  "software": [
+    { "name": "Premiere Pro", "icon": "🎬", "level": 95 },
+    { "name": "After Effects", "icon": "⚡", "level": 92 },
+    { "name": "DaVinci Resolve", "icon": "🎨", "level": 88 },
+    { "name": "Final Cut Pro", "icon": "✂️", "level": 80 },
+    { "name": "Cinema 4D", "icon": "🌐", "level": 70 },
+    { "name": "Blender", "icon": "🔷", "level": 65 },
+    { "name": "Photoshop", "icon": "🖼️", "level": 85 },
+    { "name": "Audition", "icon": "🔊", "level": 82 }
+  ]
+}
