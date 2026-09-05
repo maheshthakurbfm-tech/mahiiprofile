@@ -91,8 +91,8 @@
         "zIndex": 1,
         "mouseParallax": {
           "enabled": true,
-          "speedX": -15.0,
-          "speedY": -7.5
+          "speedX": -32.0,
+          "speedY": -18.0
         },
         "scrollMotion": {
           "exitXPercent": 35,

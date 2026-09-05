@@ -606,9 +606,9 @@ function initHeroAnimations() {
       const dx = Math.max(-1, Math.min(1, (e.clientX - cx) / cx));
       const dy = Math.max(-1, Math.min(1, (e.clientY - cy) / cy));
 
-      // Elastic pull away from home anchor: max 2–5px (+7% boost)
-      const targetX = dx * 3.75;
-      const targetY = dy * 2.14;
+      // Elastic pull away from home anchor: minimal yet clearly noticeable offset
+      const targetX = dx * 8.0;
+      const targetY = dy * 4.5;
 
       if (mouseTween) mouseTween.kill();
       mouseTween = gsap.to(mouseObj, {
