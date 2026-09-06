@@ -394,6 +394,9 @@ function getSiteData() {
 
 function saveSiteData(data) {
   window.siteData = data;
+  try {
+    localStorage.setItem('mt-portfolio-data', JSON.stringify(data));
+  } catch (_) {}
 }
 
 /* ─── REFRESH SITE UI ─── */
