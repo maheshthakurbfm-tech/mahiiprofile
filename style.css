@@ -199,10 +199,10 @@ body:has(button:hover) #cursor-ring { width: 56px; height: 56px; border-color: r
   background:
     radial-gradient(
       circle at 50% 42%,
-rgba(60, 2, 101, 0.055) 0%,
-      rgba(26, 17, 48, 0.025) 28%,
-      rgba(0, 0, 0, 0) 58%    ),
-      rgba(70, 3, 114, 0.08)
+rgb(255, 0, 0) 0%,
+      rgba(198, 0, 0, 0.025) 28%,
+      rgba(94, 2, 2, 0) 58%    ),
+      rgba(59, 1, 1, 0.08)
     #050608;
 }
 #hero::before {

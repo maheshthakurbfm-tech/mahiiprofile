@@ -200,8 +200,8 @@ window.uploadAndAttachToProject = async function(e, fieldType) {
   showToast(`Uploading ${file.name} to Cloudinary...`);
 
   try {
-    const cloudName = 'mahesh-portfolio';
-    const uploadPreset = 'portfolio_unsigned_preset';
+    const cloudName = 'esvwgoxe';
+    const uploadPreset = 'esvwgoxe';
 
     let resourceType = 'image';
     if (file.type.startsWith('video/')) resourceType = 'video';
@@ -813,8 +813,8 @@ async function handleDirectUpload(e) {
   for (const file of files) {
     showToast(`Preparing Cloudinary upload for ${file.name}...`);
     try {
-      const cloudName = 'mahesh-portfolio';
-      const uploadPreset = 'portfolio_unsigned_preset';
+      const cloudName = 'esvwgoxe';
+      const uploadPreset = 'esvwgoxe';
 
       let resourceType = 'image';
       if (file.type.startsWith('video/')) resourceType = 'video';
@@ -998,13 +998,13 @@ async function checkCloudflareStatus() {
   const cdnSub = document.getElementById('cf-cdn-sub');
   const cdnBadge = document.getElementById('cf-cdn-badge');
 
-  if (workerSub) workerSub.textContent = 'Configured Cloud: mahesh-portfolio';
+  if (workerSub) workerSub.textContent = 'Configured Cloud: esvwgoxe';
   if (workerBadge) {
     workerBadge.textContent = 'Ready';
     workerBadge.style.background = 'rgba(0,255,150,0.2)';
     workerBadge.style.color = '#00ff96';
   }
-  if (r2Sub) r2Sub.textContent = 'Preset: portfolio_unsigned_preset';
+  if (r2Sub) r2Sub.textContent = 'Preset: esvwgoxe';
   if (r2Badge) {
     r2Badge.textContent = 'Active';
     r2Badge.style.background = 'rgba(0,255,150,0.2)';
