@@ -1149,7 +1149,10 @@ function initAdminCursor() {
 }
 
 /* ─── INIT ─── */
-function initAdmin() {
+async function initAdmin() {
+  if (typeof loadData === 'function' && !window.siteData) {
+    await loadData();
+  }
   initAdminCursor();
   initPasswordGate();
   initAdminTabs();
