@@ -201,32 +201,79 @@
 
           <!-- Project Edit Card -->
           <div class="editor-card" style="margin-top:24px;">
-            <h3>Project Details Editor</h3>
-            <input type="hidden" id="edit-proj-id" value="" />
-            <div class="form-group">
-              <label>Project Title</label>
-              <input type="text" id="edit-proj-title" placeholder="e.g. Commercial Brand Edit" />
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+              <h3 style="margin:0;">Project & Media Editor</h3>
+              <select id="edit-proj-selector" onchange="loadProjectIntoEditor(this.value)" style="padding:8px 14px;border-radius:8px;background:var(--surface-1);border:1px solid var(--glass-border);color:white;font-size:0.82rem;font-weight:700;">
+                <option value="">-- Select Project Card --</option>
+                <option value="1">Commercial & Brand Ads</option>
+                <option value="2">Motion Graphics & MOGRT Packs</option>
+                <option value="3">YouTube & Long-Form Edits</option>
+                <option value="4">Reels & Short-Form Content</option>
+                <option value="5">Cinematic Short Film / Music Video</option>
+              </select>
             </div>
+
+            <input type="hidden" id="edit-proj-id" value="" />
+            
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+              <div class="form-group">
+                <label>Project / Card Title</label>
+                <input type="text" id="edit-proj-title" placeholder="e.g. Commercial & Brand Ads" />
+              </div>
+              <div class="form-group">
+                <label>Category</label>
+                <input type="text" id="edit-proj-category" placeholder="Commercial / Motion / Film" />
+              </div>
+            </div>
+
             <div class="form-group">
               <label>Description</label>
               <textarea id="edit-proj-desc" rows="3" placeholder="Project overview..."></textarea>
             </div>
-            <div class="form-group">
-              <label>Tools Used (comma-separated)</label>
-              <input type="text" id="edit-proj-tools" placeholder="Premiere Pro, After Effects, DaVinci Resolve" />
-            </div>
-            <div class="form-group">
-              <label>Video / Embed URL</label>
-              <div style="display:flex;gap:8px;">
-                <input type="text" id="edit-proj-embed" placeholder="https://..." style="flex:1;" />
-                <button type="button" class="btn-dash-action secondary" onclick="openMediaPicker('edit-proj-embed')">📁 Pick Media</button>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+              <div class="form-group">
+                <label>Tools Used (comma-separated)</label>
+                <input type="text" id="edit-proj-tools" placeholder="Premiere Pro, After Effects, DaVinci Resolve" />
+              </div>
+              <div class="form-group">
+                <label>Client</label>
+                <input type="text" id="edit-proj-client" placeholder="Client Name (Optional)" />
+              </div>
+              <div class="form-group">
+                <label>Year</label>
+                <input type="text" id="edit-proj-year" placeholder="2025" />
               </div>
             </div>
-            <div class="form-group">
-              <label>Thumbnail Poster URL</label>
-              <div style="display:flex;gap:8px;">
-                <input type="text" id="edit-proj-thumb" placeholder="https://..." style="flex:1;" />
-                <button type="button" class="btn-dash-action secondary" onclick="openMediaPicker('edit-proj-thumb')">📁 Pick Media</button>
+
+            <!-- MEDIA ATTACHMENT SECTION -->
+            <div style="border-top:1px solid var(--glass-border);padding-top:16px;margin-top:12px;">
+              <h4 style="font-size:0.9rem;color:var(--electric-blue);margin-bottom:14px;">Media Attachments</h4>
+              
+              <!-- MAIN VIDEO FIELD -->
+              <div class="form-group">
+                <label>Main Video (URL or R2 Asset)</label>
+                <div style="display:flex;gap:8px;">
+                  <input type="text" id="edit-proj-embed" placeholder="https://..." style="flex:1;" />
+                  <label class="btn-dash-action" style="cursor:pointer;margin:0;font-size:0.75rem;padding:6px 12px;">
+                    ⬆ Upload Video
+                    <input type="file" accept="video/*" style="display:none;" onchange="uploadAndAttachToProject(event, 'video')" />
+                  </label>
+                  <button type="button" class="btn-dash-action secondary" onclick="openMediaPicker('edit-proj-embed')" style="font-size:0.75rem;padding:6px 12px;">📁 Choose from Library</button>
+                </div>
+              </div>
+
+              <!-- THUMBNAIL FIELD -->
+              <div class="form-group">
+                <label>Thumbnail Poster (URL or R2 Asset)</label>
+                <div style="display:flex;gap:8px;">
+                  <input type="text" id="edit-proj-thumb" placeholder="https://..." style="flex:1;" />
+                  <label class="btn-dash-action" style="cursor:pointer;margin:0;font-size:0.75rem;padding:6px 12px;">
+                    ⬆ Upload Poster
+                    <input type="file" accept="image/*" style="display:none;" onchange="uploadAndAttachToProject(event, 'thumb')" />
+                  </label>
+                  <button type="button" class="btn-dash-action secondary" onclick="openMediaPicker('edit-proj-thumb')" style="font-size:0.75rem;padding:6px 12px;">📁 Choose from Library</button>
+                </div>
               </div>
             </div>
           </div>

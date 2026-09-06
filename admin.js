@@ -162,15 +162,25 @@ function renderAdminProjects(projects) {
 }
 
 /* ─── EDIT PROJECT ─── */
+/* ─── EDIT PROJECT & CARD ASSIGNMENT ─── */
+window.loadProjectIntoEditor = function(id) {
+  if (!id) return;
+  editProject(parseInt(id));
+};
+
 window.editProject = function(id) {
   const d = getSiteData();
-  const p = d.projects.find(x => x.id === id);
+  const p = d.projects.find(x => String(x.id) === String(id));
   if (!p) return;
 
   setVal('edit-proj-id', p.id);
+  setVal('edit-proj-selector', p.id);
   setVal('edit-proj-title', p.title);
+  setVal('edit-proj-category', p.category || '');
   setVal('edit-proj-desc', p.description);
   setVal('edit-proj-tools', (p.tools || []).join(', '));
+  setVal('edit-proj-client', p.client || '');
+  setVal('edit-proj-year', p.year || '');
   setVal('edit-proj-embed', p.embedUrl || '');
   setVal('edit-proj-thumb', p.thumbnail || '');
 
@@ -179,10 +189,92 @@ window.editProject = function(id) {
   playClickSFX();
 };
 
+/* ─── DIRECT UPLOAD & AUTO-ATTACH TO CURRENT PROJECT ─── */
+window.uploadAndAttachToProject = async function(e, fieldType) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  const projId = getVal('edit-proj-id') || getVal('edit-proj-selector');
+  const projTitle = getVal('edit-proj-title') || 'Selected Project';
+
+  showToast(`Uploading ${file.name} for "${projTitle}"...`);
+
+  try {
+    const reqBody = { fileName: file.name, fileType: file.type, fileSize: file.size };
+    let uploadUrl = '', objectKey = '', publicUrl = '', assetId = '';
+
+    try {
+      const resp = await fetch('/api/upload-url', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminAuthToken}`
+        },
+        body: JSON.stringify(reqBody)
+      });
+      const data = await resp.json();
+      if (resp.ok) {
+        uploadUrl = data.uploadUrl;
+        objectKey = data.objectKey;
+        publicUrl = data.publicUrl;
+        assetId = data.assetId;
+      }
+    } catch (_) {}
+
+    if (!uploadUrl) {
+      assetId = 'med_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
+      const folder = file.type.startsWith('video/') ? 'media/videos' : 'media/images';
+      objectKey = `${folder}/${assetId}_${file.name}`;
+      uploadUrl = `/api/direct-upload/${objectKey}`;
+      publicUrl = `assets/${file.name}`;
+    }
+
+    await fetch(uploadUrl, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': file.type,
+        'Authorization': `Bearer ${adminAuthToken}`
+      },
+      body: file
+    });
+
+    // Save to Media Library
+    const items = getMediaItems();
+    items.unshift({
+      id: assetId,
+      name: file.name,
+      type: file.type || 'file',
+      size: formatBytes(file.size),
+      objectKey: objectKey,
+      publicUrl: publicUrl,
+      isExternal: false,
+      projectId: projId ? parseInt(projId) : null,
+      projectTitle: projTitle,
+      uploadDate: new Date().toLocaleDateString()
+    });
+    saveMediaItems(items);
+    renderMediaLibraryUI();
+
+    // Auto-fill form field & save immediately to project
+    const inputId = fieldType === 'video' ? 'edit-proj-embed' : 'edit-proj-thumb';
+    setVal(inputId, publicUrl);
+
+    showToast(`Uploaded & attached to "${projTitle}"!`);
+    playClickSFX();
+
+    // Auto-trigger Save Changes to store relationship in siteData
+    document.getElementById('admin-save-btn')?.click();
+
+  } catch (err) {
+    showToast(`Upload failed: ${err.message}`);
+  }
+  e.target.value = '';
+};
+
 /* ─── DELETE PROJECT ─── */
 window.deleteProject = function(id) {
   const d = getSiteData();
-  const idx = d.projects.findIndex(x => x.id === id);
+  const idx = d.projects.findIndex(x => String(x.id) === String(id));
   if (idx === -1) return;
   d.projects.splice(idx, 1);
   saveSiteData(d);
@@ -204,7 +296,7 @@ function initAddProject() {
 }
 
 function clearProjectForm() {
-  ['edit-proj-id','edit-proj-title','edit-proj-desc','edit-proj-tools','edit-proj-embed','edit-proj-thumb'].forEach(id => {
+  ['edit-proj-id','edit-proj-selector','edit-proj-title','edit-proj-category','edit-proj-desc','edit-proj-tools','edit-proj-client','edit-proj-year','edit-proj-embed','edit-proj-thumb'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -232,13 +324,16 @@ function initSaveButton() {
     // Project save/update
     const projTitle = getVal('edit-proj-title');
     if (projTitle) {
-      const projId = getVal('edit-proj-id');
+      const projId = getVal('edit-proj-id') || getVal('edit-proj-selector');
       const toolsRaw = getVal('edit-proj-tools');
       const tools = toolsRaw ? toolsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
       const projData = {
         title: projTitle,
+        category: getVal('edit-proj-category'),
         description: getVal('edit-proj-desc'),
         tools,
+        client: getVal('edit-proj-client'),
+        year: getVal('edit-proj-year'),
         embedUrl: getVal('edit-proj-embed'),
         thumbnail: getVal('edit-proj-thumb'),
       };
@@ -252,7 +347,6 @@ function initSaveButton() {
         const maxId = d.projects.reduce((m, p) => Math.max(m, p.id), 0);
         d.projects.push({ id: maxId + 1, ...projData });
       }
-      clearProjectForm();
     }
 
     saveSiteData(d);
