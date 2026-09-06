@@ -15,123 +15,178 @@ let lenis = null;
 let gearAudioCtx = null;
 let isUserInteracted = false;
 
-// Enable audio context after first user gesture (respecting browser autoplay rules)
+// Enable audio context automatically on any initial gesture or scroll movement
 function unlockAudioContext() {
-  if (!isUserInteracted) {
+  if (!gearAudioCtx) {
+    gearAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (gearAudioCtx.state === 'suspended') {
+    gearAudioCtx.resume().then(() => {
+      isUserInteracted = true;
+    }).catch(() => {
+      isUserInteracted = true;
+    });
+  } else {
     isUserInteracted = true;
-    if (gearAudioCtx && gearAudioCtx.state === 'suspended') {
-      gearAudioCtx.resume();
-    }
   }
 }
-window.addEventListener('pointerdown', unlockAudioContext, { once: true, passive: true });
-window.addEventListener('keydown', unlockAudioContext, { once: true, passive: true });
-window.addEventListener('scroll', unlockAudioContext, { once: true, passive: true });
+
+['pointerdown', 'touchstart', 'mousedown', 'keydown', 'wheel', 'scroll'].forEach(evt => {
+  window.addEventListener(evt, unlockAudioContext, { passive: true });
+});
 
 function getAudioCtx() {
   if (!gearAudioCtx) {
     gearAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
   }
-  if (gearAudioCtx.state === 'suspended' && isUserInteracted) {
+  if (gearAudioCtx.state === 'suspended') {
     gearAudioCtx.resume();
   }
   return gearAudioCtx;
 }
 
-function playClickSFX() {
-  if (!audioEnabled || !isUserInteracted) return;
+/* ─── REAL AUDIO ASSET ENGINE ─── */
+const soundAssets = {
+  repulsor: new Audio('assets/repulsor_beam.mp3'),
+  magnetic: new Audio('assets/magnetic_button.wav'),
+  click4: new Audio('assets/click_4.mp3')
+};
+
+// Preload & setup volume
+soundAssets.repulsor.volume = 0.35;
+soundAssets.magnetic.volume = 0.45;
+soundAssets.click4.volume = 0.50;
+
+/**
+ * Play Click 4 SFX (assets/click_4.mp3) EXCLUSIVELY for opening Intro cards/boxes
+ * (Showreel Accordion & Beyond The Edit cards)
+ */
+function playCardOpenSFX() {
+  if (!audioEnabled) return;
   try {
-    const ctx = getAudioCtx();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(800, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.04);
-    gain.gain.setValueAtTime(0.12, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 0.04);
+    const snd = soundAssets.click4.cloneNode();
+    snd.volume = 0.50;
+    snd.play().catch(() => {});
   } catch (_) {}
 }
 
 /**
- * Crisp, Dry, Metallic Mechanical Gear Ratchet Sound ("chak-chak-chak")
- * Synthesizes a physical metal gear tooth engagement transient.
- * @param {number} velocity - Current scroll speed (positive = DOWN, negative = UP)
+ * Play Repulsor Beam SFX when user lands on page
  */
-function playGearTick(velocity = 0) {
-  if (!audioEnabled || !isUserInteracted) return;
+function playRepulsorLandingSFX() {
+  if (!audioEnabled) return;
+  try {
+    soundAssets.repulsor.currentTime = 0;
+    soundAssets.repulsor.play().catch(() => {
+      // Browser autoplay policy handler: unlock on first gesture
+      const unlockLanding = () => {
+        if (audioEnabled) {
+          soundAssets.repulsor.currentTime = 0;
+          soundAssets.repulsor.play().catch(() => {});
+        }
+        window.removeEventListener('pointerdown', unlockLanding);
+        window.removeEventListener('scroll', unlockLanding);
+      };
+      window.addEventListener('pointerdown', unlockLanding, { passive: true });
+      window.addEventListener('scroll', unlockLanding, { passive: true });
+    });
+  } catch (_) {}
+}
+
+/**
+ * Play Magnetic Button SFX (assets/magnetic_button.wav) for clicks and card/box triggers
+ */
+function playClickSFX() {
+  if (!audioEnabled) return;
+  try {
+    const snd = soundAssets.magnetic.cloneNode();
+    snd.volume = 0.45;
+    snd.play().catch(() => {});
+  } catch (_) {}
+}
+
+function playHoverSFX() {
+  if (!audioEnabled) return;
+  try {
+    const snd = soundAssets.magnetic.cloneNode();
+    snd.volume = 0.20;
+    snd.play().catch(() => {});
+  } catch (_) {}
+}
+
+/**
+ * Heavy, Deep & Long Cinematic Whoosh SFX (Web Audio API)
+ * Synthesizes a deep sub-bass heavy whoosh that scales duration & speed with scroll velocity.
+ * @param {string} type - 'in' (sweeps up & deep) or 'out' (sweeps down & deep)
+ * @param {number} velocity - Current scroll speed (fast scroll = faster heavy whoosh, slow scroll = long smooth fade)
+ */
+function playWhooshSFX(type = 'in', velocity = 1.0) {
+  if (!audioEnabled) return;
   try {
     const ctx = getAudioCtx();
-    if (ctx.state !== 'running') return;
-
-    const absVel = Math.abs(velocity);
-    const isScrollUp = velocity < 0;
+    if (ctx.state === 'suspended') ctx.resume();
     const now = ctx.currentTime;
-    const tickDuration = 0.007; // 7ms ultra-tight mechanical tooth impact
+    
+    // Scale duration with scroll speed: fast scroll = ~0.35s punchy heavy whoosh, slow scroll = ~0.85s long heavy whoosh
+    const absVel = Math.abs(velocity) || 1.0;
+    const duration = Math.max(0.35, Math.min(0.95 - (absVel * 0.1), 0.95));
 
-    // 1. HARD METALLIC TRANSIENT NOISE (The "Chak" tooth impact)
-    // Short burst of high-frequency white noise filtered into a dry metal click
-    const bufferSize = Math.floor(ctx.sampleRate * tickDuration);
+    // 1. Deep Sub-Bass Rumble Layer (Bharipan)
+    const subOsc = ctx.createOscillator();
+    const subGain = ctx.createGain();
+    subOsc.type = 'sine';
+    const subStart = type === 'in' ? 65 : 120;
+    const subEnd = type === 'in' ? 140 : 45;
+    
+    subOsc.frequency.setValueAtTime(subStart, now);
+    subOsc.frequency.exponentialRampToValueAtTime(subEnd, now + duration);
+    
+    subGain.gain.setValueAtTime(0.0001, now);
+    subGain.gain.linearRampToValueAtTime(0.065, now + (duration * 0.35));
+    subGain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+    
+    subOsc.connect(subGain);
+    subGain.connect(ctx.destination);
+    subOsc.start(now);
+    subOsc.stop(now + duration);
+
+    // 2. Heavy Filtered Air Noise Layer
+    const bufferSize = Math.floor(ctx.sampleRate * duration);
     const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
     const data = buffer.getChannelData(0);
     for (let i = 0; i < bufferSize; i++) {
-      // Exponential decay on noise burst for ultra-sharp mechanical snap
-      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.25));
+      data[i] = Math.random() * 2 - 1;
     }
 
     const noise = ctx.createBufferSource();
     noise.buffer = buffer;
 
-    // Bandpass filter centered at metallic resonance (2.4kHz - 3.8kHz)
-    const bandpass = ctx.createBiquadFilter();
-    bandpass.type = 'bandpass';
-    bandpass.frequency.setValueAtTime(isScrollUp ? 3600 : 2800, now);
-    bandpass.Q.setValueAtTime(4.5, now);
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.Q.setValueAtTime(3.5, now);
 
-    // Highpass to eliminate any muddy low-end "scroll rumbling"
-    const highpass = ctx.createBiquadFilter();
-    highpass.type = 'highpass';
-    highpass.frequency.setValueAtTime(1400, now);
+    const startFreq = type === 'in' ? 180 : 1400;
+    const endFreq = type === 'in' ? 1600 : 150;
 
-    // 2. METALLIC GEAR TOOTH TINK / RING
-    // Very short metallic resonance of the tooth striking the ratchet pawl
-    const metalPing = ctx.createOscillator();
-    const pingGain = ctx.createGain();
-    const pingFreq = isScrollUp ? 1850 : 1420;
-    
-    metalPing.type = 'triangle';
-    metalPing.frequency.setValueAtTime(pingFreq, now);
-    metalPing.frequency.exponentialRampToValueAtTime(pingFreq * 0.65, now + 0.008);
+    filter.frequency.setValueAtTime(startFreq, now);
+    filter.frequency.exponentialRampToValueAtTime(endFreq, now + duration);
 
-    pingGain.gain.setValueAtTime(0.04, now);
-    pingGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.008);
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.linearRampToValueAtTime(0.075, now + (duration * 0.4));
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
-    metalPing.connect(pingGain);
-
-    // Noise gain stage
-    const noiseGain = ctx.createGain();
-    const vol = Math.min(0.045 + Math.min(absVel * 0.01, 0.045), 0.08);
-    noiseGain.gain.setValueAtTime(vol, now);
-    noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + tickDuration);
-
-    noise.connect(bandpass);
-    bandpass.connect(highpass);
-    highpass.connect(noiseGain);
-
-    noiseGain.connect(ctx.destination);
-    pingGain.connect(ctx.destination);
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
 
     noise.start(now);
-    metalPing.start(now);
-    metalPing.stop(now + 0.008);
+    noise.stop(now + duration);
   } catch (_) {}
 }
 
 function playScrollTick() {
-  playGearTick(2);
+  playHoverSFX();
 }
 
 /* ─── SOUND TOGGLE ─── */
@@ -304,7 +359,7 @@ function getFallbackData() {
       { id:4, title:"Reels & Short-Form Content", description:"Beat-synced high-energy short-form edits.", tools:["Premiere Pro","CapCut"], embedUrl:"", thumbnail:"" },
       { id:5, title:"Cinematic Short Film / Music Video", description:"Cinematic storytelling with Log footage.", tools:["DaVinci Resolve","After Effects"], embedUrl:"", thumbnail:"" }
     ],
-    contact: { email:"maheshthakurbfm@gmail.com", linkedin:"https://www.linkedin.com/in/mahesh-thakur-317872277/", instagram:"https://www.instagram.com/motion.mogrt" },
+    contact: { email:"mahesh19031@govtsciencecollegedurg.ac.in", linkedin:"https://www.linkedin.com/in/mahesh-thakur-317872277/", instagram:"https://www.instagram.com/motion.mogrt" },
     software: [
       {name:"Premiere Pro",icon:"🎬",level:95},{name:"After Effects",icon:"⚡",level:92},
       {name:"DaVinci Resolve",icon:"🎨",level:88},{name:"Final Cut Pro",icon:"✂️",level:80},
@@ -357,7 +412,7 @@ function renderAccordion() {
     item.classList.add('is-open');
     const trigger = item.querySelector('.accordion-trigger');
     if (trigger) trigger.setAttribute('aria-expanded', 'true');
-    playScrollTick();
+    playCardOpenSFX();
   };
 
   // Bind hover (mouseenter) and click on each item
@@ -377,7 +432,6 @@ function renderAccordion() {
         } else {
           item.classList.remove('is-open');
           trigger.setAttribute('aria-expanded', 'false');
-          playClickSFX();
         }
       });
     }
@@ -539,6 +593,16 @@ function initHeroAnimations() {
   // ------------------------------------------------------------
   if (typeof ScrollTrigger !== 'undefined' && bgText) {
     gsap.registerPlugin(ScrollTrigger);
+
+    // Section entrance whoosh trigger for PORTFOLIO
+    ScrollTrigger.create({
+      trigger: '#hero',
+      start: 'top 80%',
+      onEnter: () => playWhooshSFX('in', currentScrollVelocity),
+      onLeave: () => playWhooshSFX('out', currentScrollVelocity),
+      onEnterBack: () => playWhooshSFX('in', currentScrollVelocity),
+      onLeaveBack: () => playWhooshSFX('out', currentScrollVelocity)
+    });
 
     const exitXPercent = design.bgText?.scrollMotion?.exitXPercent ?? 35;
     const scrollState = { x: 0, opacity: targetBgOpacity };
@@ -743,6 +807,17 @@ function initHeroAnimations() {
     aboutBgText.style.setProperty('--scroll-x', '0vw');
     aboutBgText.style.opacity = targetAboutOpacity;
 
+    // Section entrance & exit whoosh SFX for ABOUT watermark
+    ScrollTrigger.create({
+      trigger: '#about',
+      start: 'top 75%',
+      end: 'bottom top',
+      onEnter: () => playWhooshSFX('in', currentScrollVelocity),
+      onLeave: () => playWhooshSFX('out', currentScrollVelocity),
+      onEnterBack: () => playWhooshSFX('in', currentScrollVelocity),
+      onLeaveBack: () => playWhooshSFX('out', currentScrollVelocity)
+    });
+
     gsap.to(scrollState, {
       x: exitXPercent,
       opacity: 0,
@@ -807,6 +882,17 @@ function initHeroAnimations() {
     interestsBgText.style.setProperty('--scroll-x', '0vw');
     interestsBgText.style.opacity = targetPassionsOpacity;
 
+    // Section entrance & exit whoosh SFX for PASSIONS watermark
+    ScrollTrigger.create({
+      trigger: '#interests',
+      start: 'top 75%',
+      end: 'bottom top',
+      onEnter: () => playWhooshSFX('in', currentScrollVelocity),
+      onLeave: () => playWhooshSFX('out', currentScrollVelocity),
+      onEnterBack: () => playWhooshSFX('in', currentScrollVelocity),
+      onLeaveBack: () => playWhooshSFX('out', currentScrollVelocity)
+    });
+
     gsap.to(scrollState, {
       x: exitXPercent,
       opacity: 0,
@@ -865,9 +951,10 @@ function initHeroAnimations() {
   if (passionCards.length) {
     passionCards.forEach(card => {
       const activateCard = () => {
+        if (card.classList.contains('is-active')) return;
         passionCards.forEach(c => c.classList.remove('is-active'));
         card.classList.add('is-active');
-        playScrollTick();
+        playCardOpenSFX();
       };
       card.addEventListener('mouseenter', activateCard);
       card.addEventListener('click', activateCard);
@@ -926,35 +1013,15 @@ function initNavbar() {
   }, { passive: true });
 }
 
-/* ─── SMOOTH SCROLL (Lenis) + GEAR SFX SYNCHRONIZATION ─── */
+let currentScrollVelocity = 1.0;
+
+/* ─── SMOOTH SCROLL (Lenis) ─── */
 function initLenis() {
-  let accumulatedScrollDistance = 0;
-
-  const handleScrollVelocity = (velocity) => {
-    if (!audioEnabled || !isUserInteracted) return;
-    const absVel = Math.abs(velocity);
-    if (absVel < 0.05) return;
-
-    // Accumulate scroll displacement
-    accumulatedScrollDistance += absVel;
-
-    // Gear tooth distance threshold: lower threshold at higher speed for natural gear teeth engagement rhythm
-    // Slow scroll: tick every ~18px
-    // Fast scroll: tick every ~10px
-    const tickInterval = Math.max(10, 22 - Math.min(absVel * 3, 12));
-
-    if (accumulatedScrollDistance >= tickInterval) {
-      accumulatedScrollDistance = 0;
-      playGearTick(velocity);
-    }
-  };
-
   if (typeof Lenis !== 'undefined') {
     lenis = new Lenis({ duration: 1.2, easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
 
     lenis.on('scroll', (e) => {
-      // e.velocity gives direction and speed (positive = DOWN, negative = UP)
-      handleScrollVelocity(e.velocity);
+      currentScrollVelocity = e.velocity || 1.0;
     });
 
     function raf(time) {
@@ -963,15 +1030,6 @@ function initLenis() {
       requestAnimationFrame(raf);
     }
     requestAnimationFrame(raf);
-  } else {
-    // Native scroll fallback
-    let lastY = window.scrollY;
-    window.addEventListener('scroll', () => {
-      const currentY = window.scrollY;
-      const delta = currentY - lastY;
-      lastY = currentY;
-      handleScrollVelocity(delta * 0.1);
-    }, { passive: true });
   }
 
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -990,11 +1048,32 @@ function initLenis() {
   });
 }
 
-/* ─── CLICK SFX on all interactive elements ─── */
+/* ─── FUTURISTIC SUBTLE UI SFX BINDINGS ─── */
 function initClickSFX() {
-  document.querySelectorAll('button, .btn-primary, .btn-ghost, .social-btn, .focus-card, .software-card').forEach(el => {
-    el.addEventListener('click', playClickSFX);
-  });
+  const isInteractive = (target) => {
+    // Exclude Beyond The Edit (#interests / .passion-card) and Showreel Accordion (#projects / .accordion-item)
+    if (target.closest('#interests, .passion-card, #projects, .accordion-item, .accordion-trigger')) {
+      return null;
+    }
+    return target.closest('button, a, .btn-primary, .btn-ghost, .social-btn, .focus-card, .software-card, .nav-links a, .stat-card, .role-pill, .hero-scroll-hint');
+  };
+
+  // Global event delegation for clicks
+  document.addEventListener('click', (e) => {
+    if (isInteractive(e.target)) {
+      playClickSFX();
+    }
+  }, { passive: true });
+
+  // Global event delegation for hovers
+  document.addEventListener('mouseover', (e) => {
+    const el = isInteractive(e.target);
+    if (el && !el._hoveredSFX) {
+      el._hoveredSFX = true;
+      playHoverSFX();
+      setTimeout(() => { el._hoveredSFX = false; }, 200);
+    }
+  }, { passive: true });
 }
 
 /* ─── TOAST ─── */
@@ -1049,7 +1128,10 @@ function initAdminTrigger() {
 function hideLoader() {
   const loader = document.getElementById('site-loader');
   if (loader) {
-    setTimeout(() => loader.classList.add('hidden'), 1500);
+    setTimeout(() => {
+      loader.classList.add('hidden');
+      playRepulsorLandingSFX();
+    }, 1500);
   }
 }
 
@@ -1100,8 +1182,37 @@ async function boot() {
   waitForLenis();
 }
 
-if (document.readyState === 'loading') {
+  if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', boot);
 } else {
   boot();
 }
+
+/* ── CONTACT CHOOSER POPOVER ── */
+function toggleContactChooser(show) {
+  const chooser = document.getElementById('contact-chooser');
+  if (!chooser) return;
+  if (show) {
+    chooser.classList.add('active');
+    chooser.setAttribute('aria-hidden', 'false');
+  } else {
+    chooser.classList.remove('active');
+    chooser.setAttribute('aria-hidden', 'true');
+  }
+}
+
+// Global listeners for closing popover on Escape key or outside click
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    toggleContactChooser(false);
+  }
+});
+
+document.addEventListener('click', (e) => {
+  const chooser = document.getElementById('contact-chooser');
+  const msgBtn = document.getElementById('contact-msg-btn');
+  if (!chooser || !chooser.classList.contains('active')) return;
+  if (!chooser.contains(e.target) && !msgBtn.contains(e.target)) {
+    toggleContactChooser(false);
+  }
+});
