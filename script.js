@@ -338,13 +338,6 @@ async function loadData() {
   try {
     const res = await fetch('data.json');
     siteData = await res.json();
-    const stored = localStorage.getItem('mt-portfolio-data');
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      if (parsed && parsed.projects) {
-        siteData = { ...siteData, ...parsed };
-      }
-    }
   } catch (_) {
     siteData = getFallbackData();
   }
