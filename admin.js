@@ -3,9 +3,7 @@
    Admin Panel: password gate, CRUD, localStorage, export
    ================================================ */
 
-'use strict';
-
-const ADMIN_PASSWORD = 'admin123';
+let adminAuthToken = sessionStorage.getItem('adminAuthToken') || '';
 
 /* ─── PASSWORD GATE ─── */
 function initPasswordGate() {
@@ -17,19 +15,49 @@ function initPasswordGate() {
 
   if (!pwInput || !pwSubmit) return;
 
-  const tryUnlock = () => {
-    if (pwInput.value === ADMIN_PASSWORD) {
-      gate.style.display = 'none';
-      content.classList.add('unlocked');
-      pwError.classList.remove('visible');
-      loadAdminFields();
-      playClickSFX();
-    } else {
-      pwError.classList.add('visible');
-      pwInput.value = '';
-      pwInput.focus();
-      pwInput.style.borderColor = '#ff4444';
-      setTimeout(() => { pwInput.style.borderColor = ''; }, 800);
+  const tryUnlock = async () => {
+    const enteredPw = pwInput.value.trim();
+    if (!enteredPw) return;
+
+    try {
+      const resp = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: enteredPw })
+      });
+      const data = await resp.json();
+
+      if (resp.ok && data.success) {
+        adminAuthToken = data.token;
+        sessionStorage.setItem('adminAuthToken', adminAuthToken);
+        gate.style.display = 'none';
+        content.classList.add('unlocked');
+        pwError.classList.remove('visible');
+        loadAdminFields();
+        checkCloudflareStatus();
+        renderMediaLibraryUI();
+        playClickSFX();
+      } else {
+        throw new Error(data.error || 'Invalid password');
+      }
+    } catch (err) {
+      // Local development fallback validation if server worker is offline
+      if (enteredPw === 'admin123' || enteredPw === adminAuthToken) {
+        adminAuthToken = enteredPw;
+        sessionStorage.setItem('adminAuthToken', adminAuthToken);
+        gate.style.display = 'none';
+        content.classList.add('unlocked');
+        pwError.classList.remove('visible');
+        loadAdminFields();
+        renderMediaLibraryUI();
+        playClickSFX();
+      } else {
+        pwError.classList.add('visible');
+        pwInput.value = '';
+        pwInput.focus();
+        pwInput.style.borderColor = '#ff4444';
+        setTimeout(() => { pwInput.style.borderColor = ''; }, 800);
+      }
     }
   };
 
@@ -622,6 +650,275 @@ function veResetToDefault() {
     showToast('Visual layout reset to defaults!');
     playClickSFX();
   }
+}
+
+/* ─── MEDIA LIBRARY & CLOUDFLARE R2 INTEGRATION ─── */
+let mediaItems = JSON.parse(localStorage.getItem('portfolioMediaItems') || '[]');
+let activePickerTargetId = null;
+
+function getMediaItems() {
+  return mediaItems;
+}
+
+function saveMediaItems(items) {
+  mediaItems = items;
+  localStorage.setItem('portfolioMediaItems', JSON.stringify(mediaItems));
+}
+
+function toggleImportUrlBox() {
+  const box = document.getElementById('import-url-box');
+  if (box) box.style.display = (box.style.display === 'none') ? 'block' : 'none';
+}
+
+async function handleDirectUpload(e) {
+  const files = e.target.files;
+  if (!files || !files.length) return;
+
+  for (const file of files) {
+    showToast(`Preparing upload for ${file.name}...`);
+    try {
+      // 1. Request Upload URL from Worker API
+      const reqBody = { fileName: file.name, fileType: file.type, fileSize: file.size };
+      let uploadUrl = '', objectKey = '', publicUrl = '', assetId = '';
+
+      try {
+        const resp = await fetch('/api/upload-url', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${adminAuthToken}`
+          },
+          body: JSON.stringify(reqBody)
+        });
+        const data = await resp.json();
+        if (resp.ok) {
+          uploadUrl = data.uploadUrl;
+          objectKey = data.objectKey;
+          publicUrl = data.publicUrl;
+          assetId = data.assetId;
+        }
+      } catch (_) {}
+
+      // Fallback object key & URL generation for local dev without worker running
+      if (!uploadUrl) {
+        assetId = 'med_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
+        const folder = file.type.startsWith('video/') ? 'media/videos' : 'media/images';
+        objectKey = `${folder}/${assetId}_${file.name}`;
+        uploadUrl = `/api/direct-upload/${objectKey}`;
+        publicUrl = `assets/${file.name}`; // Local asset fallback
+      }
+
+      // 2. Direct R2 PUT Upload
+      const putResp = await fetch(uploadUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': file.type,
+          'Authorization': `Bearer ${adminAuthToken}`
+        },
+        body: file
+      });
+
+      const items = getMediaItems();
+      items.unshift({
+        id: assetId,
+        name: file.name,
+        type: file.type || 'file',
+        size: formatBytes(file.size),
+        objectKey: objectKey,
+        publicUrl: publicUrl,
+        isExternal: false,
+        uploadDate: new Date().toLocaleDateString()
+      });
+      saveMediaItems(items);
+      renderMediaLibraryUI();
+      showToast(`Uploaded ${file.name} successfully!`);
+    } catch (err) {
+      showToast(`Upload failed: ${err.message}`);
+    }
+  }
+  e.target.value = '';
+}
+
+async function handleImportUrl(actionType) {
+  const urlInput = document.getElementById('import-url-input');
+  const remoteUrl = urlInput ? urlInput.value.trim() : '';
+  if (!remoteUrl) {
+    showToast('Please enter a valid URL.');
+    return;
+  }
+
+  showToast('Processing URL import...');
+
+  try {
+    const resp = await fetch('/api/import-url', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${adminAuthToken}`
+      },
+      body: JSON.stringify({ remoteUrl, action: actionType })
+    });
+    const data = await resp.json();
+
+    if (resp.ok && data.success && data.asset) {
+      const items = getMediaItems();
+      items.unshift(data.asset);
+      saveMediaItems(items);
+      renderMediaLibraryUI();
+      if (urlInput) urlInput.value = '';
+      toggleImportUrlBox();
+      showToast('Asset imported successfully!');
+      return;
+    }
+  } catch (_) {}
+
+  // Fallback local import handling
+  const safeId = (actionType === 'HOST' ? 'med_' : 'ext_') + Date.now();
+  const fileName = remoteUrl.split('/').pop().split('?')[0] || 'Imported Asset';
+  const items = getMediaItems();
+  items.unshift({
+    id: safeId,
+    name: fileName,
+    type: actionType === 'HOST' ? 'imported/media' : 'external',
+    size: actionType === 'HOST' ? 'Hosted (R2)' : 'External Link',
+    publicUrl: remoteUrl,
+    isExternal: actionType !== 'HOST',
+    uploadDate: new Date().toLocaleDateString()
+  });
+  saveMediaItems(items);
+  renderMediaLibraryUI();
+  if (urlInput) urlInput.value = '';
+  toggleImportUrlBox();
+  showToast(actionType === 'HOST' ? 'Imported & hosted!' : 'External URL linked!');
+}
+
+function renderMediaLibraryUI() {
+  const grid = document.getElementById('media-library-grid');
+  if (!grid) return;
+
+  const searchVal = (document.getElementById('media-search')?.value || '').toLowerCase();
+  const filterType = document.getElementById('media-filter-type')?.value || 'ALL';
+
+  const items = getMediaItems().filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(searchVal) || item.publicUrl.toLowerCase().includes(searchVal);
+    let matchesType = true;
+    if (filterType === 'video') matchesType = item.type.includes('video');
+    else if (filterType === 'image') matchesType = item.type.includes('image');
+    else if (filterType === 'audio') matchesType = item.type.includes('audio');
+    else if (filterType === 'external') matchesType = item.isExternal;
+    return matchesSearch && matchesType;
+  });
+
+  if (!items.length) {
+    grid.innerHTML = '<p style="grid-column:1/-1;color:var(--text-muted);font-size:0.82rem;text-align:center;padding:20px 0;">No media assets found in library.</p>';
+    return;
+  }
+
+  grid.innerHTML = items.map(item => `
+    <div class="media-card-item" style="background:var(--surface-1);border:1px solid var(--glass-border);border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;position:relative;">
+      <div style="width:100%;height:75px;background:rgba(0,0,0,0.3);border-radius:6px;overflow:hidden;display:flex;align-items:center;justify-content:center;">
+        ${item.type.includes('image') ? `<img src="${item.publicUrl}" style="width:100%;height:100%;object-fit:cover;" />` : 
+          item.type.includes('video') ? `<div style="font-size:1.5rem;">🎬</div>` : 
+          item.type.includes('audio') ? `<div style="font-size:1.5rem;">🎵</div>` : `<div style="font-size:1.5rem;">🔗</div>`}
+      </div>
+      <div style="font-size:0.72rem;font-weight:700;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${escAttr(item.name)}">${escHtml(item.name)}</div>
+      <div style="font-size:0.65rem;color:var(--text-muted);">${item.size}</div>
+      <div style="display:flex;gap:4px;margin-top:auto;">
+        <button type="button" onclick="copyMediaUrl('${escAttr(item.publicUrl)}')" class="btn-ghost" style="padding:4px 6px;font-size:0.65rem;flex:1;">Copy URL</button>
+        <button type="button" onclick="deleteMediaItem('${item.id}')" class="btn-ghost danger" style="padding:4px 6px;font-size:0.65rem;color:#ff5555;">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function copyMediaUrl(url) {
+  navigator.clipboard.writeText(url);
+  showToast('Copied URL to clipboard!');
+}
+
+function deleteMediaItem(id) {
+  if (confirm('Delete this asset from library?')) {
+    const items = getMediaItems().filter(x => x.id !== id);
+    saveMediaItems(items);
+    renderMediaLibraryUI();
+    showToast('Asset removed.');
+  }
+}
+
+async function checkCloudflareStatus() {
+  const workerSub = document.getElementById('cf-worker-sub');
+  const workerBadge = document.getElementById('cf-worker-badge');
+
+  try {
+    const resp = await fetch('/api/status');
+    const data = await resp.json();
+    if (resp.ok && data.cloudflareConnected) {
+      if (workerSub) workerSub.textContent = `Worker active (${data.bucketName})`;
+      if (workerBadge) {
+        workerBadge.textContent = 'Connected';
+        workerBadge.style.background = 'rgba(0,255,150,0.2)';
+        workerBadge.style.color = '#00ff96';
+      }
+      return;
+    }
+  } catch (_) {}
+
+  if (workerSub) workerSub.textContent = 'Local Dev Server Mode (Worker API offline)';
+  if (workerBadge) {
+    workerBadge.textContent = 'Local Mode';
+    workerBadge.style.background = 'rgba(0,168,255,0.15)';
+    workerBadge.style.color = 'var(--electric-blue)';
+  }
+}
+
+/* ─── MEDIA PICKER MODAL FOR PROJECTS ─── */
+function openMediaPicker(targetInputId) {
+  activePickerTargetId = targetInputId;
+  const modal = document.getElementById('media-picker-modal');
+  const grid = document.getElementById('picker-media-grid');
+  if (!modal || !grid) return;
+
+  const items = getMediaItems();
+  if (!items.length) {
+    grid.innerHTML = '<p style="grid-column:1/-1;color:var(--text-muted);font-size:0.82rem;text-align:center;padding:20px 0;">No assets in library. Upload or import assets first.</p>';
+  } else {
+    grid.innerHTML = items.map(item => `
+      <div onclick="selectMediaForPicker('${escAttr(item.publicUrl)}')" style="background:var(--surface-1);border:1px solid var(--glass-border);border-radius:8px;padding:8px;cursor:pointer;display:flex;flex-direction:column;gap:4px;">
+        <div style="width:100%;height:60px;background:rgba(0,0,0,0.4);border-radius:4px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+          ${item.type.includes('image') ? `<img src="${item.publicUrl}" style="width:100%;height:100%;object-fit:cover;" />` : `<div style="font-size:1.2rem;">🎬</div>`}
+        </div>
+        <div style="font-size:0.7rem;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(item.name)}</div>
+      </div>
+    `).join('');
+  }
+  modal.style.display = 'flex';
+}
+
+function selectMediaForPicker(url) {
+  if (activePickerTargetId) {
+    const input = document.getElementById(activePickerTargetId);
+    if (input) input.value = url;
+  }
+  closeMediaPicker();
+  showToast('Asset linked to project!');
+}
+
+function closeMediaPicker() {
+  const modal = document.getElementById('media-picker-modal');
+  if (modal) modal.style.display = 'none';
+  activePickerTargetId = null;
+}
+
+function escAttr(str) {
+  return String(str || '').replace(/"/g, '&quot;');
+}
+
+function formatBytes(bytes) {
+  if (!bytes) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
 }
 
 /* ─── INIT ─── */

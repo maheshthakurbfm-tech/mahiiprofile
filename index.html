@@ -468,6 +468,8 @@
           <button class="admin-tab active" data-tab="visual-editor">🎨 Visual Editor</button>
           <button class="admin-tab" data-tab="hero">Hero Content</button>
           <button class="admin-tab" data-tab="projects">Projects</button>
+          <button class="admin-tab" data-tab="media-library">📁 Media Library</button>
+          <button class="admin-tab" data-tab="cf-status">☁️ Cloudflare</button>
           <button class="admin-tab" data-tab="contact">Contact</button>
         </div>
 
@@ -641,13 +643,88 @@
                 <input type="text" id="edit-proj-tools" />
               </div>
               <div class="form-group">
-                <label>YouTube / Video Embed URL</label>
-                <input type="text" id="edit-proj-embed" placeholder="https://www.youtube.com/embed/..." />
+                <label>Video / Embed URL</label>
+                <div style="display:flex;gap:8px;">
+                  <input type="text" id="edit-proj-embed" placeholder="https://..." style="flex:1;" />
+                  <button type="button" class="btn-ghost" onclick="openMediaPicker('edit-proj-embed')" style="padding:6px 12px;font-size:0.75rem;">📁 Pick Media</button>
+                </div>
               </div>
               <div class="form-group">
                 <label>Thumbnail URL</label>
-                <input type="text" id="edit-proj-thumb" placeholder="https://..." />
+                <div style="display:flex;gap:8px;">
+                  <input type="text" id="edit-proj-thumb" placeholder="https://..." style="flex:1;" />
+                  <button type="button" class="btn-ghost" onclick="openMediaPicker('edit-proj-thumb')" style="padding:6px 12px;font-size:0.75rem;">📁 Pick Media</button>
+                </div>
               </div>
+            </div>
+          </div>
+
+          <!-- TAB: MEDIA LIBRARY -->
+          <div class="admin-tab-content" id="tab-media-library">
+            <div class="media-lib-header" style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px;">
+              <!-- Upload & Import Controls -->
+              <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                <label class="btn-primary" style="padding:8px 16px;font-size:0.8rem;cursor:pointer;margin:0;">
+                  ⬆ Direct Upload File
+                  <input type="file" id="media-file-input" multiple accept="video/*,image/*,audio/*,.pdf" style="display:none;" onchange="handleDirectUpload(event)" />
+                </label>
+                <button type="button" class="btn-ghost" onclick="toggleImportUrlBox()" style="padding:8px 14px;font-size:0.8rem;">🔗 Import From URL</button>
+              </div>
+
+              <!-- Import URL Box -->
+              <div id="import-url-box" style="display:none;padding:12px;border-radius:10px;background:rgba(0,168,255,0.05);border:1px solid rgba(0,168,255,0.2);">
+                <input type="text" id="import-url-input" placeholder="Paste media URL (e.g. https://domain.com/video.mp4 or YouTube link)" style="width:100%;margin-bottom:8px;padding:8px 12px;border-radius:6px;background:var(--surface-1);border:1px solid var(--glass-border);color:white;font-size:0.8rem;" />
+                <div style="display:flex;gap:8px;">
+                  <button type="button" class="btn-primary" onclick="handleImportUrl('HOST')" style="padding:6px 12px;font-size:0.75rem;">[ IMPORT & HOST ]</button>
+                  <button type="button" class="btn-ghost" onclick="handleImportUrl('EXTERNAL')" style="padding:6px 12px;font-size:0.75rem;">[ USE EXTERNAL URL ]</button>
+                </div>
+              </div>
+
+              <!-- Filter Bar -->
+              <div style="display:flex;gap:8px;align-items:center;margin-top:4px;">
+                <input type="text" id="media-search" placeholder="Search media..." oninput="renderMediaLibraryUI()" style="flex:1;padding:6px 12px;border-radius:6px;background:var(--surface-1);border:1px solid var(--glass-border);color:white;font-size:0.8rem;" />
+                <select id="media-filter-type" onchange="renderMediaLibraryUI()" style="padding:6px 10px;border-radius:6px;background:var(--surface-1);border:1px solid var(--glass-border);color:white;font-size:0.8rem;">
+                  <option value="ALL">All Media</option>
+                  <option value="video">Videos</option>
+                  <option value="image">Images</option>
+                  <option value="audio">Audio</option>
+                  <option value="external">External Links</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Media Grid -->
+            <div id="media-library-grid" class="media-grid-container" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(130px, 1fr));gap:12px;max-height:360px;overflow-y:auto;padding-right:4px;">
+              <!-- Dynamically populated by admin.js -->
+            </div>
+          </div>
+
+          <!-- TAB: CLOUDFLARE STATUS -->
+          <div class="admin-tab-content" id="tab-cf-status">
+            <div style="display:flex;flex-direction:column;gap:14px;padding:4px 0;">
+              <h4 style="font-size:0.95rem;color:var(--text-primary);margin-bottom:4px;">☁️ Cloudflare Connection Status</h4>
+              <div class="cf-status-card" style="padding:14px;border-radius:10px;background:var(--surface-1);border:1px solid var(--glass-border);display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                  <div style="font-size:0.82rem;font-weight:700;color:var(--text-primary);">Cloudflare Worker Connection</div>
+                  <div style="font-size:0.72rem;color:var(--text-muted);" id="cf-worker-sub">Testing worker connection...</div>
+                </div>
+                <span id="cf-worker-badge" class="badge" style="padding:4px 10px;border-radius:20px;font-size:0.7rem;font-weight:700;background:rgba(255,255,255,0.1);color:white;">Testing</span>
+              </div>
+              <div class="cf-status-card" style="padding:14px;border-radius:10px;background:var(--surface-1);border:1px solid var(--glass-border);display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                  <div style="font-size:0.82rem;font-weight:700;color:var(--text-primary);">Cloudflare R2 Bucket Binding</div>
+                  <div style="font-size:0.72rem;color:var(--text-muted);" id="cf-r2-sub">Bucket: mahesh-portfolio-media</div>
+                </div>
+                <span id="cf-r2-badge" class="badge" style="padding:4px 10px;border-radius:20px;font-size:0.7rem;font-weight:700;background:rgba(255,255,255,0.1);color:white;">Configured</span>
+              </div>
+              <div class="cf-status-card" style="padding:14px;border-radius:10px;background:var(--surface-1);border:1px solid var(--glass-border);display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                  <div style="font-size:0.82rem;font-weight:700;color:var(--text-primary);">Public CDN Delivery Endpoint</div>
+                  <div style="font-size:0.72rem;color:var(--text-muted);" id="cf-cdn-sub">Production Custom Domain / Worker Proxy</div>
+                </div>
+                <span id="cf-cdn-badge" class="badge" style="padding:4px 10px;border-radius:20px;font-size:0.7rem;font-weight:700;background:rgba(0,168,255,0.15);color:var(--electric-blue);">Ready</span>
+              </div>
+              <button type="button" class="btn-ghost" onclick="checkCloudflareStatus()" style="padding:8px;font-size:0.78rem;margin-top:6px;">🔄 Refresh Status</button>
             </div>
           </div>
 
@@ -677,7 +754,19 @@
       </div><!-- /#admin-panel-content -->
 
     </div><!-- /.admin-panel -->
-  </div><!-- /#admin-modal -->
+  <!-- ╔══ MEDIA PICKER MODAL ══╗ -->
+  <div id="media-picker-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(10px);z-index:2000;align-items:center;justify-content:center;padding:20px;">
+    <div style="width:100%;max-width:550px;background:var(--surface-2);border:1px solid var(--glass-border);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:16px;max-height:85vh;">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <h3 style="font-size:1.1rem;color:white;margin:0;">📁 Select Asset from Media Library</h3>
+        <button type="button" onclick="closeMediaPicker()" style="background:none;border:none;color:var(--text-muted);font-size:1.2rem;cursor:pointer;">✕</button>
+      </div>
+      <div id="picker-media-grid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(110px, 1fr));gap:10px;overflow-y:auto;max-height:380px;padding-right:4px;">
+        <!-- Populated dynamically -->
+      </div>
+      <button type="button" class="btn-ghost" onclick="closeMediaPicker()" style="padding:8px 16px;align-self:flex-end;">Cancel</button>
+    </div>
+  </div>
 
   <!-- Scripts -->
   <script src="admin.js" defer></script>

@@ -440,6 +440,21 @@ function renderAccordion() {
 
 function renderVideoArea(p) {
   if (p.embedUrl && p.embedUrl.trim()) {
+    const url = p.embedUrl.trim().toLowerCase();
+    const isDirectVideo = url.endsWith('.mp4') || url.endsWith('.webm') || url.endsWith('.mov') || url.includes('/media/videos/');
+    
+    if (isDirectVideo) {
+      return `
+        <video 
+          src="${escAttr(p.embedUrl)}" 
+          poster="${escAttr(p.thumbnail || '')}" 
+          controls 
+          preload="metadata" 
+          playsinline 
+          style="width:100%;height:100%;object-fit:cover;border-radius:12px;"
+        ></video>
+      `;
+    }
     return `<iframe src="${escAttr(p.embedUrl)}" allow="autoplay; encrypted-media" allowfullscreen title="${escAttr(p.title)}"></iframe>`;
   }
   if (p.thumbnail && p.thumbnail.trim()) {
