@@ -45,14 +45,14 @@ function unlockAudioSystem() {
     }
   });
 
-  // Remove listeners after initial legitimate user interaction
-  ['pointerdown', 'touchstart', 'mousedown', 'keydown', 'wheel', 'scroll', 'mousemove', 'pointermove'].forEach(evt => {
+// Remove listeners after initial legitimate user interaction
+  ['pointerdown', 'touchstart', 'mousedown', 'keydown'].forEach(evt => {
     window.removeEventListener(evt, unlockAudioSystem, { capture: true });
   });
 }
 
-// Listen to all legitimate user interaction events to unlock audio engine safely
-['pointerdown', 'touchstart', 'mousedown', 'keydown', 'wheel', 'scroll', 'mousemove', 'pointermove'].forEach(evt => {
+// Listen ONLY to true user activation gestures (Safari WebKit requirement)
+['pointerdown', 'touchstart', 'mousedown', 'keydown'].forEach(evt => {
   window.addEventListener(evt, unlockAudioSystem, { passive: true, capture: true });
 });
 
