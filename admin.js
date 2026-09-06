@@ -793,7 +793,52 @@ let mediaItems = JSON.parse(localStorage.getItem('portfolioMediaItems') || '[]')
 let activePickerTargetId = null;
 
 function getMediaItems() {
-  return mediaItems;
+  const localItems = JSON.parse(localStorage.getItem('portfolioMediaItems') || '[]');
+  const d = getSiteData();
+  const projectMedia = [];
+
+  if (d && d.projects) {
+    d.projects.forEach(p => {
+      if (p.embedUrl) {
+        const name = p.title + ' (Video)';
+        projectMedia.push({
+          id: p.videoId || ('proj_vid_' + p.id),
+          publicId: p.videoId || '',
+          name: name,
+          type: 'video/mp4',
+          size: 'Cloudinary Hosted',
+          publicUrl: p.embedUrl,
+          isExternal: false,
+          hosted: 'Cloudinary',
+          uploadDate: 'Published'
+        });
+      }
+      if (p.thumbnail) {
+        const name = p.title + ' (Poster)';
+        projectMedia.push({
+          id: p.thumbnailId || ('proj_thumb_' + p.id),
+          publicId: p.thumbnailId || '',
+          name: name,
+          type: 'image/png',
+          size: 'Cloudinary Hosted',
+          publicUrl: p.thumbnail,
+          isExternal: false,
+          hosted: 'Cloudinary',
+          uploadDate: 'Published'
+        });
+      }
+    });
+  }
+
+  // Combine projectMedia and localItems avoiding duplicates by publicUrl
+  const existingUrls = new Set(localItems.map(x => x.publicUrl));
+  projectMedia.forEach(pm => {
+    if (!existingUrls.has(pm.publicUrl)) {
+      localItems.push(pm);
+    }
+  });
+
+  return localItems;
 }
 
 function saveMediaItems(items) {
@@ -894,47 +939,57 @@ async function handleImportUrl(actionType) {
 
   showToast('Processing URL import...');
 
-  try {
-    const resp = await fetch('/api/import-url', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${adminAuthToken}`
-      },
-      body: JSON.stringify({ remoteUrl, action: actionType })
-    });
-    const data = await resp.json();
+  const safeId = (actionType === 'HOST' ? 'cld_imp_' : 'ext_') + Date.now();
+  const fileName = remoteUrl.split('/').pop().split('?')[0] || 'Imported Media';
 
-    if (resp.ok && data.success && data.asset) {
-      const items = getMediaItems();
-      items.unshift(data.asset);
-      saveMediaItems(items);
-      renderMediaLibraryUI();
-      if (urlInput) urlInput.value = '';
-      toggleImportUrlBox();
-      showToast('Asset imported successfully!');
-      return;
+  let finalUrl = remoteUrl;
+  let isVideo = remoteUrl.endsWith('.mp4') || remoteUrl.endsWith('.webm') || remoteUrl.includes('/video/upload/');
+  let isImg = remoteUrl.endsWith('.png') || remoteUrl.endsWith('.jpg') || remoteUrl.endsWith('.webp') || remoteUrl.includes('/image/upload/');
+
+  if (actionType === 'HOST') {
+    try {
+      const cloudName = 'esvwgoxe';
+      const uploadPreset = 'esvwgoxe';
+      const resourceType = isVideo ? 'video' : 'image';
+
+      const formData = new FormData();
+      formData.append('file', remoteUrl);
+      formData.append('upload_preset', uploadPreset);
+
+      const resp = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`, {
+        method: 'POST',
+        body: formData
+      });
+      const cldData = await resp.json();
+
+      if (resp.ok && cldData.secure_url) {
+        finalUrl = cldData.secure_url;
+        showToast('Successfully imported and hosted on Cloudinary!');
+      } else {
+        throw new Error(cldData.error?.message || 'Cloudinary URL upload failed');
+      }
+    } catch (err) {
+      showToast(`Hosting failed (${err.message}). Saved as direct link.`);
     }
-  } catch (_) {}
+  }
 
-  // Fallback local import handling
-  const safeId = (actionType === 'HOST' ? 'med_' : 'ext_') + Date.now();
-  const fileName = remoteUrl.split('/').pop().split('?')[0] || 'Imported Asset';
   const items = getMediaItems();
   items.unshift({
     id: safeId,
     name: fileName,
-    type: actionType === 'HOST' ? 'imported/media' : 'external',
-    size: actionType === 'HOST' ? 'Hosted (R2)' : 'External Link',
-    publicUrl: remoteUrl,
+    type: isVideo ? 'video/mp4' : isImg ? 'image/jpeg' : 'external',
+    size: actionType === 'HOST' ? 'Cloudinary Hosted' : 'External Link',
+    publicUrl: finalUrl,
     isExternal: actionType !== 'HOST',
+    hosted: actionType === 'HOST' ? 'Cloudinary' : 'External',
     uploadDate: new Date().toLocaleDateString()
   });
   saveMediaItems(items);
   renderMediaLibraryUI();
+
   if (urlInput) urlInput.value = '';
   toggleImportUrlBox();
-  showToast(actionType === 'HOST' ? 'Imported & hosted!' : 'External URL linked!');
+  playClickSFX();
 }
 
 function renderMediaLibraryUI() {
