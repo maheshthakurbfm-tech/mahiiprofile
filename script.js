@@ -76,33 +76,58 @@ function playCardOpenSFX() {
 function playRepulsorLandingSFX() {
   if (!audioEnabled) return;
   let played = false;
+  let retryInterval = null;
 
   const tryPlay = () => {
-    if (played || !audioEnabled) return;
-    soundAssets.repulsor.currentTime = 0;
-    soundAssets.repulsor.play().then(() => {
-      played = true;
+    if (played || !audioEnabled) {
       cleanup();
-    }).catch(() => {
-      // Browser autoplay policy might require interaction, listeners will catch mousemove/scroll/click
-    });
+      return;
+    }
+
+    // Ensure audio context is active
+    if (gearAudioCtx && gearAudioCtx.state === 'suspended') {
+      gearAudioCtx.resume().catch(() => {});
+    }
+
+    soundAssets.repulsor.currentTime = 0;
+    const promise = soundAssets.repulsor.play();
+
+    if (promise !== undefined) {
+      promise.then(() => {
+        played = true;
+        cleanup();
+      }).catch(() => {
+        // Autoplay policy prevented playback, keep retrying on events & interval
+      });
+    }
   };
 
   const cleanup = () => {
-    window.removeEventListener('mousemove', tryPlay);
-    window.removeEventListener('pointerdown', tryPlay);
-    window.removeEventListener('scroll', tryPlay);
-    window.removeEventListener('keydown', tryPlay);
+    if (retryInterval) {
+      clearInterval(retryInterval);
+      retryInterval = null;
+    }
+    ['mousemove', 'pointermove', 'pointerdown', 'touchstart', 'scroll', 'wheel', 'keydown'].forEach(evt => {
+      window.removeEventListener(evt, tryPlay);
+    });
   };
 
   // Immediate attempt
   tryPlay();
 
-  // Listeners for mousemove, scroll, click, and keydown to autotrigger as soon as mouse moves
-  window.addEventListener('mousemove', tryPlay, { passive: true });
-  window.addEventListener('pointerdown', tryPlay, { passive: true });
-  window.addEventListener('scroll', tryPlay, { passive: true });
-  window.addEventListener('keydown', tryPlay, { passive: true });
+  // Retry loop every 200ms until audio successfully plays
+  retryInterval = setInterval(() => {
+    if (!played) {
+      tryPlay();
+    } else {
+      cleanup();
+    }
+  }, 200);
+
+  // Global interaction listeners that trigger instant sound play
+  ['mousemove', 'pointermove', 'pointerdown', 'touchstart', 'scroll', 'wheel', 'keydown'].forEach(evt => {
+    window.addEventListener(evt, tryPlay, { passive: true });
+  });
 }
 
 /**
