@@ -11,39 +11,50 @@ let audioEnabled = true;
 let audioCtx = null;
 let lenis = null;
 
-/* ─── MECHANICAL GEAR SFX ENGINE (Web Audio API) ─── */
-let gearAudioCtx = null;
-let isUserInteracted = false;
-
-// Enable audio context automatically on any initial gesture or scroll movement
-function unlockAudioContext() {
-  if (!gearAudioCtx) {
-    gearAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
-  if (gearAudioCtx.state === 'suspended') {
-    gearAudioCtx.resume().then(() => {
-      isUserInteracted = true;
-    }).catch(() => {
-      isUserInteracted = true;
-    });
-  } else {
-    isUserInteracted = true;
-  }
-}
-
-['pointerdown', 'touchstart', 'mousedown', 'keydown', 'wheel', 'scroll'].forEach(evt => {
-  window.addEventListener(evt, unlockAudioContext, { passive: true });
-});
+/* ─── BROWSER-COMPLIANT AUDIO UNLOCK SYSTEM (Safari & Modern Browsers) ─── */
+let sharedAudioCtx = null;
+let isAudioUnlocked = false;
 
 function getAudioCtx() {
-  if (!gearAudioCtx) {
-    gearAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (!sharedAudioCtx) {
+    sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
   }
-  if (gearAudioCtx.state === 'suspended') {
-    gearAudioCtx.resume();
+  if (sharedAudioCtx.state === 'suspended') {
+    sharedAudioCtx.resume().catch(() => {});
   }
-  return gearAudioCtx;
+  return sharedAudioCtx;
 }
+
+function unlockAudioSystem() {
+  if (isAudioUnlocked) return;
+
+  // 1. Resume Web Audio API Context (for Whoosh SFX)
+  const ctx = getAudioCtx();
+  if (ctx && ctx.state === 'suspended') {
+    ctx.resume().then(() => {
+      isAudioUnlocked = true;
+    }).catch(() => {});
+  } else {
+    isAudioUnlocked = true;
+  }
+
+  // 2. Unlock HTMLAudioElement playback for Safari / macOS
+  Object.values(soundAssets).forEach(audio => {
+    if (audio && typeof audio.load === 'function') {
+      audio.load();
+    }
+  });
+
+  // Remove listeners after initial legitimate user interaction
+  ['pointerdown', 'touchstart', 'mousedown', 'keydown', 'wheel', 'scroll', 'mousemove', 'pointermove'].forEach(evt => {
+    window.removeEventListener(evt, unlockAudioSystem, { capture: true });
+  });
+}
+
+// Listen to all legitimate user interaction events to unlock audio engine safely
+['pointerdown', 'touchstart', 'mousedown', 'keydown', 'wheel', 'scroll', 'mousemove', 'pointermove'].forEach(evt => {
+  window.addEventListener(evt, unlockAudioSystem, { passive: true, capture: true });
+});
 
 /* ─── REAL AUDIO ASSET ENGINE ─── */
 const soundAssets = {
@@ -75,59 +86,10 @@ function playCardOpenSFX() {
  */
 function playRepulsorLandingSFX() {
   if (!audioEnabled) return;
-  let played = false;
-  let retryInterval = null;
-
-  const tryPlay = () => {
-    if (played || !audioEnabled) {
-      cleanup();
-      return;
-    }
-
-    // Ensure audio context is active
-    if (gearAudioCtx && gearAudioCtx.state === 'suspended') {
-      gearAudioCtx.resume().catch(() => {});
-    }
-
+  try {
     soundAssets.repulsor.currentTime = 0;
-    const promise = soundAssets.repulsor.play();
-
-    if (promise !== undefined) {
-      promise.then(() => {
-        played = true;
-        cleanup();
-      }).catch(() => {
-        // Autoplay policy prevented playback, keep retrying on events & interval
-      });
-    }
-  };
-
-  const cleanup = () => {
-    if (retryInterval) {
-      clearInterval(retryInterval);
-      retryInterval = null;
-    }
-    ['mousemove', 'pointermove', 'pointerdown', 'touchstart', 'scroll', 'wheel', 'keydown'].forEach(evt => {
-      window.removeEventListener(evt, tryPlay);
-    });
-  };
-
-  // Immediate attempt
-  tryPlay();
-
-  // Retry loop every 200ms until audio successfully plays
-  retryInterval = setInterval(() => {
-    if (!played) {
-      tryPlay();
-    } else {
-      cleanup();
-    }
-  }, 200);
-
-  // Global interaction listeners that trigger instant sound play
-  ['mousemove', 'pointermove', 'pointerdown', 'touchstart', 'scroll', 'wheel', 'keydown'].forEach(evt => {
-    window.addEventListener(evt, tryPlay, { passive: true });
-  });
+    soundAssets.repulsor.play().catch(() => {});
+  } catch (_) {}
 }
 
 /**
