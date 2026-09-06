@@ -75,22 +75,34 @@ function playCardOpenSFX() {
  */
 function playRepulsorLandingSFX() {
   if (!audioEnabled) return;
-  try {
+  let played = false;
+
+  const tryPlay = () => {
+    if (played || !audioEnabled) return;
     soundAssets.repulsor.currentTime = 0;
-    soundAssets.repulsor.play().catch(() => {
-      // Browser autoplay policy handler: unlock on first gesture
-      const unlockLanding = () => {
-        if (audioEnabled) {
-          soundAssets.repulsor.currentTime = 0;
-          soundAssets.repulsor.play().catch(() => {});
-        }
-        window.removeEventListener('pointerdown', unlockLanding);
-        window.removeEventListener('scroll', unlockLanding);
-      };
-      window.addEventListener('pointerdown', unlockLanding, { passive: true });
-      window.addEventListener('scroll', unlockLanding, { passive: true });
+    soundAssets.repulsor.play().then(() => {
+      played = true;
+      cleanup();
+    }).catch(() => {
+      // Browser autoplay policy might require interaction, listeners will catch mousemove/scroll/click
     });
-  } catch (_) {}
+  };
+
+  const cleanup = () => {
+    window.removeEventListener('mousemove', tryPlay);
+    window.removeEventListener('pointerdown', tryPlay);
+    window.removeEventListener('scroll', tryPlay);
+    window.removeEventListener('keydown', tryPlay);
+  };
+
+  // Immediate attempt
+  tryPlay();
+
+  // Listeners for mousemove, scroll, click, and keydown to autotrigger as soon as mouse moves
+  window.addEventListener('mousemove', tryPlay, { passive: true });
+  window.addEventListener('pointerdown', tryPlay, { passive: true });
+  window.addEventListener('scroll', tryPlay, { passive: true });
+  window.addEventListener('keydown', tryPlay, { passive: true });
 }
 
 /**
