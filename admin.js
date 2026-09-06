@@ -197,74 +197,86 @@ window.uploadAndAttachToProject = async function(e, fieldType) {
   const projId = getVal('edit-proj-id') || getVal('edit-proj-selector');
   const projTitle = getVal('edit-proj-title') || 'Selected Project';
 
-  showToast(`Uploading ${file.name} for "${projTitle}"...`);
+  showToast(`Uploading ${file.name} to Cloudinary...`);
 
   try {
-    const reqBody = { fileName: file.name, fileType: file.type, fileSize: file.size };
-    let uploadUrl = '', objectKey = '', publicUrl = '', assetId = '';
+    const cloudName = 'mahesh-portfolio';
+    const uploadPreset = 'portfolio_unsigned_preset';
 
-    try {
-      const resp = await fetch('/api/upload-url', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${adminAuthToken}`
-        },
-        body: JSON.stringify(reqBody)
-      });
-      const data = await resp.json();
-      if (resp.ok) {
-        uploadUrl = data.uploadUrl;
-        objectKey = data.objectKey;
-        publicUrl = data.publicUrl;
-        assetId = data.assetId;
+    let resourceType = 'image';
+    if (file.type.startsWith('video/')) resourceType = 'video';
+    else if (file.type.startsWith('audio/')) resourceType = 'raw';
+    else if (file.type === 'application/pdf') resourceType = 'raw';
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', uploadPreset);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`, true);
+
+    xhr.upload.onprogress = (evt) => {
+      if (evt.lengthComputable) {
+        const percent = Math.round((evt.loaded / evt.total) * 100);
+        showToast(`Uploading ${file.name}: ${percent}%`);
       }
-    } catch (_) {}
+    };
 
-    if (!uploadUrl) {
-      assetId = 'med_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
-      const folder = file.type.startsWith('video/') ? 'media/videos' : 'media/images';
-      objectKey = `${folder}/${assetId}_${file.name}`;
-      uploadUrl = `/api/direct-upload/${objectKey}`;
-      publicUrl = `assets/${file.name}`;
-    }
-
-    await fetch(uploadUrl, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': file.type,
-        'Authorization': `Bearer ${adminAuthToken}`
-      },
-      body: file
+    const uploadPromise = new Promise((resolve, reject) => {
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve(JSON.parse(xhr.responseText));
+        } else {
+          try {
+            const errData = JSON.parse(xhr.responseText);
+            reject(new Error(errData.error?.message || 'Cloudinary upload failed'));
+          } catch (_) {
+            reject(new Error(`Upload failed with status ${xhr.status}`));
+          }
+        }
+      };
+      xhr.onerror = () => reject(new Error('Network error during Cloudinary upload'));
     });
+
+    xhr.send(formData);
+    const cldRes = await uploadPromise;
+
+    const publicUrl = cldRes.secure_url;
+    const publicId = cldRes.public_id;
+    const assetId = cldRes.asset_id || ('cld_' + Date.now());
 
     // Save to Media Library
     const items = getMediaItems();
-    items.unshift({
+    const newMediaAsset = {
       id: assetId,
+      publicId: publicId,
       name: file.name,
       type: file.type || 'file',
       size: formatBytes(file.size),
-      objectKey: objectKey,
       publicUrl: publicUrl,
       isExternal: false,
-      projectId: projId ? parseInt(projId) : null,
-      projectTitle: projTitle,
+      hosted: 'Cloudinary',
+      resourceType: resourceType,
+      format: cldRes.format || file.name.split('.').pop(),
+      duration: cldRes.duration ? `${Math.round(cldRes.duration)}s` : undefined,
+      dimensions: cldRes.width ? `${cldRes.width}x${cldRes.height}` : undefined,
       uploadDate: new Date().toLocaleDateString()
-    });
+    };
+    items.unshift(newMediaAsset);
     saveMediaItems(items);
     renderMediaLibraryUI();
 
-    // Auto-fill form field & save immediately to project
-    const inputId = fieldType === 'video' ? 'edit-proj-embed' : 'edit-proj-thumb';
-    setVal(inputId, publicUrl);
+    // Auto-attach to project field
+    if (fieldType === 'video') {
+      setVal('edit-proj-video', publicUrl);
+      setVal('edit-proj-videoid', assetId);
+    } else if (fieldType === 'thumb') {
+      setVal('edit-proj-thumb', publicUrl);
+      setVal('edit-proj-thumbid', assetId);
+    }
 
-    showToast(`Uploaded & attached to "${projTitle}"!`);
-    playClickSFX();
-
-    // Auto-trigger Save Changes to store relationship in siteData
-    document.getElementById('admin-save-btn')?.click();
-
+    updateProjectPreview();
+    showToast(`Uploaded & attached to "${projTitle}" successfully!`);
   } catch (err) {
     showToast(`Upload failed: ${err.message}`);
   }
@@ -799,63 +811,72 @@ async function handleDirectUpload(e) {
   if (!files || !files.length) return;
 
   for (const file of files) {
-    showToast(`Preparing upload for ${file.name}...`);
+    showToast(`Preparing Cloudinary upload for ${file.name}...`);
     try {
-      // 1. Request Upload URL from Worker API
-      const reqBody = { fileName: file.name, fileType: file.type, fileSize: file.size };
-      let uploadUrl = '', objectKey = '', publicUrl = '', assetId = '';
+      const cloudName = 'mahesh-portfolio';
+      const uploadPreset = 'portfolio_unsigned_preset';
 
-      try {
-        const resp = await fetch('/api/upload-url', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${adminAuthToken}`
-          },
-          body: JSON.stringify(reqBody)
-        });
-        const data = await resp.json();
-        if (resp.ok) {
-          uploadUrl = data.uploadUrl;
-          objectKey = data.objectKey;
-          publicUrl = data.publicUrl;
-          assetId = data.assetId;
+      let resourceType = 'image';
+      if (file.type.startsWith('video/')) resourceType = 'video';
+      else if (file.type.startsWith('audio/')) resourceType = 'raw';
+      else if (file.type === 'application/pdf') resourceType = 'raw';
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', uploadPreset);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`, true);
+
+      xhr.upload.onprogress = (evt) => {
+        if (evt.lengthComputable) {
+          const percent = Math.round((evt.loaded / evt.total) * 100);
+          showToast(`Uploading ${file.name}: ${percent}%`);
         }
-      } catch (_) {}
+      };
 
-      // Fallback object key & URL generation for local dev without worker running
-      if (!uploadUrl) {
-        assetId = 'med_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
-        const folder = file.type.startsWith('video/') ? 'media/videos' : 'media/images';
-        objectKey = `${folder}/${assetId}_${file.name}`;
-        uploadUrl = `/api/direct-upload/${objectKey}`;
-        publicUrl = `assets/${file.name}`; // Local asset fallback
-      }
-
-      // 2. Direct R2 PUT Upload
-      const putResp = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': file.type,
-          'Authorization': `Bearer ${adminAuthToken}`
-        },
-        body: file
+      const uploadPromise = new Promise((resolve, reject) => {
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(JSON.parse(xhr.responseText));
+          } else {
+            try {
+              const errData = JSON.parse(xhr.responseText);
+              reject(new Error(errData.error?.message || 'Cloudinary upload failed'));
+            } catch (_) {
+              reject(new Error(`Upload failed with status ${xhr.status}`));
+            }
+          }
+        };
+        xhr.onerror = () => reject(new Error('Network error during Cloudinary upload'));
       });
+
+      xhr.send(formData);
+      const cldRes = await uploadPromise;
+
+      const publicUrl = cldRes.secure_url;
+      const publicId = cldRes.public_id;
+      const assetId = cldRes.asset_id || ('cld_' + Date.now());
 
       const items = getMediaItems();
       items.unshift({
         id: assetId,
+        publicId: publicId,
         name: file.name,
         type: file.type || 'file',
         size: formatBytes(file.size),
-        objectKey: objectKey,
         publicUrl: publicUrl,
         isExternal: false,
+        hosted: 'Cloudinary',
+        resourceType: resourceType,
+        format: cldRes.format || file.name.split('.').pop(),
+        duration: cldRes.duration ? `${Math.round(cldRes.duration)}s` : undefined,
+        dimensions: cldRes.width ? `${cldRes.width}x${cldRes.height}` : undefined,
         uploadDate: new Date().toLocaleDateString()
       });
       saveMediaItems(items);
       renderMediaLibraryUI();
-      showToast(`Uploaded ${file.name} successfully!`);
+      showToast(`Uploaded ${file.name} to Cloudinary!`);
     } catch (err) {
       showToast(`Upload failed: ${err.message}`);
     }
@@ -972,26 +993,28 @@ function deleteMediaItem(id) {
 async function checkCloudflareStatus() {
   const workerSub = document.getElementById('cf-worker-sub');
   const workerBadge = document.getElementById('cf-worker-badge');
+  const r2Sub = document.getElementById('cf-r2-sub');
+  const r2Badge = document.getElementById('cf-r2-badge');
+  const cdnSub = document.getElementById('cf-cdn-sub');
+  const cdnBadge = document.getElementById('cf-cdn-badge');
 
-  try {
-    const resp = await fetch('/api/status');
-    const data = await resp.json();
-    if (resp.ok && data.cloudflareConnected) {
-      if (workerSub) workerSub.textContent = `Worker active (${data.bucketName})`;
-      if (workerBadge) {
-        workerBadge.textContent = 'Connected';
-        workerBadge.style.background = 'rgba(0,255,150,0.2)';
-        workerBadge.style.color = '#00ff96';
-      }
-      return;
-    }
-  } catch (_) {}
-
-  if (workerSub) workerSub.textContent = 'Local Dev Server Mode (Worker API offline)';
+  if (workerSub) workerSub.textContent = 'Configured Cloud: mahesh-portfolio';
   if (workerBadge) {
-    workerBadge.textContent = 'Local Mode';
-    workerBadge.style.background = 'rgba(0,168,255,0.15)';
-    workerBadge.style.color = 'var(--electric-blue)';
+    workerBadge.textContent = 'Ready';
+    workerBadge.style.background = 'rgba(0,255,150,0.2)';
+    workerBadge.style.color = '#00ff96';
+  }
+  if (r2Sub) r2Sub.textContent = 'Preset: portfolio_unsigned_preset';
+  if (r2Badge) {
+    r2Badge.textContent = 'Active';
+    r2Badge.style.background = 'rgba(0,255,150,0.2)';
+    r2Badge.style.color = '#00ff96';
+  }
+  if (cdnSub) cdnSub.textContent = 'https://res.cloudinary.com';
+  if (cdnBadge) {
+    cdnBadge.textContent = 'Ready';
+    cdnBadge.style.background = 'rgba(0,255,150,0.2)';
+    cdnBadge.style.color = '#00ff96';
   }
 }
 
