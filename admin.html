@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CMS Dashboard — Mahesh Thakur Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="admin-dashboard.css" />
+</head>
+<body class="admin-dashboard-body">
+
+  <!-- ╔══ AUTHENTICATION OVERLAY / GATE ══╗ -->
+  <div id="dash-auth-overlay" class="dash-auth-overlay">
+    <div class="dash-auth-card">
+      <div class="auth-icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--electric-blue)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+      </div>
+      <h2>Admin Authentication</h2>
+      <p>Enter your security key to access the portfolio CMS dashboard.</p>
+      <div class="auth-input-group">
+        <input type="password" id="admin-pw-input" placeholder="Enter password" autocomplete="off" />
+        <button id="admin-pw-submit" class="btn-primary">Unlock Dashboard</button>
+      </div>
+      <p id="pw-error" class="pw-error-text">Authentication failed. Check your password.</p>
+      <a href="index.html" class="back-to-site">← Return to Public Portfolio</a>
+    </div>
+  </div>
+
+  <!-- ╔══ MAIN DASHBOARD WRAPPER ══╗ -->
+  <div id="admin-dashboard-app" class="admin-dashboard-app" style="display:none;">
+
+    <!-- TOP HEADER -->
+    <header class="dash-header">
+      <div class="dash-header-left">
+        <div class="dash-brand">
+          <span class="brand-accent">MAHESH THAKUR</span>
+          <span class="brand-badge">CMS DASHBOARD</span>
+        </div>
+      </div>
+      <div class="dash-header-center">
+        <div class="status-indicator">
+          <span class="status-dot green" id="status-dot"></span>
+          <span class="status-text" id="status-text">Cloudflare Connected</span>
+        </div>
+      </div>
+      <div class="dash-header-right">
+        <button type="button" class="btn-dash-action" id="admin-save-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+          Save Changes
+        </button>
+        <button type="button" class="btn-dash-action secondary" id="admin-export-btn">Export data.json</button>
+        <a href="index.html" target="_blank" class="btn-dash-action ghost">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+          View Site
+        </a>
+        <button type="button" class="btn-dash-action danger" onclick="logoutAdmin()">Logout</button>
+      </div>
+    </header>
+
+    <!-- MAIN BODY (SIDEBAR + WORKSPACE) -->
+    <div class="dash-main-container">
+
+      <!-- SIDEBAR NAVIGATION -->
+      <aside class="dash-sidebar">
+        <nav class="dash-nav-group">
+          <div class="nav-section-label">CORE</div>
+          <button class="dash-nav-item active" data-tab="dashboard">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            Dashboard
+          </button>
+          <button class="dash-nav-item" data-tab="media-library">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+            Media Library
+          </button>
+          <button class="dash-nav-item" data-tab="projects">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+            Projects Manager
+          </button>
+        </nav>
+
+        <nav class="dash-nav-group">
+          <div class="nav-section-label">CONTENT & DESIGN</div>
+          <button class="dash-nav-item" data-tab="visual-editor">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="14.31" y1="8" x2="20.05" y2="17.94"></line><line x1="9.69" y1="8" x2="21.17" y2="8"></line><line x1="7.38" y1="12" x2="13.12" y2="2.06"></line><line x1="9.69" y1="16" x2="3.95" y2="6.06"></line><line x1="14.31" y1="16" x2="2.83" y2="16"></line><line x1="16.62" y1="12" x2="10.88" y2="21.94"></line></svg>
+            Visual Editor
+          </button>
+          <button class="dash-nav-item" data-tab="hero">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            Hero & Bio
+          </button>
+          <button class="dash-nav-item" data-tab="contact">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+            Contact Info
+          </button>
+        </nav>
+
+        <nav class="dash-nav-group">
+          <div class="nav-section-label">SYSTEM</div>
+          <button class="dash-nav-item" data-tab="cf-status">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>
+            Cloudflare R2 Status
+          </button>
+        </nav>
+      </aside>
+
+      <!-- MAIN WORKSPACE MODULES -->
+      <main class="dash-content-area">
+
+        <!-- MODULE 1: DASHBOARD HOME -->
+        <div class="dash-tab-content active" id="tab-dashboard">
+          <div class="module-header">
+            <h2>System Overview</h2>
+            <p>Real-time analytics, Cloudflare connection status, and CMS actions.</p>
+          </div>
+
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-val" id="dash-stat-projects">0</div>
+              <div class="metric-label">Published Projects</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-val" id="dash-stat-media">0</div>
+              <div class="metric-label">Media Library Assets</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-val" id="dash-stat-storage">R2 Active</div>
+              <div class="metric-label">Storage Engine</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-val" id="dash-stat-cf">Online</div>
+              <div class="metric-label">Cloudflare Worker Status</div>
+            </div>
+          </div>
+
+          <div class="quick-actions-panel">
+            <h3>Quick Actions</h3>
+            <div class="actions-flex">
+              <button class="btn-dash-action" id="dash-quick-add-proj">+ New Project</button>
+              <button class="btn-dash-action secondary" onclick="document.querySelector('[data-tab=\'media-library\']').click()">⬆ Upload Media</button>
+              <button class="btn-dash-action secondary" onclick="document.querySelector('[data-tab=\'visual-editor\']').click()">🎨 Launch Visual Editor</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODULE 2: MEDIA LIBRARY -->
+        <div class="dash-tab-content" id="tab-media-library">
+          <div class="module-header" style="display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <h2>Media Library</h2>
+              <p>Manage, upload, and import assets stored in Cloudflare R2 Bucket.</p>
+            </div>
+            <div style="display:flex;gap:10px;">
+              <label class="btn-dash-action" style="cursor:pointer;margin:0;">
+                ⬆ Upload File
+                <input type="file" id="media-file-input" multiple accept="video/*,image/*,audio/*,.pdf" style="display:none;" onchange="handleDirectUpload(event)" />
+              </label>
+              <button class="btn-dash-action secondary" onclick="toggleImportUrlBox()">🔗 Import From URL</button>
+            </div>
+          </div>
+
+          <!-- Import URL Panel -->
+          <div id="import-url-box" class="import-panel" style="display:none;">
+            <h4>Import Remote Media Asset</h4>
+            <input type="text" id="import-url-input" placeholder="Paste direct media URL (e.g., https://domain.com/video.mp4) or YouTube link" />
+            <div style="display:flex;gap:10px;margin-top:10px;">
+              <button class="btn-dash-action" onclick="handleImportUrl('HOST')">[ IMPORT & HOST IN R2 ]</button>
+              <button class="btn-dash-action secondary" onclick="handleImportUrl('EXTERNAL')">[ USE EXTERNAL LINK ]</button>
+            </div>
+          </div>
+
+          <!-- Filter & Search Bar -->
+          <div class="media-filter-bar">
+            <input type="text" id="media-search" placeholder="Search media assets..." oninput="renderMediaLibraryUI()" />
+            <select id="media-filter-type" onchange="renderMediaLibraryUI()">
+              <option value="ALL">All Media</option>
+              <option value="video">Videos</option>
+              <option value="image">Images</option>
+              <option value="audio">Audio</option>
+              <option value="external">External Links</option>
+            </select>
+          </div>
+
+          <!-- Media Cards Grid -->
+          <div id="media-library-grid" class="media-grid"></div>
+        </div>
+
+        <!-- MODULE 3: PROJECTS MANAGER -->
+        <div class="dash-tab-content" id="tab-projects">
+          <div class="module-header" style="display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <h2>Projects Manager</h2>
+              <p>Add, edit, and organize portfolio showcase projects.</p>
+            </div>
+            <button class="btn-dash-action" id="admin-add-proj-btn">+ Add Project</button>
+          </div>
+
+          <div class="admin-project-list" id="admin-project-list"></div>
+
+          <!-- Project Edit Card -->
+          <div class="editor-card" style="margin-top:24px;">
+            <h3>Project Details Editor</h3>
+            <input type="hidden" id="edit-proj-id" value="" />
+            <div class="form-group">
+              <label>Project Title</label>
+              <input type="text" id="edit-proj-title" placeholder="e.g. Commercial Brand Edit" />
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <textarea id="edit-proj-desc" rows="3" placeholder="Project overview..."></textarea>
+            </div>
+            <div class="form-group">
+              <label>Tools Used (comma-separated)</label>
+              <input type="text" id="edit-proj-tools" placeholder="Premiere Pro, After Effects, DaVinci Resolve" />
+            </div>
+            <div class="form-group">
+              <label>Video / Embed URL</label>
+              <div style="display:flex;gap:8px;">
+                <input type="text" id="edit-proj-embed" placeholder="https://..." style="flex:1;" />
+                <button type="button" class="btn-dash-action secondary" onclick="openMediaPicker('edit-proj-embed')">📁 Pick Media</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Thumbnail Poster URL</label>
+              <div style="display:flex;gap:8px;">
+                <input type="text" id="edit-proj-thumb" placeholder="https://..." style="flex:1;" />
+                <button type="button" class="btn-dash-action secondary" onclick="openMediaPicker('edit-proj-thumb')">📁 Pick Media</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODULE 4: VISUAL EDITOR (PRESERVED) -->
+        <div class="dash-tab-content" id="tab-visual-editor">
+          <div class="module-header">
+            <h2>Visual Layout & Motion Editor</h2>
+            <p>Interactive canvas for fine-tuning subject offsets, watermark text, and mouse parallax.</p>
+          </div>
+
+          <div class="ve-toolbar">
+            <div class="ve-device-selector">
+              <button class="ve-device-btn active" data-device="desktop">🖥️ Desktop</button>
+              <button class="ve-device-btn" data-device="tablet">📱 Tablet</button>
+              <button class="ve-device-btn" data-device="mobile">📲 Mobile</button>
+            </div>
+            <div class="ve-history-controls">
+              <button class="ve-btn" id="ve-undo-btn">↩️ Undo</button>
+              <button class="ve-btn" id="ve-redo-btn">↪️ Redo</button>
+              <button class="ve-btn danger" id="ve-reset-btn">🔄 Reset</button>
+            </div>
+          </div>
+
+          <div class="ve-workspace">
+            <div class="ve-canvas-wrapper">
+              <div class="ve-canvas-frame" id="ve-canvas-frame">
+                <div class="ve-layer" id="ve-layer-bgText" data-layer="bgText">
+                  <span id="ve-canvas-bgtext-render">PORTFOLIO</span>
+                </div>
+                <div class="ve-layer" id="ve-layer-subject" data-layer="subject">
+                  <img src="assets/hero.png" alt="Hero Subject" id="ve-canvas-subject-img" />
+                </div>
+                <div class="ve-transform-box" id="ve-transform-box">
+                  <div class="ve-handle ve-handle-tl" data-handle="tl"></div>
+                  <div class="ve-handle ve-handle-tr" data-handle="tr"></div>
+                  <div class="ve-handle ve-handle-bl" data-handle="bl"></div>
+                  <div class="ve-handle ve-handle-br" data-handle="br"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Inspector Sidebar -->
+            <div class="ve-inspector">
+              <div class="ve-inspector-header">
+                <h3>Layer Inspector</h3>
+                <div class="ve-layer-selector-group">
+                  <button class="ve-layer-tab active" data-target-layer="subject">👤 Hero Subject</button>
+                  <button class="ve-layer-tab" data-target-layer="bgText">🔤 Watermark Text</button>
+                </div>
+              </div>
+
+              <div class="ve-props-body">
+                <div class="ve-prop-row">
+                  <label>Lock Layer Position</label>
+                  <input type="checkbox" id="ve-prop-locked" />
+                </div>
+                <div class="ve-prop-group">
+                  <div class="ve-group-title">Layout & Position</div>
+                  <div class="ve-prop-row">
+                    <label>Offset X (px)</label>
+                    <input type="range" id="ve-slider-x" min="-250" max="250" value="0" />
+                    <input type="number" id="ve-num-x" min="-500" max="500" value="0" />
+                  </div>
+                  <div class="ve-prop-row">
+                    <label>Offset Y (px)</label>
+                    <input type="range" id="ve-slider-y" min="-250" max="250" value="0" />
+                    <input type="number" id="ve-num-y" min="-500" max="500" value="0" />
+                  </div>
+                  <div class="ve-prop-row">
+                    <label>Scale Factor</label>
+                    <input type="range" id="ve-slider-scale" min="0.4" max="2.5" step="0.05" value="1.0" />
+                    <input type="number" id="ve-num-scale" min="0.1" max="5.0" step="0.05" value="1.0" />
+                  </div>
+                  <div class="ve-prop-row">
+                    <label>Opacity</label>
+                    <input type="range" id="ve-slider-opacity" min="0" max="1" step="0.01" value="1.0" />
+                    <input type="number" id="ve-num-opacity" min="0" max="1" step="0.01" value="1.0" />
+                  </div>
+                </div>
+
+                <div class="ve-prop-group" id="ve-motion-group" style="display:none;">
+                  <div class="ve-group-title">Typography & Motion</div>
+                  <div class="ve-prop-row">
+                    <label>Font Family</label>
+                    <select id="ve-prop-fontfamily">
+                      <option value="'Space Grotesk', sans-serif">Space Grotesk</option>
+                      <option value="'Inter', sans-serif">Inter</option>
+                      <option value="'Montserrat', sans-serif">Montserrat</option>
+                      <option value="'Poppins', sans-serif">Poppins</option>
+                    </select>
+                  </div>
+                  <div class="ve-prop-row">
+                    <label>Watermark Text</label>
+                    <input type="text" id="ve-prop-textcontent" value="PORTFOLIO" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODULE 5: HERO & BIO CONTENT -->
+        <div class="dash-tab-content" id="tab-hero">
+          <div class="module-header">
+            <h2>Hero & Bio Content</h2>
+            <p>Update main hero greeting, headline names, and introductory biography.</p>
+          </div>
+          <div class="editor-card">
+            <div class="form-group">
+              <label>First Name (Blue Highlight)</label>
+              <input type="text" id="edit-firstName" />
+            </div>
+            <div class="form-group">
+              <label>Last Name (White)</label>
+              <input type="text" id="edit-lastName" />
+            </div>
+            <div class="form-group">
+              <label>Greeting Line</label>
+              <input type="text" id="edit-greeting" />
+            </div>
+            <div class="form-group">
+              <label>Hero Bio Text</label>
+              <textarea id="edit-bio" rows="4"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODULE 6: CONTACT INFORMATION -->
+        <div class="dash-tab-content" id="tab-contact">
+          <div class="module-header">
+            <h2>Contact Details</h2>
+            <p>Update public contact email, LinkedIn, and social profiles.</p>
+          </div>
+          <div class="editor-card">
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" id="edit-email" />
+            </div>
+            <div class="form-group">
+              <label>LinkedIn Profile URL</label>
+              <input type="text" id="edit-linkedin" />
+            </div>
+            <div class="form-group">
+              <label>Instagram Handle / URL</label>
+              <input type="text" id="edit-instagram" />
+            </div>
+          </div>
+        </div>
+
+        <!-- MODULE 7: CLOUDFLARE R2 STATUS -->
+        <div class="dash-tab-content" id="tab-cf-status">
+          <div class="module-header">
+            <h2>Cloudflare System Diagnostics</h2>
+            <p>Live verification of Cloudflare Worker API & R2 Storage bindings.</p>
+          </div>
+
+          <div class="status-grid">
+            <div class="status-box">
+              <div>
+                <h4>Cloudflare Worker API</h4>
+                <p id="cf-worker-sub">Checking connection status...</p>
+              </div>
+              <span id="cf-worker-badge" class="badge">Testing</span>
+            </div>
+            <div class="status-box">
+              <div>
+                <h4>Cloudflare R2 Bucket Binding</h4>
+                <p id="cf-r2-sub">Bucket: mahesh-portfolio-media</p>
+              </div>
+              <span id="cf-r2-badge" class="badge">Active</span>
+            </div>
+            <div class="status-box">
+              <div>
+                <h4>Public Delivery CDN Domain</h4>
+                <p id="cf-cdn-sub">Production Custom CDN Endpoint</p>
+              </div>
+              <span id="cf-cdn-badge" class="badge">Ready</span>
+            </div>
+          </div>
+          <button type="button" class="btn-dash-action secondary" onclick="checkCloudflareStatus()" style="margin-top:16px;">🔄 Refresh Diagnostics</button>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ╔══ MEDIA PICKER DIALOG OVERLAY ══╗ -->
+  <div id="media-picker-modal" class="picker-overlay" style="display:none;">
+    <div class="picker-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <h3 style="font-size:1.1rem;color:white;margin:0;">📁 Select Media Asset</h3>
+        <button type="button" onclick="closeMediaPicker()" style="background:none;border:none;color:var(--text-muted);font-size:1.2rem;cursor:pointer;">✕</button>
+      </div>
+      <div id="picker-media-grid" class="picker-grid"></div>
+      <button type="button" class="btn-dash-action secondary" onclick="closeMediaPicker()" style="align-self:flex-end;margin-top:12px;">Cancel</button>
+    </div>
+  </div>
+
+  <script src="admin.js" defer></script>
+</body>
+</html>

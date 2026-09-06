@@ -1104,21 +1104,12 @@ window.showToast = showToast;
 
 /* ─── ADMIN MODAL OPEN ─── */
 function openAdmin() {
-  const modal = document.getElementById('admin-modal');
-  if (!modal) return;
-  modal.classList.add('active');
-  document.body.style.overflow = 'hidden';
-  const pw = document.getElementById('admin-pw-input');
-  if (pw && !document.getElementById('admin-panel-content').classList.contains('unlocked')) {
-    setTimeout(() => pw.focus(), 100);
-  }
+  window.location.href = 'admin.html';
 }
+window.openAdmin = openAdmin;
 
 function closeAdmin() {
-  const modal = document.getElementById('admin-modal');
-  if (!modal) return;
-  modal.classList.remove('active');
-  document.body.style.overflow = '';
+  // Safe fallback
 }
 window.closeAdmin = closeAdmin;
 
@@ -1128,15 +1119,7 @@ function initAdminTrigger() {
 
   document.addEventListener('keydown', (e) => {
     if (e.altKey && e.key === 'a') { e.preventDefault(); openAdmin(); }
-    if (e.key === 'Escape') closeAdmin();
   });
-
-  const modal = document.getElementById('admin-modal');
-  if (modal) {
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) closeAdmin();
-    });
-  }
 }
 
 /* ─── SITE LOADER ─── */

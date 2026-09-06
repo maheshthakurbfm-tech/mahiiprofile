@@ -10,10 +10,20 @@ function initPasswordGate() {
   const pwInput = document.getElementById('admin-pw-input');
   const pwSubmit = document.getElementById('admin-pw-submit');
   const pwError = document.getElementById('pw-error');
-  const content = document.getElementById('admin-panel-content');
-  const gate = document.getElementById('admin-password-gate');
+  const dashApp = document.getElementById('admin-dashboard-app');
+  const authOverlay = document.getElementById('dash-auth-overlay');
 
   if (!pwInput || !pwSubmit) return;
+
+  // Auto-unlock if already authenticated in session
+  if (adminAuthToken && authOverlay && dashApp) {
+    authOverlay.style.display = 'none';
+    dashApp.style.display = 'flex';
+    loadAdminFields();
+    checkCloudflareStatus();
+    renderMediaLibraryUI();
+    updateDashboardMetrics();
+  }
 
   const tryUnlock = async () => {
     const enteredPw = pwInput.value.trim();
@@ -30,12 +40,13 @@ function initPasswordGate() {
       if (resp.ok && data.success) {
         adminAuthToken = data.token;
         sessionStorage.setItem('adminAuthToken', adminAuthToken);
-        gate.style.display = 'none';
-        content.classList.add('unlocked');
+        if (authOverlay) authOverlay.style.display = 'none';
+        if (dashApp) dashApp.style.display = 'flex';
         pwError.classList.remove('visible');
         loadAdminFields();
         checkCloudflareStatus();
         renderMediaLibraryUI();
+        updateDashboardMetrics();
         playClickSFX();
       } else {
         throw new Error(data.error || 'Invalid password');
@@ -45,11 +56,12 @@ function initPasswordGate() {
       if (enteredPw === 'admin123' || enteredPw === adminAuthToken) {
         adminAuthToken = enteredPw;
         sessionStorage.setItem('adminAuthToken', adminAuthToken);
-        gate.style.display = 'none';
-        content.classList.add('unlocked');
+        if (authOverlay) authOverlay.style.display = 'none';
+        if (dashApp) dashApp.style.display = 'flex';
         pwError.classList.remove('visible');
         loadAdminFields();
         renderMediaLibraryUI();
+        updateDashboardMetrics();
         playClickSFX();
       } else {
         pwError.classList.add('visible');
@@ -65,10 +77,16 @@ function initPasswordGate() {
   pwInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') tryUnlock(); });
 }
 
+function logoutAdmin() {
+  sessionStorage.removeItem('adminAuthToken');
+  adminAuthToken = '';
+  window.location.reload();
+}
+
 /* ─── TAB SWITCHING ─── */
 function initAdminTabs() {
-  const tabs = document.querySelectorAll('.admin-tab');
-  const contents = document.querySelectorAll('.admin-tab-content');
+  const tabs = document.querySelectorAll('.dash-nav-item, .admin-tab');
+  const contents = document.querySelectorAll('.dash-tab-content, .admin-tab-content');
 
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
@@ -76,10 +94,22 @@ function initAdminTabs() {
       tabs.forEach(t => t.classList.remove('active'));
       contents.forEach(c => c.classList.remove('active'));
       tab.classList.add('active');
-      document.getElementById('tab-' + target)?.classList.add('active');
+      const targetEl = document.getElementById('tab-' + target);
+      if (targetEl) targetEl.classList.add('active');
       playClickSFX();
     });
   });
+}
+
+function updateDashboardMetrics() {
+  const d = getSiteData();
+  const projCount = d && d.projects ? d.projects.length : 0;
+  const mediaCount = (getMediaItems() || []).length;
+
+  const statProj = document.getElementById('dash-stat-projects');
+  const statMedia = document.getElementById('dash-stat-media');
+  if (statProj) statProj.textContent = projCount;
+  if (statMedia) statMedia.textContent = mediaCount;
 }
 
 /* ─── LOAD DATA INTO FIELDS ─── */
