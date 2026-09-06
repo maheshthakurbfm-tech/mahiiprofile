@@ -1045,8 +1045,34 @@ function formatBytes(bytes) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
 }
 
+/* ─── CUSTOM CURSOR FOR ADMIN ─── */
+function initAdminCursor() {
+  const dot = document.getElementById('custom-cursor');
+  const ring = document.getElementById('cursor-ring');
+  if (!dot || !ring) return;
+
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', (e) => {
+    mx = e.clientX;
+    my = e.clientY;
+    dot.style.left = mx + 'px';
+    dot.style.top = my + 'px';
+  });
+
+  function animRing() {
+    rx += (mx - rx) * 0.14;
+    ry += (my - ry) * 0.14;
+    ring.style.left = rx + 'px';
+    ring.style.top = ry + 'px';
+    requestAnimationFrame(animRing);
+  }
+  animRing();
+}
+
 /* ─── INIT ─── */
 function initAdmin() {
+  initAdminCursor();
   initPasswordGate();
   initAdminTabs();
   initAddProject();
