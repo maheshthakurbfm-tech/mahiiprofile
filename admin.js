@@ -1046,12 +1046,15 @@ function deleteMediaItem(id) {
 }
 
 async function checkCloudflareStatus() {
+  const headerStatusText = document.getElementById('status-text');
   const workerSub = document.getElementById('cf-worker-sub');
   const workerBadge = document.getElementById('cf-worker-badge');
   const r2Sub = document.getElementById('cf-r2-sub');
   const r2Badge = document.getElementById('cf-r2-badge');
   const cdnSub = document.getElementById('cf-cdn-sub');
   const cdnBadge = document.getElementById('cf-cdn-badge');
+
+  if (headerStatusText) headerStatusText.textContent = 'Cloudinary Active';
 
   if (workerSub) workerSub.textContent = 'Configured Cloud: esvwgoxe';
   if (workerBadge) {
