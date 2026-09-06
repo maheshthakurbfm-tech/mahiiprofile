@@ -268,7 +268,7 @@ window.uploadAndAttachToProject = async function(e, fieldType) {
 
     // Auto-attach to project field
     if (fieldType === 'video') {
-      setVal('edit-proj-video', publicUrl);
+      setVal('edit-proj-embed', publicUrl);
       setVal('edit-proj-videoid', assetId);
     } else if (fieldType === 'thumb') {
       setVal('edit-proj-thumb', publicUrl);

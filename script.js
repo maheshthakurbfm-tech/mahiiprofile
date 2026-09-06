@@ -435,13 +435,14 @@ function renderAccordion() {
 
 function renderVideoArea(p) {
   if (p.embedUrl && p.embedUrl.trim()) {
-    const url = p.embedUrl.trim().toLowerCase();
-    const isDirectVideo = url.endsWith('.mp4') || url.endsWith('.webm') || url.endsWith('.mov') || url.includes('/media/videos/');
+    const rawUrl = p.embedUrl.trim();
+    const url = rawUrl.toLowerCase();
+    const isDirectVideo = url.endsWith('.mp4') || url.endsWith('.webm') || url.endsWith('.mov') || url.includes('/media/videos/') || url.includes('cloudinary.com/') || url.includes('/video/upload/');
     
     if (isDirectVideo) {
       return `
         <video 
-          src="${escAttr(p.embedUrl)}" 
+          src="${escAttr(rawUrl)}" 
           poster="${escAttr(p.thumbnail || '')}" 
           controls 
           preload="metadata" 
