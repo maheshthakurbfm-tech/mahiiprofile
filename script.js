@@ -27,25 +27,21 @@ function getAudioCtx() {
 
 function unlockAudioSystem() {
   if (isAudioUnlocked) return;
+  isAudioUnlocked = true;
 
   // 1. Resume Web Audio API Context (for Whoosh SFX)
   const ctx = getAudioCtx();
   if (ctx && ctx.state === 'suspended') {
-    ctx.resume().then(() => {
-      isAudioUnlocked = true;
-    }).catch(() => {});
-  } else {
-    isAudioUnlocked = true;
+    ctx.resume().catch(() => {});
   }
 
-  // 2. Unlock HTMLAudioElement playback for Safari / macOS
-  Object.values(soundAssets).forEach(audio => {
-    if (audio && typeof audio.load === 'function') {
-      audio.load();
-    }
-  });
+  // 2. Unlock HTMLAudioElement playback & trigger repulsor landing sound on first gesture
+  try {
+    soundAssets.repulsor.currentTime = 0;
+    soundAssets.repulsor.play().catch(() => {});
+  } catch (_) {}
 
-// Remove listeners after initial legitimate user interaction
+  // Remove listeners after initial legitimate user interaction
   ['pointerdown', 'touchstart', 'mousedown', 'keydown'].forEach(evt => {
     window.removeEventListener(evt, unlockAudioSystem, { capture: true });
   });
