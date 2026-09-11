@@ -557,7 +557,8 @@ function renderVideoArea(p) {
 function renderSoftware() {
   const grid = document.getElementById('software-grid');
   if (!grid || !siteData) return;
-  grid.innerHTML = siteData.software.map(s => {
+  const software = Array.isArray(siteData.software) ? siteData.software : [];
+  grid.innerHTML = software.map(s => {
     const isImg = s.icon && (s.icon.includes('/') || s.icon.endsWith('.svg') || s.icon.endsWith('.png'));
     const iconMarkup = isImg
       ? `<img class="software-icon-img" src="${escAttr(s.icon)}" alt="${escAttr(s.name)}" />`
@@ -567,7 +568,7 @@ function renderSoftware() {
         <span class="software-icon">${iconMarkup}</span>
         <div class="software-name">${escHtml(s.name)}</div>
         <div class="skill-bar">
-          <div class="skill-bar-fill" data-level="${s.level}"></div>
+          <div class="skill-bar-fill" data-level="${s.level || 0}"></div>
         </div>
       </div>
     `;
@@ -577,14 +578,14 @@ function renderSoftware() {
 /* ─── UPDATE HERO FROM DATA ─── */
 function applyHeroData() {
   if (!siteData) return;
-  const h = siteData.hero;
+  const h = siteData.hero || {};
   const fn = document.querySelector('.hero-name .first');
   const ln = document.querySelector('.hero-name .last');
   const bio = document.querySelector('.hero-bio');
   const greet = document.querySelector('.hero-greeting');
-  if (fn) fn.textContent = h.firstName;
-  if (ln) ln.textContent = h.lastName;
-  if (bio) bio.textContent = h.bio;
+  if (fn && h.firstName) fn.textContent = h.firstName;
+  if (ln && h.lastName) ln.textContent = h.lastName;
+  if (bio && h.bio) bio.textContent = h.bio;
   if (greet) {
     const rawGreeting = h.greeting || "Hi I'm";
     if (rawGreeting.trim().toLowerCase().startsWith("hi i'm") || rawGreeting.trim().toLowerCase().startsWith("hi, i'm")) {
@@ -595,11 +596,15 @@ function applyHeroData() {
   }
 
   // Contact
-  const emailLinks = document.querySelectorAll('.contact-email, [href^="mailto:"]');
-  emailLinks.forEach(el => {
-    el.href = `mailto:${siteData.contact.email}`;
-    if (el.classList.contains('contact-email')) el.childNodes[el.childNodes.length - 1].textContent = ` ${siteData.contact.email}`;
-  });
+  if (siteData.contact && siteData.contact.email) {
+    const emailLinks = document.querySelectorAll('.contact-email, [href^="mailto:"]');
+    emailLinks.forEach(el => {
+      el.href = `mailto:${siteData.contact.email}`;
+      if (el.classList.contains('contact-email') && el.childNodes.length > 0) {
+        el.childNodes[el.childNodes.length - 1].textContent = ` ${siteData.contact.email}`;
+      }
+    });
+  }
 }
 
 /* ─── GSAP HERO ANIMATIONS ─── */
@@ -1208,12 +1213,15 @@ function initAdminTrigger() {
 }
 
 /* ─── SITE LOADER ─── */
+let loaderHidden = false;
 function hideLoader() {
+  if (loaderHidden) return;
   const loader = document.getElementById('site-loader');
   if (loader) {
+    loaderHidden = true;
     setTimeout(() => {
       loader.classList.add('hidden');
-      playRepulsorLandingSFX();
+      try { playRepulsorLandingSFX(); } catch (_) {}
     }, 1500);
   }
 }
@@ -1230,25 +1238,40 @@ window.escAttr = escAttr;
 
 /* ─── BOOT ─── */
 async function boot() {
-  await loadData();
-  applyHeroData();
-  renderAccordion();
-  renderSoftware();
-  initSoundToggle();
-  initCursor();
-  initParticles();
-  initMagneticGrid();
-  initNavbar();
-  initClickSFX();
-  initAdminTrigger();
-  hideLoader();
+  // Emergency fallback timer to guarantee loader dismissal even on unexpected errors
+  const fallbackTimer = setTimeout(() => {
+    hideLoader();
+  }, 4000);
+
+  try {
+    await loadData();
+    try { applyHeroData(); } catch (e) { console.error('Error applying hero data:', e); }
+    try { renderAccordion(); } catch (e) { console.error('Error rendering accordion:', e); }
+    try { renderSoftware(); } catch (e) { console.error('Error rendering software grid:', e); }
+    try { initSoundToggle(); } catch (e) { console.error('Error init sound toggle:', e); }
+    try { initCursor(); } catch (e) { console.error('Error init cursor:', e); }
+    try { initParticles(); } catch (e) { console.error('Error init particles:', e); }
+    try { initMagneticGrid(); } catch (e) { console.error('Error init magnetic grid:', e); }
+    try { initNavbar(); } catch (e) { console.error('Error init navbar:', e); }
+    try { initClickSFX(); } catch (e) { console.error('Error init click SFX:', e); }
+    try { initAdminTrigger(); } catch (e) { console.error('Error init admin trigger:', e); }
+  } catch (fatalBootError) {
+    console.error('Fatal error during site initialization:', fatalBootError);
+  } finally {
+    clearTimeout(fallbackTimer);
+    hideLoader();
+  }
 
   // GSAP & Lenis init after scripts load
   const waitForGSAP = () => {
     if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
-      gsap.registerPlugin(ScrollTrigger);
-      initHeroAnimations();
-      initStatCounters();
+      try {
+        gsap.registerPlugin(ScrollTrigger);
+        initHeroAnimations();
+        initStatCounters();
+      } catch (e) {
+        console.error('Error initializing GSAP/ScrollTrigger:', e);
+      }
     } else {
       setTimeout(waitForGSAP, 80);
     }
@@ -1257,7 +1280,11 @@ async function boot() {
 
   const waitForLenis = () => {
     if (typeof Lenis !== 'undefined') {
-      initLenis();
+      try {
+        initLenis();
+      } catch (e) {
+        console.error('Error initializing Lenis:', e);
+      }
     } else {
       setTimeout(waitForLenis, 80);
     }

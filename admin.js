@@ -457,21 +457,21 @@ function initSaveButton() {
 
   btn.addEventListener('click', async () => {
     console.log('[REAL SAVE CLICK FIRED]');
-    const d = getSiteData();
-    if (!d) {
-      showToast('Save failed: Site data unavailable');
-      return;
-    }
+    const existingData = getSiteData() || (typeof getFallbackData === 'function' ? getFallbackData() : {});
 
-    // Set loading state on Save button
-    const originalContent = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin"><circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="12"></circle></svg> Saving...`;
-
-    // Ensure nested objects exist
-    if (!d.hero) d.hero = {};
-    if (!d.contact) d.contact = {};
-    if (!d.projects) d.projects = [];
+    // Construct complete dataset by preserving all existing sections
+    const fallback = typeof getFallbackData === 'function' ? getFallbackData() : {};
+    const d = {
+      ...fallback,
+      ...existingData,
+      hero: { ...(fallback.hero || {}), ...(existingData.hero || {}) },
+      about: existingData.about || fallback.about || {},
+      software: (Array.isArray(existingData.software) && existingData.software.length > 0) ? existingData.software : (fallback.software || []),
+      contact: { ...(fallback.contact || {}), ...(existingData.contact || {}) },
+      projects: Array.isArray(existingData.projects) ? [...existingData.projects] : (fallback.projects || []),
+      design: existingData.design || fallback.design || {},
+      mediaLibrary: getMediaItems() || existingData.mediaLibrary || []
+    };
 
     // Hero tab fields
     const firstName = getVal('edit-firstName');
@@ -535,9 +535,6 @@ function initSaveButton() {
         d.projects.push(newProj);
       }
     }
-
-    // Save current media library items into site payload
-    d.mediaLibrary = getMediaItems();
 
     console.log('[FORM DATA COLLECTED]', d);
 

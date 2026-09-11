@@ -36,15 +36,15 @@
     {
       "id": 1,
       "title": "Commercial & Brand Ads",
-      "description": "Apple Effect commercial showcase edit with retention pacing and motion design.",
+      "description": "MY REAL SAVE TEST",
       "tools": [
         "Premiere Pro",
         "After Effects",
         "DaVinci Resolve"
       ],
       "embedUrl": "https://res.cloudinary.com/esvwgoxe/video/upload/v1789095426/portfolio-projects/tduu0lc9ianrp2ia6c4r.mp4",
-      "videoId": "6ca4014e8ce9a3c0aa0f653d696b0ca0",
-      "thumbnail": "https://res.cloudinary.com/esvwgoxe/image/upload/v1789095344/portfolio-projects/idlaudklhfvcpmx22nkt.svg"
+      "videoId": "tduu0lc9ianrp2ia6c4r",
+      "thumbnail": ""
     },
     {
       "id": 2,
@@ -55,7 +55,7 @@
         "Premiere Pro",
         "Illustrator"
       ],
-      "embedUrl": "https://res.cloudinary.com/esvwgoxe/video/upload/v1789095263/portfolio-projects/f801ancaiadv4l6gycnd.mp4",
+      "embedUrl": "",
       "thumbnail": ""
     },
     {
@@ -176,8 +176,8 @@
         "zIndex": 1,
         "mouseParallax": {
           "enabled": true,
-          "speedX": -32,
-          "speedY": -18
+          "speedX": -14,
+          "speedY": -7
         },
         "scrollMotion": {
           "exitXPercent": 35,
@@ -186,5 +186,29 @@
       }
     }
   },
-  "updatedAt": "2026-09-11T02:57:07.900Z"
+  "mediaLibrary": [
+    {
+      "id": "proj_vid_7",
+      "publicId": "",
+      "name": "hiii (Video)",
+      "type": "video/mp4",
+      "size": "Cloudinary Hosted",
+      "publicUrl": "https://res.cloudinary.com/esvwgoxe/video/upload/v1789095943/real_estate_video_raw_vs_edited.mp4",
+      "isExternal": false,
+      "hosted": "Cloudinary",
+      "uploadDate": "Published"
+    },
+    {
+      "id": "proj_thumb_7",
+      "publicId": "",
+      "name": "hiii (Poster)",
+      "type": "image/png",
+      "size": "Cloudinary Hosted",
+      "publicUrl": "https://www.vecteezy.com/free-photos/4k",
+      "isExternal": false,
+      "hosted": "Cloudinary",
+      "uploadDate": "Published"
+    }
+  ],
+  "updatedAt": "2026-09-11T03:15:08.262Z"
 }
