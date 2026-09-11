@@ -675,6 +675,10 @@ section {
 #about .section-container {
   position: relative;
   z-index: 2;
+  max-width: 1440px;
+  width: 92%;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 3.5vw, 48px);
 }
 
 .about-bg-text {
@@ -706,21 +710,52 @@ section {
 
 .about-grid {
   display: grid;
-  grid-template-columns: 365px 1fr;
-  gap: 64px;
+  grid-template-columns: minmax(395px, 425px) 1fr;
+  gap: clamp(36px, 4.5vw, 64px);
   align-items: start;
-  margin-top: 60px;
+  margin-top: 56px;
 }
 
 .about-portrait-col {
   position: relative;
-  transform: translateY(14px);
+  transform: translateY(6px);
+}
+
+/* Subtle single cinematic glass panel starting around shoulder level */
+.about-portrait-backdrop {
+  position: absolute;
+  top: 26%;
+  left: -16px;
+  right: -16px;
+  bottom: -12px;
+  background: linear-gradient(145deg, rgba(8, 16, 32, 0.65) 0%, rgba(3, 7, 16, 0.82) 100%);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(0, 168, 255, 0.12);
+  border-radius: 24px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5),
+    0 0 30px rgba(0, 168, 255, 0.03);
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.about-portrait-backdrop::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 15%;
+  right: 15%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 168, 255, 0.35), transparent);
+  opacity: 0.8;
 }
 
 .about-portrait-frame {
   position: relative;
   border-radius: 20px;
   overflow: hidden;
+  z-index: 2;
 }
 
 .about-portrait-frame img {
@@ -747,7 +782,7 @@ section {
 .about-content-col {
   display: flex;
   flex-direction: column;
-  gap: 36px;
+  gap: 32px;
 }
 
 .about-bio {
@@ -763,29 +798,64 @@ section {
 }
 
 .focus-card {
-  padding: 22px 20px;
+  position: relative;
+  padding: 24px 22px;
   border-radius: 16px;
   background: var(--surface-1);
   border: 1px solid var(--glass-border);
-  transition: all 0.3s;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: default;
+  overflow: hidden;
 }
 
 .focus-card:hover {
-  border-color: rgba(0, 168, 255, 0.25);
+  border-color: rgba(0, 168, 255, 0.28);
   background: var(--surface-2);
   transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35), 0 0 20px rgba(0, 168, 255, 0.04);
 }
 
-.focus-card .icon {
-  font-size: 1.5rem;
-  margin-bottom: 10px;
-  display: block;
+/* Subtle contextual background graphic */
+.card-bg-graphic {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 140px;
+  height: 60px;
+  color: var(--electric-blue);
+  opacity: 0.08;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 0.35s, transform 0.35s;
+}
+
+.focus-card:hover .card-bg-graphic {
+  opacity: 0.14;
+  transform: scale(1.03);
+}
+
+/* Professional icon badge container */
+.focus-icon-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(0, 168, 255, 0.08);
+  border: 1px solid rgba(0, 168, 255, 0.22);
+  color: var(--electric-blue);
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 0 8px rgba(0, 168, 255, 0.04);
 }
 
 .focus-card h4 {
+  position: relative;
+  z-index: 2;
   font-family: var(--font-display);
-  font-size: 0.82rem;
+  font-size: 0.84rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -794,6 +864,8 @@ section {
 }
 
 .focus-card p {
+  position: relative;
+  z-index: 2;
   font-size: 0.82rem;
   color: var(--text-muted);
   line-height: 1.6;
@@ -2146,13 +2218,27 @@ footer {
     align-items: center;
   }
 
+  #about .section-container {
+    width: 100%;
+    padding: 0 20px;
+  }
+
   .about-grid {
     grid-template-columns: 1fr;
+    gap: 40px;
   }
 
   .about-portrait-col {
-    max-width: 280px;
+    max-width: 310px;
     margin: 0 auto;
+  }
+
+  .about-portrait-backdrop {
+    top: 24%;
+    left: -12px;
+    right: -12px;
+    bottom: -10px;
+    border-radius: 20px;
   }
 
   .about-focus-grid {
