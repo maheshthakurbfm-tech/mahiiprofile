@@ -675,6 +675,10 @@ section {
 #about .section-container {
   position: relative;
   z-index: 2;
+  max-width: 1440px;
+  width: 92%;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 3.5vw, 48px);
 }
 
 .about-bg-text {
@@ -706,21 +710,65 @@ section {
 
 .about-grid {
   display: grid;
-  grid-template-columns: 365px 1fr;
-  gap: 64px;
+  grid-template-columns: minmax(390px, 420px) 1fr;
+  gap: clamp(40px, 4.5vw, 68px);
   align-items: start;
-  margin-top: 60px;
+  margin-top: 56px;
 }
 
 .about-portrait-col {
   position: relative;
-  transform: translateY(14px);
+  transform: translateY(8px);
+}
+
+/* Cinematic background glass panel starting around shoulder area */
+.about-portrait-panel {
+  position: absolute;
+  top: 30%;
+  left: -20px;
+  right: -24px;
+  bottom: -16px;
+  background: linear-gradient(145deg, rgba(8, 18, 36, 0.72) 0%, rgba(3, 8, 18, 0.88) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 168, 255, 0.14);
+  border-radius: 26px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6),
+    0 0 35px rgba(0, 168, 255, 0.05),
+    inset 0 1px 1px rgba(255, 255, 255, 0.08),
+    inset 0 0 20px rgba(0, 168, 255, 0.03);
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.about-portrait-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 12%;
+  right: 12%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 168, 255, 0.4), transparent);
+  opacity: 0.9;
+}
+
+.about-portrait-panel::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 140px;
+  height: 140px;
+  background: radial-gradient(circle at top right, rgba(0, 168, 255, 0.1), transparent 70%);
+  pointer-events: none;
 }
 
 .about-portrait-frame {
   position: relative;
   border-radius: 20px;
   overflow: hidden;
+  z-index: 2;
 }
 
 .about-portrait-frame img {
@@ -747,7 +795,7 @@ section {
 .about-content-col {
   display: flex;
   flex-direction: column;
-  gap: 36px;
+  gap: 32px;
 }
 
 .about-bio {
@@ -2091,6 +2139,14 @@ footer {
   transform: translateY(40px);
 }
 
+/* ── TABLET ABOUT RESPONSIVE ── */
+@media (max-width: 1024px) and (min-width: 821px) {
+  .about-grid {
+    grid-template-columns: 340px 1fr;
+    gap: 36px;
+  }
+}
+
 /* ── RESPONSIVE ── */
 @media (max-width: 820px) {
   #navbar {
@@ -2146,13 +2202,27 @@ footer {
     align-items: center;
   }
 
+  #about .section-container {
+    width: 100%;
+    padding: 0 20px;
+  }
+
   .about-grid {
     grid-template-columns: 1fr;
+    gap: 40px;
   }
 
   .about-portrait-col {
-    max-width: 280px;
+    max-width: 320px;
     margin: 0 auto;
+  }
+
+  .about-portrait-panel {
+    top: 28%;
+    left: -14px;
+    right: -14px;
+    bottom: -12px;
+    border-radius: 22px;
   }
 
   .about-focus-grid {
