@@ -1,4 +1,162 @@
 {
+  "hero": {
+    "greeting": "Hi I'm",
+    "firstName": "Mahesh",
+    "lastName": "Thakur",
+    "bio": "Retention-focused video edits, After Effects MOGRTs, color grading, sound design — crafting visuals that move people.",
+    "roles": [
+      "VIDEO EDITOR",
+      "MOTION DESIGNER",
+      "COLORIST",
+      "VISUAL STORYTELLER"
+    ]
+  },
+  "about": {
+    "bio": "I'm Mahesh Thakur, a Video Editor from India with 2.5+ years of experience. I work across video editing, motion graphics, color grading, and sound, with a focus on clean work, strong pacing, and attention to detail. I'm looking for a team where I can put my skills to their best use, keep learning, take on new challenges, and contribute to the growth of the work and the company along the way.",
+    "stats": [
+      {
+        "value": "100+",
+        "label": "Videos Edited"
+      },
+      {
+        "value": "2.5+",
+        "label": "Years Experience"
+      },
+      {
+        "value": "MULTIPLE",
+        "label": "Projects Delivered"
+      },
+      {
+        "value": "100%",
+        "label": "Client Satisfaction"
+      }
+    ]
+  },
+  "projects": [
+    {
+      "id": 1,
+      "title": "Commercial & Brand Ads",
+      "description": "Apple Effect commercial showcase edit with retention pacing and motion design.",
+      "tools": [
+        "Premiere Pro",
+        "After Effects",
+        "DaVinci Resolve"
+      ],
+      "embedUrl": "https://res.cloudinary.com/esvwgoxe/video/upload/v1789095426/portfolio-projects/tduu0lc9ianrp2ia6c4r.mp4",
+      "videoId": "6ca4014e8ce9a3c0aa0f653d696b0ca0",
+      "thumbnail": "https://res.cloudinary.com/esvwgoxe/image/upload/v1789095344/portfolio-projects/idlaudklhfvcpmx22nkt.svg"
+    },
+    {
+      "id": 2,
+      "title": "Motion Graphics & MOGRT Packs",
+      "description": "Kinetic typography, animated lower thirds, logo reveals, and custom MOGRT templates for Adobe Premiere.",
+      "tools": [
+        "After Effects",
+        "Premiere Pro",
+        "Illustrator"
+      ],
+      "embedUrl": "https://res.cloudinary.com/esvwgoxe/video/upload/v1789095263/portfolio-projects/f801ancaiadv4l6gycnd.mp4",
+      "thumbnail": ""
+    },
+    {
+      "id": 3,
+      "title": "YouTube & Long-Form Edits",
+      "description": "Narrative documentary-style long-form content with retention-driven pacing and dynamic B-roll structure.",
+      "tools": [
+        "Premiere Pro",
+        "After Effects",
+        "Audition"
+      ],
+      "embedUrl": "",
+      "thumbnail": ""
+    },
+    {
+      "id": 4,
+      "title": "Reels & Short-Form Content",
+      "description": "Beat-synced, high-energy short-form edits for Instagram Reels, YouTube Shorts, and TikTok.",
+      "tools": [
+        "Premiere Pro",
+        "After Effects",
+        "CapCut"
+      ],
+      "embedUrl": "",
+      "thumbnail": ""
+    },
+    {
+      "id": 5,
+      "title": "Cinematic Short Film / Music Video",
+      "description": "Cinematic storytelling with color-graded Log footage, foley integration, and immersive soundscapes.",
+      "tools": [
+        "DaVinci Resolve",
+        "After Effects",
+        "Audition"
+      ],
+      "embedUrl": "",
+      "thumbnail": ""
+    }
+  ],
+  "contact": {
+    "email": "mahesh19031@govtsciencecollegedurg.ac.in",
+    "linkedin": "https://www.linkedin.com/in/mahesh-thakur-317872277/",
+    "instagram": "https://www.instagram.com/motion.mogrt"
+  },
+  "software": [
+    {
+      "name": "Premiere Pro",
+      "icon": "assets/icons/premiere.svg",
+      "level": 95
+    },
+    {
+      "name": "After Effects",
+      "icon": "assets/icons/aftereffects.svg",
+      "level": 92
+    },
+    {
+      "name": "DaVinci Resolve",
+      "icon": "assets/icons/davinci.svg",
+      "level": 88
+    },
+    {
+      "name": "Lightroom",
+      "icon": "assets/icons/lightroom.svg",
+      "level": 85
+    },
+    {
+      "name": "CapCut",
+      "icon": "assets/icons/capcut.png",
+      "level": 90
+    },
+    {
+      "name": "CorelDRAW",
+      "icon": "assets/icons/coreldraw.png",
+      "level": 80
+    },
+    {
+      "name": "Illustrator",
+      "icon": "assets/icons/illustrator.svg",
+      "level": 88
+    },
+    {
+      "name": "Inkscape",
+      "icon": "assets/icons/inkscape.png",
+      "level": 78
+    },
+    {
+      "name": "Blender",
+      "icon": "assets/icons/blender.png",
+      "level": 65
+    },
+    {
+      "name": "Photoshop",
+      "icon": "assets/icons/photoshop.svg",
+      "level": 85
+    },
+    {
+      "name": "Canva",
+      "icon": "assets/icons/canva.png",
+      "level": 90
+    }
+  ],
   "design": {
     "hero": {
       "subject": {
@@ -18,8 +176,8 @@
         "zIndex": 1,
         "mouseParallax": {
           "enabled": true,
-          "speedX": -14,
-          "speedY": -7
+          "speedX": -32,
+          "speedY": -18
         },
         "scrollMotion": {
           "exitXPercent": 35,
@@ -28,23 +186,5 @@
       }
     }
   },
-  "hero": {},
-  "contact": {},
-  "projects": [
-    {
-      "id": 7,
-      "title": "hiii",
-      "category": "test",
-      "description": "test",
-      "tools": [
-        "test"
-      ],
-      "client": "test",
-      "year": "test",
-      "embedUrl": "",
-      "thumbnail": ""
-    }
-  ],
-  "mediaLibrary": [],
-  "updatedAt": "2026-09-11T02:51:08.328Z"
+  "updatedAt": "2026-09-11T02:57:07.900Z"
 }
