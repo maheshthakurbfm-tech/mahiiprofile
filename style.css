@@ -675,10 +675,6 @@ section {
 #about .section-container {
   position: relative;
   z-index: 2;
-  max-width: 1440px;
-  width: 92%;
-  margin: 0 auto;
-  padding: 0 clamp(20px, 3.5vw, 48px);
 }
 
 .about-bg-text {
@@ -710,125 +706,21 @@ section {
 
 .about-grid {
   display: grid;
-  grid-template-columns: minmax(400px, 440px) 1fr;
-  gap: clamp(36px, 4.5vw, 64px);
+  grid-template-columns: 365px 1fr;
+  gap: 64px;
   align-items: start;
-  margin-top: 56px;
+  margin-top: 60px;
 }
 
 .about-portrait-col {
   position: relative;
-  transform: translateY(6px);
-}
-
-/* Cinematic background glass panel starting around shoulder area */
-.about-portrait-panel {
-  position: absolute;
-  top: 18%;
-  left: -24px;
-  right: -24px;
-  bottom: -16px;
-  background: linear-gradient(145deg, rgba(8, 16, 32, 0.78) 0%, rgba(2, 6, 16, 0.9) 100%);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(0, 168, 255, 0.18);
-  border-radius: 28px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6),
-    0 0 35px rgba(0, 168, 255, 0.06),
-    inset 0 1px 1px rgba(255, 255, 255, 0.08),
-    inset 0 0 24px rgba(0, 168, 255, 0.03);
-  z-index: 1;
-  pointer-events: none;
-  overflow: hidden;
-  padding: 24px 20px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.about-portrait-panel::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 10%;
-  right: 10%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(0, 168, 255, 0.45), transparent);
-  opacity: 0.9;
-}
-
-.about-portrait-panel::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 160px;
-  height: 160px;
-  background: radial-gradient(circle at top right, rgba(0, 168, 255, 0.12), transparent 70%);
-  pointer-events: none;
-}
-
-.about-panel-top {
-  position: relative;
-  z-index: 1;
-  max-width: 170px;
-  text-align: left;
-}
-
-.about-panel-signature {
-  font-family: 'Caveat', cursive;
-  font-size: 1.85rem;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.92);
-  line-height: 1;
-  margin-bottom: 6px;
-  letter-spacing: 0.02em;
-  transform: rotate(-3deg);
-  transform-origin: left bottom;
-}
-
-.about-panel-role {
-  font-family: var(--font-display);
-  font-size: 0.58rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  color: var(--electric-blue);
-  text-transform: uppercase;
-  margin-bottom: 12px;
-}
-
-.about-panel-quote {
-  font-family: var(--font-body);
-  font-size: 0.68rem;
-  font-style: italic;
-  color: var(--text-muted);
-  line-height: 1.45;
-  border-left: 2px solid rgba(0, 168, 255, 0.5);
-  padding-left: 8px;
-  margin-top: 6px;
-}
-
-.about-panel-tags {
-  position: absolute;
-  bottom: 24px;
-  left: 22px;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  font-family: var(--font-display);
-  font-size: 0.54rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  color: rgba(255, 255, 255, 0.35);
-  text-transform: uppercase;
+  transform: translateY(14px);
 }
 
 .about-portrait-frame {
   position: relative;
   border-radius: 20px;
   overflow: hidden;
-  z-index: 2;
 }
 
 .about-portrait-frame img {
@@ -855,7 +747,7 @@ section {
 .about-content-col {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 36px;
 }
 
 .about-bio {
@@ -2199,14 +2091,6 @@ footer {
   transform: translateY(40px);
 }
 
-/* ── TABLET ABOUT RESPONSIVE ── */
-@media (max-width: 1024px) and (min-width: 821px) {
-  .about-grid {
-    grid-template-columns: 340px 1fr;
-    gap: 36px;
-  }
-}
-
 /* ── RESPONSIVE ── */
 @media (max-width: 820px) {
   #navbar {
@@ -2262,53 +2146,13 @@ footer {
     align-items: center;
   }
 
-  #about .section-container {
-    width: 100%;
-    padding: 0 20px;
-  }
-
   .about-grid {
     grid-template-columns: 1fr;
-    gap: 40px;
   }
 
   .about-portrait-col {
-    max-width: 320px;
+    max-width: 280px;
     margin: 0 auto;
-  }
-
-  .about-portrait-panel {
-    top: 24%;
-    left: -14px;
-    right: -14px;
-    bottom: -12px;
-    border-radius: 22px;
-    padding: 18px 16px;
-  }
-
-  .about-panel-top {
-    max-width: 135px;
-  }
-
-  .about-panel-signature {
-    font-size: 1.5rem;
-  }
-
-  .about-panel-role {
-    font-size: 0.5rem;
-    margin-bottom: 8px;
-  }
-
-  .about-panel-quote {
-    font-size: 0.6rem;
-    line-height: 1.35;
-  }
-
-  .about-panel-tags {
-    font-size: 0.46rem;
-    bottom: 16px;
-    left: 16px;
-    gap: 3px;
   }
 
   .about-focus-grid {
