@@ -55,8 +55,11 @@
         "Premiere Pro",
         "Illustrator"
       ],
-      "embedUrl": "",
-      "thumbnail": ""
+      "embedUrl": "https://res.cloudinary.com/esvwgoxe/video/upload/v1789095943/real_estate_video_raw_vs_edited.mp4",
+      "thumbnail": "",
+      "category": "",
+      "client": "",
+      "year": ""
     },
     {
       "id": 3,
@@ -199,6 +202,17 @@
       "uploadDate": "Published"
     },
     {
+      "id": "tduu0lc9ianrp2ia6c4r",
+      "publicId": "tduu0lc9ianrp2ia6c4r",
+      "name": "Commercial & Brand Ads (Video)",
+      "type": "video/mp4",
+      "size": "Cloudinary Hosted",
+      "publicUrl": "https://res.cloudinary.com/esvwgoxe/video/upload/v1789095426/portfolio-projects/tduu0lc9ianrp2ia6c4r.mp4",
+      "isExternal": false,
+      "hosted": "Cloudinary",
+      "uploadDate": "Published"
+    },
+    {
       "id": "proj_thumb_7",
       "publicId": "",
       "name": "hiii (Poster)",
@@ -210,5 +224,5 @@
       "uploadDate": "Published"
     }
   ],
-  "updatedAt": "2026-09-11T03:15:08.262Z"
+  "updatedAt": "2026-09-11T05:27:07.913Z"
 }
