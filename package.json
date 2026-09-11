@@ -1,0 +1,18 @@
+{
+  "name": "mahesh-thakur-portfolio",
+  "version": "1.0.0",
+  "description": "Mahesh Thakur - Video Editor & Motion Graphics Portfolio",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "dev:portfolio": "node server.js"
+  },
+  "keywords": [
+    "portfolio",
+    "video-editor",
+    "motion-graphics"
+  ],
+  "author": "Mahesh Thakur",
+  "license": "ISC"
+}

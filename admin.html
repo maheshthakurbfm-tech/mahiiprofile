@@ -152,7 +152,7 @@
           <div class="module-header" style="display:flex;align-items:center;justify-content:space-between;">
             <div>
               <h2>Media Library</h2>
-              <p>Manage, upload, and import assets stored in Cloudflare R2 Bucket.</p>
+              <p>Manage, upload, and import persistent assets stored in Cloud Storage CDN.</p>
             </div>
             <div style="display:flex;gap:10px;">
               <label class="btn-dash-action" style="cursor:pointer;margin:0;">
@@ -163,12 +163,23 @@
             </div>
           </div>
 
+          <!-- Media Upload Progress Bar -->
+          <div id="media-lib-upload-progress" style="display:none;margin-bottom:14px;background:var(--surface-1);border:1px solid var(--glass-border);border-radius:10px;padding:10px 14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <span id="media-lib-progress-label" style="font-size:0.75rem;color:white;font-weight:600;">Uploading file...</span>
+              <span id="media-lib-progress-percent" style="font-size:0.75rem;color:var(--electric-blue);font-weight:700;">0%</span>
+            </div>
+            <div style="width:100%;height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden;">
+              <div id="media-lib-progress-bar" style="width:0%;height:100%;background:var(--electric-blue);transition:width 0.15s ease;"></div>
+            </div>
+          </div>
+
           <!-- Import URL Panel -->
           <div id="import-url-box" class="import-panel" style="display:none;">
             <h4>Import Remote Media Asset</h4>
             <input type="text" id="import-url-input" placeholder="Paste direct media URL (e.g., https://domain.com/video.mp4) or YouTube link" />
             <div style="display:flex;gap:10px;margin-top:10px;">
-              <button class="btn-dash-action" onclick="handleImportUrl('HOST')">[ IMPORT & HOST IN R2 ]</button>
+              <button class="btn-dash-action" onclick="handleImportUrl('HOST')">[ IMPORT & HOST IN CLOUDINARY ]</button>
               <button class="btn-dash-action secondary" onclick="handleImportUrl('EXTERNAL')">[ USE EXTERNAL LINK ]</button>
             </div>
           </div>
@@ -252,11 +263,22 @@
             <div style="border-top:1px solid var(--glass-border);padding-top:16px;margin-top:12px;">
               <h4 style="font-size:0.9rem;color:var(--electric-blue);margin-bottom:14px;">Media Attachments</h4>
               
+              <!-- Upload Progress Indicator -->
+              <div id="proj-upload-progress" style="display:none;margin-bottom:14px;background:var(--surface-1);border:1px solid var(--glass-border);border-radius:8px;padding:8px 12px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+                  <span id="proj-upload-label" style="font-size:0.72rem;color:white;font-weight:600;">Uploading media...</span>
+                  <span id="proj-upload-percent" style="font-size:0.72rem;color:var(--electric-blue);font-weight:700;">0%</span>
+                </div>
+                <div style="width:100%;height:5px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden;">
+                  <div id="proj-upload-bar" style="width:0%;height:100%;background:var(--electric-blue);transition:width 0.15s ease;"></div>
+                </div>
+              </div>
+
               <!-- MAIN VIDEO FIELD -->
               <div class="form-group">
-                <label>Main Video (URL or R2 Asset)</label>
+                <label>Main Video (Cloud URL or Video Asset)</label>
                 <div style="display:flex;gap:8px;">
-                  <input type="text" id="edit-proj-embed" placeholder="https://..." style="flex:1;" />
+                  <input type="text" id="edit-proj-embed" placeholder="https://..." style="flex:1;" oninput="updateProjectPreview()" />
                   <label class="btn-dash-action" style="cursor:pointer;margin:0;font-size:0.75rem;padding:6px 12px;">
                     ⬆ Upload Video
                     <input type="file" accept="video/*" style="display:none;" onchange="uploadAndAttachToProject(event, 'video')" />
@@ -267,15 +289,24 @@
 
               <!-- THUMBNAIL FIELD -->
               <div class="form-group">
-                <label>Thumbnail Poster (URL or R2 Asset)</label>
+                <label>Thumbnail Poster (Cloud URL or Image Asset)</label>
                 <div style="display:flex;gap:8px;">
-                  <input type="text" id="edit-proj-thumb" placeholder="https://..." style="flex:1;" />
+                  <input type="text" id="edit-proj-thumb" placeholder="https://..." style="flex:1;" oninput="updateProjectPreview()" />
                   <label class="btn-dash-action" style="cursor:pointer;margin:0;font-size:0.75rem;padding:6px 12px;">
                     ⬆ Upload Poster
                     <input type="file" accept="image/*" style="display:none;" onchange="uploadAndAttachToProject(event, 'thumb')" />
                   </label>
                   <button type="button" class="btn-dash-action secondary" onclick="openMediaPicker('edit-proj-thumb')" style="font-size:0.75rem;padding:6px 12px;">📁 Choose from Library</button>
                 </div>
+              </div>
+
+              <!-- LIVE PROJECT MEDIA PREVIEW AREA -->
+              <div id="proj-media-preview-area" style="margin-top:14px;padding:12px;background:rgba(0,0,0,0.3);border:1px solid var(--glass-border);border-radius:8px;display:none;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                  <span style="font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">Live Media Preview</span>
+                  <span id="proj-preview-type" style="font-size:0.68rem;padding:2px 6px;border-radius:4px;background:rgba(0,255,150,0.15);color:#00ff96;font-weight:600;">Active</span>
+                </div>
+                <div id="proj-preview-content" style="max-height:220px;border-radius:6px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#000;"></div>
               </div>
             </div>
           </div>
@@ -445,9 +476,9 @@
             <div class="status-box">
               <div>
                 <h4>Unsigned Upload Preset</h4>
-                <p id="cf-r2-sub">Preset: esvwgoxe</p>
+                <p id="cld-preset-sub">Preset: esvwgoxe</p>
               </div>
-              <span id="cf-r2-badge" class="badge" style="background:rgba(0,255,150,0.2);color:#00ff96;">Active</span>
+              <span id="cld-preset-badge" class="badge" style="background:rgba(0,255,150,0.2);color:#00ff96;">Active</span>
             </div>
             <div class="status-box">
               <div>
@@ -476,7 +507,8 @@
     </div>
   </div>
 
-  <script src="script.js"></script>
-  <script src="admin.js" defer></script>
+  <script src="mediaStorageService.js?v=20260911_v2"></script>
+  <script src="script.js?v=20260911_v2"></script>
+  <script src="admin.js?v=20260911_v2" defer></script>
 </body>
 </html>

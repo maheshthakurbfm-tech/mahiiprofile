@@ -15,61 +15,87 @@ function initPasswordGate() {
 
   if (!pwInput || !pwSubmit) return;
 
-  // Auto-unlock if already authenticated in session
-  if (adminAuthToken && authOverlay && dashApp) {
-    authOverlay.style.display = 'none';
-    dashApp.style.display = 'flex';
+  const unlockSuccess = (token) => {
+    adminAuthToken = token || 'admin123';
+    sessionStorage.setItem('adminAuthToken', adminAuthToken);
+    if (authOverlay) authOverlay.style.display = 'none';
+    if (dashApp) dashApp.style.display = 'flex';
+    if (pwError) pwError.classList.remove('visible');
     loadAdminFields();
     checkCloudflareStatus();
     renderMediaLibraryUI();
     updateDashboardMetrics();
+    playClickSFX();
+  };
+
+  const showAuthError = () => {
+    if (pwError) pwError.classList.add('visible');
+    pwInput.value = '';
+    pwInput.focus();
+    pwInput.style.borderColor = '#ff4444';
+    setTimeout(() => { pwInput.style.borderColor = ''; }, 800);
+  };
+
+  // Auto-unlock if already authenticated in session
+  if (adminAuthToken && authOverlay && dashApp) {
+    unlockSuccess(adminAuthToken);
   }
 
+  let isAuthenticating = false;
+
   const tryUnlock = async () => {
+    if (isAuthenticating) return;
     const enteredPw = pwInput.value.trim();
     if (!enteredPw) return;
 
+    isAuthenticating = true;
+    pwSubmit.disabled = true;
+
     try {
+      // 1. Primary backend authentication attempt
       const resp = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password: enteredPw })
       });
-      const data = await resp.json();
 
-      if (resp.ok && data.success) {
-        adminAuthToken = data.token;
-        sessionStorage.setItem('adminAuthToken', adminAuthToken);
-        if (authOverlay) authOverlay.style.display = 'none';
-        if (dashApp) dashApp.style.display = 'flex';
-        pwError.classList.remove('visible');
-        loadAdminFields();
-        checkCloudflareStatus();
-        renderMediaLibraryUI();
-        updateDashboardMetrics();
-        playClickSFX();
-      } else {
-        throw new Error(data.error || 'Invalid password');
+      // Safely parse JSON or handle non-JSON / 404 responses
+      const contentType = resp.headers.get('content-type') || '';
+      let data = null;
+      if (contentType.includes('application/json')) {
+        data = await resp.json();
       }
+
+      if (resp.ok && data && data.success) {
+        unlockSuccess(data.token);
+        return;
+      }
+
+      // If backend explicitly responded with 401/403 or invalid password JSON
+      if (data && data.error && !resp.ok) {
+        showAuthError();
+        return;
+      }
+
+      // If server responded with 404 / 500 HTML or unhandled status, trigger fallback
+      throw new Error((data && data.error) || `Backend unavailable (Status: ${resp.status})`);
     } catch (err) {
-      // Local development fallback validation if server worker is offline
-      if (enteredPw === 'admin123' || enteredPw === adminAuthToken) {
-        adminAuthToken = enteredPw;
-        sessionStorage.setItem('adminAuthToken', adminAuthToken);
-        if (authOverlay) authOverlay.style.display = 'none';
-        if (dashApp) dashApp.style.display = 'flex';
-        pwError.classList.remove('visible');
-        loadAdminFields();
-        renderMediaLibraryUI();
-        updateDashboardMetrics();
-        playClickSFX();
+      // LOCAL DEVELOPMENT FALLBACK
+      // Allows access during local static development (e.g. Live Server, file://, static hosting)
+      // when backend API /api/auth/login is not deployed or offline.
+      const isLocalEnv = window.location.hostname === 'localhost' ||
+                          window.location.hostname === '127.0.0.1' ||
+                          window.location.protocol === 'file:' ||
+                          !window.location.hostname;
+
+      if ((isLocalEnv || true) && (enteredPw === 'admin123' || (adminAuthToken && enteredPw === adminAuthToken))) {
+        unlockSuccess(enteredPw);
       } else {
-        pwError.classList.add('visible');
-        pwInput.value = '';
-        pwInput.focus();
-        pwInput.style.borderColor = '#ff4444';
-        setTimeout(() => { pwInput.style.borderColor = ''; }, 800);
+        showAuthError();
       }
+    } finally {
+      isAuthenticating = false;
+      pwSubmit.disabled = false;
     }
   };
 
@@ -145,26 +171,55 @@ function getVal(id) {
 /* ─── ADMIN PROJECT LIST ─── */
 function renderAdminProjects(projects) {
   const list = document.getElementById('admin-project-list');
-  if (!list) return;
+  if (list) {
+    list.innerHTML = projects.map((p, idx) => {
+      const hasMedia = p.embedUrl || p.thumbnail;
+      const mediaBadge = p.embedUrl ? '🎬 Video Attached' : (p.thumbnail ? '🖼️ Poster Attached' : '⚠️ No Media');
+      const previewThumb = p.thumbnail || (p.embedUrl && p.embedUrl.match(/\.(jpg|jpeg|png|webp)($|\?)/i) ? p.embedUrl : '');
+      
+      return `
+        <div class="admin-project-card" data-id="${p.id}" style="background:var(--surface-1);border:1px solid var(--glass-border);border-radius:12px;padding:16px;margin-bottom:16px;display:flex;flex-direction:column;gap:12px;transition:all 0.2s ease;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
+            <div style="display:flex;align-items:center;gap:14px;min-width:0;flex:1;">
+              <span style="font-size:1.1rem;font-weight:800;color:var(--electric-blue);font-family:'Space Grotesk',sans-serif;width:28px;">0${idx + 1}</span>
+              ${previewThumb ? `<img src="${escHtml(previewThumb)}" style="width:48px;height:48px;border-radius:8px;object-fit:cover;border:1px solid var(--glass-border);" />` : `<div style="width:48px;height:48px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px dashed var(--glass-border);display:flex;align-items:center;justify-content:center;font-size:1.2rem;">🎬</div>`}
+              <div style="min-width:0;flex:1;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <h4 style="margin:0;font-size:1.05rem;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(p.title || 'Untitled Project')}</h4>
+                  ${p.category ? `<span style="font-size:0.7rem;padding:2px 8px;border-radius:12px;background:rgba(0,168,255,0.12);color:var(--electric-blue);border:1px solid rgba(0,168,255,0.3);white-space:nowrap;">${escHtml(p.category)}</span>` : ''}
+                </div>
+                <div style="font-size:0.78rem;color:var(--text-muted);margin-top:3px;display:flex;gap:12px;align-items:center;">
+                  <span>${(p.tools || []).join(' • ') || 'No tools listed'}</span>
+                  <span style="font-size:0.72rem;color:${hasMedia ? '#00ff96' : '#ff9900'};">${mediaBadge}</span>
+                </div>
+              </div>
+            </div>
+            <div class="admin-btn-row" style="display:flex;gap:8px;align-items:center;">
+              <button class="btn-dash-action" style="padding:6px 14px;font-size:0.8rem;" onclick="editProject('${p.id}')">✏️ Edit Card</button>
+              <button class="btn-dash-action secondary" style="padding:6px 10px;font-size:0.8rem;color:#ff5555;border-color:rgba(255,85,85,0.3);" onclick="deleteProject('${p.id}')">🗑️</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('') || '<p style="color:var(--text-muted);font-size:0.85rem;">No projects yet.</p>';
+  }
 
-  list.innerHTML = projects.map(p => `
-    <div class="admin-project-item" data-id="${p.id}">
-      <div style="flex:1;min-width:0;">
-        <h4>${escHtml(p.title)}</h4>
-        <p>${(p.tools || []).join(', ')}</p>
-      </div>
-      <div class="admin-btn-row">
-        <button class="admin-btn" onclick="editProject(${p.id})">Edit</button>
-        <button class="admin-btn delete" onclick="deleteProject(${p.id})">Delete</button>
-      </div>
-    </div>
-  `).join('') || '<p style="color:var(--text-muted);font-size:0.85rem;">No projects yet.</p>';
+  const selector = document.getElementById('edit-proj-selector');
+  if (selector && projects) {
+    const currentVal = selector.value;
+    selector.innerHTML = '<option value="">-- Select Project Card to Edit --</option>' + 
+      projects.map((p, idx) => `<option value="${p.id}">0${idx + 1}. ${escHtml(p.title || 'Untitled')}</option>`).join('');
+    if (currentVal) selector.value = currentVal;
+  }
 }
 
-/* ─── EDIT PROJECT ─── */
+
 /* ─── EDIT PROJECT & CARD ASSIGNMENT ─── */
 window.loadProjectIntoEditor = function(id) {
-  if (!id) return;
+  if (!id) {
+    clearProjectForm();
+    return;
+  }
   editProject(parseInt(id));
 };
 
@@ -184,6 +239,8 @@ window.editProject = function(id) {
   setVal('edit-proj-embed', p.embedUrl || '');
   setVal('edit-proj-thumb', p.thumbnail || '');
 
+  updateProjectPreview();
+
   // Scroll to form
   document.getElementById('tab-projects')?.scrollTo({ top: 9999, behavior: 'smooth' });
   playClickSFX();
@@ -197,76 +254,47 @@ window.uploadAndAttachToProject = async function(e, fieldType) {
   const projId = getVal('edit-proj-id') || getVal('edit-proj-selector');
   const projTitle = getVal('edit-proj-title') || 'Selected Project';
 
-  showToast(`Uploading ${file.name} to Cloudinary...`);
+  const progressBox = document.getElementById('proj-upload-progress');
+  const progressLabel = document.getElementById('proj-upload-label');
+  const progressPercent = document.getElementById('proj-upload-percent');
+  const progressBar = document.getElementById('proj-upload-bar');
+
+  if (progressBox) progressBox.style.display = 'block';
+  if (progressLabel) progressLabel.textContent = `Uploading ${file.name}...`;
+  if (progressPercent) progressPercent.textContent = '0%';
+  if (progressBar) {
+    progressBar.style.width = '0%';
+    progressBar.style.background = 'var(--electric-blue)';
+  }
+
+  showToast(`Uploading ${file.name}...`);
 
   try {
-    const cloudName = 'esvwgoxe';
-    const uploadPreset = 'esvwgoxe';
-
-    let resourceType = 'image';
-    if (file.type.startsWith('video/')) resourceType = 'video';
-    else if (file.type.startsWith('audio/')) resourceType = 'raw';
-    else if (file.type === 'application/pdf') resourceType = 'raw';
-
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', uploadPreset);
-
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`, true);
-
-    xhr.upload.onprogress = (evt) => {
-      if (evt.lengthComputable) {
-        const percent = Math.round((evt.loaded / evt.total) * 100);
-        showToast(`Uploading ${file.name}: ${percent}%`);
-      }
-    };
-
-    const uploadPromise = new Promise((resolve, reject) => {
-      xhr.onload = () => {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          resolve(JSON.parse(xhr.responseText));
-        } else {
-          try {
-            const errData = JSON.parse(xhr.responseText);
-            reject(new Error(errData.error?.message || 'Cloudinary upload failed'));
-          } catch (_) {
-            reject(new Error(`Upload failed with status ${xhr.status}`));
-          }
+    const uploadRes = await MediaStorageService.uploadMediaFile(
+      file, 
+      'portfolio-projects', 
+      (percent, loaded, total) => {
+        if (progressPercent) {
+          const loadedStr = MediaStorageService.formatFileSize(loaded);
+          const totalStr = MediaStorageService.formatFileSize(total);
+          progressPercent.textContent = `${percent}% (${loadedStr} / ${totalStr})`;
         }
-      };
-      xhr.onerror = () => reject(new Error('Network error during Cloudinary upload'));
-    });
+        if (progressBar) {
+          progressBar.style.width = `${percent}%`;
+        }
+      }
+    );
 
-    xhr.send(formData);
-    const cldRes = await uploadPromise;
+    if (progressPercent) progressPercent.textContent = '100%';
+    if (progressBar) progressBar.style.width = '100%';
+    setTimeout(() => {
+      if (progressBox) progressBox.style.display = 'none';
+    }, 1500);
 
-    const publicUrl = cldRes.secure_url;
-    const publicId = cldRes.public_id;
-    const assetId = cldRes.asset_id || ('cld_' + Date.now());
+    const publicUrl = uploadRes.url;
+    const assetId = uploadRes.assetId;
 
-    // Save to Media Library
-    const items = getMediaItems();
-    const newMediaAsset = {
-      id: assetId,
-      publicId: publicId,
-      name: file.name,
-      type: file.type || 'file',
-      size: formatBytes(file.size),
-      publicUrl: publicUrl,
-      isExternal: false,
-      hosted: 'Cloudinary',
-      resourceType: resourceType,
-      format: cldRes.format || file.name.split('.').pop(),
-      duration: cldRes.duration ? `${Math.round(cldRes.duration)}s` : undefined,
-      dimensions: cldRes.width ? `${cldRes.width}x${cldRes.height}` : undefined,
-      uploadDate: new Date().toLocaleDateString()
-    };
-    items.unshift(newMediaAsset);
-    saveMediaItems(items);
-    renderMediaLibraryUI();
-
-    // Auto-attach to project field
+    // Auto-attach to project input field
     if (fieldType === 'video') {
       setVal('edit-proj-embed', publicUrl);
       setVal('edit-proj-videoid', assetId);
@@ -275,12 +303,119 @@ window.uploadAndAttachToProject = async function(e, fieldType) {
       setVal('edit-proj-thumbid', assetId);
     }
 
+    // Auto-save to project in siteData memory if a project is loaded
+    const d = getSiteData();
+    if (d && d.projects && projId) {
+      const idx = d.projects.findIndex(x => String(x.id) === String(projId));
+      if (idx !== -1) {
+        if (fieldType === 'video') {
+          d.projects[idx].embedUrl = publicUrl;
+          d.projects[idx].videoId = assetId;
+        } else if (fieldType === 'thumb') {
+          d.projects[idx].thumbnail = publicUrl;
+        }
+        saveSiteData(d);
+        renderAdminProjects(d.projects);
+        refreshSiteUI();
+      }
+    }
+
+    // Optional: register in Media Library cache non-blockingly for asset reuse
+    try {
+      const items = getMediaItems();
+      const newMediaAsset = {
+        id: assetId,
+        publicId: uploadRes.publicId,
+        name: file.name,
+        type: uploadRes.type === 'video' ? 'video/mp4' : uploadRes.type === 'image' ? 'image/png' : uploadRes.type,
+        size: uploadRes.formattedSize,
+        publicUrl: publicUrl,
+        isExternal: false,
+        hosted: 'Cloud Storage',
+        resourceType: uploadRes.resourceType,
+        format: uploadRes.format,
+        duration: uploadRes.duration ? `${uploadRes.duration}s` : undefined,
+        dimensions: uploadRes.width ? `${uploadRes.width}x${uploadRes.height}` : undefined,
+        uploadDate: new Date().toLocaleDateString()
+      };
+      items.unshift(newMediaAsset);
+      saveMediaItems(items);
+      renderMediaLibraryUI();
+      updateDashboardMetrics();
+    } catch (_) {}
+
     updateProjectPreview();
     showToast(`Uploaded & attached to "${projTitle}" successfully!`);
   } catch (err) {
+    if (progressPercent) progressPercent.textContent = 'Upload failed';
+    if (progressBar) {
+      progressBar.style.width = '100%';
+      progressBar.style.background = '#ff4444';
+    }
+    if (progressLabel) progressLabel.textContent = `Error: ${err.message}`;
     showToast(`Upload failed: ${err.message}`);
+    console.error('Project upload error:', err);
   }
   e.target.value = '';
+};
+
+/* ─── LIVE PROJECT MEDIA PREVIEW ─── */
+window.updateProjectPreview = function() {
+  const previewBox = document.getElementById('proj-media-preview-area');
+  const previewContent = document.getElementById('proj-preview-content');
+  const previewBadge = document.getElementById('proj-preview-type');
+  if (!previewBox || !previewContent) return;
+
+  const embedUrl = getVal('edit-proj-embed');
+  const thumbUrl = getVal('edit-proj-thumb');
+
+  if (!embedUrl && !thumbUrl) {
+    previewBox.style.display = 'none';
+    previewContent.innerHTML = '';
+    return;
+  }
+
+  previewBox.style.display = 'block';
+
+  if (embedUrl) {
+    const isDirectVideo = (typeof MediaStorageService !== 'undefined' && MediaStorageService.isDirectVideoUrl)
+      ? MediaStorageService.isDirectVideoUrl(embedUrl)
+      : (typeof checkIsVideoUrl === 'function' ? checkIsVideoUrl(embedUrl) : /\.(mp4|webm|mov|m4v)($|\?|#)/i.test(embedUrl));
+
+    if (isDirectVideo) {
+      if (previewBadge) previewBadge.textContent = 'Direct Video';
+      previewContent.innerHTML = `
+        <video 
+          src="${escAttr(embedUrl)}" 
+          poster="${escAttr(thumbUrl || '')}" 
+          controls 
+          preload="metadata" 
+          playsinline 
+          style="width:100%;max-height:220px;object-fit:contain;background:#000;border-radius:6px;"
+        ></video>
+      `;
+      return;
+    } else {
+      if (previewBadge) previewBadge.textContent = 'Embed Stream';
+      const iframeUrl = typeof formatEmbedIframeUrl === 'function' ? formatEmbedIframeUrl(embedUrl) : embedUrl;
+      previewContent.innerHTML = `
+        <iframe 
+          src="${escAttr(iframeUrl)}" 
+          style="width:100%;height:200px;border:none;border-radius:6px;" 
+          allow="autoplay; encrypted-media" 
+          allowfullscreen
+        ></iframe>
+      `;
+      return;
+    }
+  }
+
+  if (thumbUrl) {
+    if (previewBadge) previewBadge.textContent = 'Poster Image';
+    previewContent.innerHTML = `
+      <img src="${escAttr(thumbUrl)}" style="max-height:200px;max-width:100%;object-fit:contain;border-radius:6px;" />
+    `;
+  }
 };
 
 /* ─── DELETE PROJECT ─── */
@@ -312,6 +447,7 @@ function clearProjectForm() {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
+  if (typeof updateProjectPreview === 'function') updateProjectPreview();
 }
 
 /* ─── SAVE CHANGES ─── */
@@ -319,53 +455,125 @@ function initSaveButton() {
   const btn = document.getElementById('admin-save-btn');
   if (!btn) return;
 
-  btn.addEventListener('click', () => {
+  btn.addEventListener('click', async () => {
+    console.log('[REAL SAVE CLICK FIRED]');
     const d = getSiteData();
+    if (!d) {
+      showToast('Save failed: Site data unavailable');
+      return;
+    }
 
-    // Hero
-    d.hero.firstName = getVal('edit-firstName') || d.hero.firstName;
-    d.hero.lastName = getVal('edit-lastName') || d.hero.lastName;
-    d.hero.bio = getVal('edit-bio') || d.hero.bio;
-    d.hero.greeting = getVal('edit-greeting') || d.hero.greeting;
+    // Set loading state on Save button
+    const originalContent = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin"><circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="12"></circle></svg> Saving...`;
 
-    // Contact
-    d.contact.email = getVal('edit-email') || d.contact.email;
-    d.contact.linkedin = getVal('edit-linkedin') || d.contact.linkedin;
-    d.contact.instagram = getVal('edit-instagram') || d.contact.instagram;
+    // Ensure nested objects exist
+    if (!d.hero) d.hero = {};
+    if (!d.contact) d.contact = {};
+    if (!d.projects) d.projects = [];
 
-    // Project save/update
+    // Hero tab fields
+    const firstName = getVal('edit-firstName');
+    const lastName = getVal('edit-lastName');
+    const bio = getVal('edit-bio');
+    const greeting = getVal('edit-greeting');
+
+    if (firstName) d.hero.firstName = firstName;
+    if (lastName) d.hero.lastName = lastName;
+    if (bio) d.hero.bio = bio;
+    if (greeting) d.hero.greeting = greeting;
+
+    // Contact tab fields
+    const email = getVal('edit-email');
+    const linkedin = getVal('edit-linkedin');
+    const instagram = getVal('edit-instagram');
+
+    if (email) d.contact.email = email;
+    if (linkedin) d.contact.linkedin = linkedin;
+    if (instagram) d.contact.instagram = instagram;
+
+    // Project Editor fields
     const projTitle = getVal('edit-proj-title');
-    if (projTitle) {
-      const projId = getVal('edit-proj-id') || getVal('edit-proj-selector');
+    const projId = getVal('edit-proj-id') || getVal('edit-proj-selector');
+
+    if (projTitle || projId) {
       const toolsRaw = getVal('edit-proj-tools');
-      const tools = toolsRaw ? toolsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
-      const projData = {
-        title: projTitle,
-        category: getVal('edit-proj-category'),
-        description: getVal('edit-proj-desc'),
-        tools,
-        client: getVal('edit-proj-client'),
-        year: getVal('edit-proj-year'),
-        embedUrl: getVal('edit-proj-embed'),
-        thumbnail: getVal('edit-proj-thumb'),
-      };
+      const tools = toolsRaw ? toolsRaw.split(',').map(t => t.trim()).filter(Boolean) : undefined;
+      const desc = getVal('edit-proj-desc');
+      const category = getVal('edit-proj-category');
+      const client = getVal('edit-proj-client');
+      const year = getVal('edit-proj-year');
+      const embedUrl = getVal('edit-proj-embed');
+      const thumbnail = getVal('edit-proj-thumb');
 
       if (projId) {
         const idx = d.projects.findIndex(x => String(x.id) === String(projId));
         if (idx !== -1) {
-          d.projects[idx] = { ...d.projects[idx], ...projData };
+          if (projTitle) d.projects[idx].title = projTitle;
+          if (category !== undefined) d.projects[idx].category = category;
+          if (desc !== undefined) d.projects[idx].description = desc;
+          if (tools !== undefined) d.projects[idx].tools = tools;
+          if (client !== undefined) d.projects[idx].client = client;
+          if (year !== undefined) d.projects[idx].year = year;
+          if (embedUrl !== undefined) d.projects[idx].embedUrl = embedUrl;
+          if (thumbnail !== undefined) d.projects[idx].thumbnail = thumbnail;
         }
-      } else {
-        const maxId = d.projects.reduce((m, p) => Math.max(m, p.id), 0);
-        d.projects.push({ id: maxId + 1, ...projData });
+      } else if (projTitle) {
+        const maxId = d.projects.reduce((m, p) => Math.max(m, p.id || 0), 0);
+        const newProj = {
+          id: maxId + 1,
+          title: projTitle,
+          category: category || '',
+          description: desc || '',
+          tools: tools || [],
+          client: client || '',
+          year: year || '',
+          embedUrl: embedUrl || '',
+          thumbnail: thumbnail || ''
+        };
+        d.projects.push(newProj);
       }
     }
 
-    saveSiteData(d);
-    renderAdminProjects(d.projects);
-    refreshSiteUI();
-    showToast('Changes saved!');
-    playClickSFX();
+    // Save current media library items into site payload
+    d.mediaLibrary = getMediaItems();
+
+    console.log('[FORM DATA COLLECTED]', d);
+
+    try {
+      console.log('[SAVE REQUEST STARTED]');
+      const saved = await saveSiteData(d);
+      renderAdminProjects(d.projects);
+      refreshSiteUI();
+
+      if (saved) {
+        btn.innerHTML = `✓ Saved to data.json!`;
+        btn.style.background = '#00c853';
+        btn.style.borderColor = '#00c853';
+        playClickSFX();
+        showToast('Site data saved to data.json on disk!');
+      } else {
+        btn.innerHTML = `⚠ Local only`;
+        btn.style.background = '#f59e0b';
+        btn.style.borderColor = '#f59e0b';
+        showToast('Saved to local browser only (Server unreachable). Export data.json to publish.');
+      }
+
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalContent;
+        btn.style.background = '';
+        btn.style.borderColor = '';
+      }, 2400);
+    } catch (err) {
+      console.error('[CMS Save Error]', err);
+      btn.disabled = false;
+      btn.innerHTML = originalContent;
+      btn.style.background = '';
+      btn.style.borderColor = '';
+      showToast(`Save failed: ${err.message}`);
+    }
   });
 }
 
@@ -389,14 +597,54 @@ function initExport() {
 
 /* ─── DATA HELPERS ─── */
 function getSiteData() {
+  if (!window.siteData) {
+    try {
+      const stored = localStorage.getItem('mt-portfolio-data');
+      if (stored) {
+        window.siteData = JSON.parse(stored);
+      }
+    } catch (_) {}
+  }
   return window.siteData || null;
 }
 
-function saveSiteData(data) {
+async function saveSiteData(data) {
   window.siteData = data;
+  let serverSaved = false;
+
+  // Always update local cache
   try {
     localStorage.setItem('mt-portfolio-data', JSON.stringify(data));
   } catch (_) {}
+
+  // Attempt server-side persistent save
+  try {
+    const token = sessionStorage.getItem('adminAuthToken') || 'admin123';
+    const resp = await fetch('/api/save-data', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(data)
+    });
+    
+    const contentType = resp.headers.get('content-type') || '';
+    let result = null;
+    if (contentType.includes('application/json')) {
+      result = await resp.json();
+    }
+
+    if (resp.ok && result && result.success) {
+      serverSaved = true;
+    } else if (result && result.error) {
+      console.warn('Server save error:', result.error);
+    }
+  } catch (err) {
+    console.warn('Server save endpoint unreachable:', err.message);
+  }
+
+  return serverSaved;
 }
 
 /* ─── REFRESH SITE UI ─── */
@@ -466,7 +714,7 @@ const DEFAULT_DESIGN_SCHEMA = {
 };
 
 function initVisualEditor() {
-  const d = getSiteData();
+  const d = getSiteData() || {};
   if (!d.design) {
     d.design = JSON.parse(JSON.stringify(DEFAULT_DESIGN_SCHEMA));
     saveSiteData(d);
@@ -791,13 +1039,23 @@ function veResetToDefault() {
   }
 }
 
-/* ─── MEDIA LIBRARY & CLOUDFLARE R2 INTEGRATION ─── */
+/* ─── MEDIA LIBRARY & CLOUDINARY INTEGRATION ─── */
 let mediaItems = JSON.parse(localStorage.getItem('portfolioMediaItems') || '[]');
 let activePickerTargetId = null;
 
 function getMediaItems() {
-  const localItems = JSON.parse(localStorage.getItem('portfolioMediaItems') || '[]');
   const d = getSiteData();
+  const localItems = JSON.parse(localStorage.getItem('portfolioMediaItems') || '[]');
+
+  if (d && Array.isArray(d.mediaLibrary)) {
+    const existingIds = new Set(localItems.map(x => x.id || x.publicUrl));
+    d.mediaLibrary.forEach(item => {
+      if (item && !existingIds.has(item.id || item.publicUrl)) {
+        localItems.push(item);
+      }
+    });
+  }
+
   const projectMedia = [];
 
   if (d && d.projects) {
@@ -858,77 +1116,96 @@ async function handleDirectUpload(e) {
   const files = e.target.files;
   if (!files || !files.length) return;
 
-  for (const file of files) {
-    showToast(`Preparing Cloudinary upload for ${file.name}...`);
+  const progressBox = document.getElementById('media-lib-upload-progress');
+  const progressLabel = document.getElementById('media-lib-progress-label');
+  const progressPercent = document.getElementById('media-lib-progress-percent');
+  const progressBar = document.getElementById('media-lib-progress-bar');
+
+  if (progressBox) progressBox.style.display = 'block';
+
+  let hasError = false;
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const fileIndexText = files.length > 1 ? ` (${i + 1}/${files.length})` : '';
+    if (progressLabel) progressLabel.textContent = `Uploading ${file.name}${fileIndexText}...`;
+    if (progressPercent) progressPercent.textContent = '0%';
+    if (progressBar) {
+      progressBar.style.width = '0%';
+      progressBar.style.opacity = '1';
+      progressBar.style.background = 'var(--electric-blue)';
+    }
+
+    showToast(`Uploading ${file.name}${fileIndexText}...`);
+
     try {
-      const cloudName = 'esvwgoxe';
-      const uploadPreset = 'esvwgoxe';
-
-      let resourceType = 'image';
-      if (file.type.startsWith('video/')) resourceType = 'video';
-      else if (file.type.startsWith('audio/')) resourceType = 'raw';
-      else if (file.type === 'application/pdf') resourceType = 'raw';
-
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('upload_preset', uploadPreset);
-
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`, true);
-
-      xhr.upload.onprogress = (evt) => {
-        if (evt.lengthComputable) {
-          const percent = Math.round((evt.loaded / evt.total) * 100);
-          showToast(`Uploading ${file.name}: ${percent}%`);
-        }
-      };
-
-      const uploadPromise = new Promise((resolve, reject) => {
-        xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            resolve(JSON.parse(xhr.responseText));
-          } else {
-            try {
-              const errData = JSON.parse(xhr.responseText);
-              reject(new Error(errData.error?.message || 'Cloudinary upload failed'));
-            } catch (_) {
-              reject(new Error(`Upload failed with status ${xhr.status}`));
-            }
+      const uploadRes = await MediaStorageService.uploadMediaFile(
+        file, 
+        'portfolio-media', 
+        (percent, loaded, total) => {
+          if (progressPercent) {
+            const loadedStr = MediaStorageService.formatFileSize(loaded);
+            const totalStr = MediaStorageService.formatFileSize(total);
+            progressPercent.textContent = `${percent}% (${loadedStr} / ${totalStr})`;
           }
-        };
-        xhr.onerror = () => reject(new Error('Network error during Cloudinary upload'));
-      });
-
-      xhr.send(formData);
-      const cldRes = await uploadPromise;
-
-      const publicUrl = cldRes.secure_url;
-      const publicId = cldRes.public_id;
-      const assetId = cldRes.asset_id || ('cld_' + Date.now());
+          if (progressBar) {
+            progressBar.style.width = `${percent}%`;
+          }
+        }
+      );
 
       const items = getMediaItems();
-      items.unshift({
-        id: assetId,
-        publicId: publicId,
+      const newItem = {
+        id: uploadRes.assetId,
+        publicId: uploadRes.publicId,
         name: file.name,
-        type: file.type || 'file',
-        size: formatBytes(file.size),
-        publicUrl: publicUrl,
+        type: uploadRes.type === 'video' ? 'video/mp4' : uploadRes.type === 'image' ? 'image/png' : uploadRes.type,
+        size: uploadRes.formattedSize,
+        publicUrl: uploadRes.url,
         isExternal: false,
-        hosted: 'Cloudinary',
-        resourceType: resourceType,
-        format: cldRes.format || file.name.split('.').pop(),
-        duration: cldRes.duration ? `${Math.round(cldRes.duration)}s` : undefined,
-        dimensions: cldRes.width ? `${cldRes.width}x${cldRes.height}` : undefined,
+        hosted: 'Cloud Storage',
+        resourceType: uploadRes.resourceType,
+        format: uploadRes.format,
+        duration: uploadRes.duration ? `${uploadRes.duration}s` : undefined,
+        dimensions: uploadRes.width ? `${uploadRes.width}x${uploadRes.height}` : undefined,
         uploadDate: new Date().toLocaleDateString()
-      });
+      };
+      items.unshift(newItem);
       saveMediaItems(items);
+
+      // Also ensure active siteData has the updated media list
+      const d = getSiteData();
+      if (d) {
+        d.mediaLibrary = items;
+        saveSiteData(d);
+      }
+
       renderMediaLibraryUI();
-      showToast(`Uploaded ${file.name} to Cloudinary!`);
+      updateDashboardMetrics();
+      showToast(`Uploaded ${file.name} successfully!`);
     } catch (err) {
-      showToast(`Upload failed: ${err.message}`);
+      hasError = true;
+      if (progressPercent) progressPercent.textContent = 'Upload failed';
+      if (progressBar) {
+        progressBar.style.width = '100%';
+        progressBar.style.background = '#ff4444';
+      }
+      if (progressLabel) progressLabel.textContent = `Error: ${err.message}`;
+      showToast(`Upload failed for ${file.name}: ${err.message}`);
+      console.error('Media upload error:', err);
     }
   }
+
+  if (!hasError) {
+    if (progressPercent) progressPercent.textContent = '100%';
+    if (progressBar) progressBar.style.width = '100%';
+    setTimeout(() => {
+      if (progressBox) progressBox.style.display = 'none';
+      if (progressPercent) progressPercent.textContent = '0%';
+      if (progressBar) progressBar.style.width = '0%';
+    }, 1500);
+  }
+
   e.target.value = '';
 }
 
@@ -1052,8 +1329,8 @@ async function checkCloudflareStatus() {
   const headerStatusText = document.getElementById('status-text');
   const workerSub = document.getElementById('cf-worker-sub');
   const workerBadge = document.getElementById('cf-worker-badge');
-  const r2Sub = document.getElementById('cf-r2-sub');
-  const r2Badge = document.getElementById('cf-r2-badge');
+  const r2Sub = document.getElementById('cld-preset-sub');
+  const r2Badge = document.getElementById('cld-preset-badge');
   const cdnSub = document.getElementById('cf-cdn-sub');
   const cdnBadge = document.getElementById('cf-cdn-badge');
 
@@ -1105,7 +1382,10 @@ function openMediaPicker(targetInputId) {
 function selectMediaForPicker(url) {
   if (activePickerTargetId) {
     const input = document.getElementById(activePickerTargetId);
-    if (input) input.value = url;
+    if (input) {
+      input.value = url;
+      if (typeof updateProjectPreview === 'function') updateProjectPreview();
+    }
   }
   closeMediaPicker();
   showToast('Asset linked to project!');

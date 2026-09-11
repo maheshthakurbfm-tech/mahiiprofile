@@ -335,12 +335,49 @@ function initMagneticGrid() {
 
 /* ─── LOAD DATA ─── */
 async function loadData() {
+  // 1. Try server API endpoint first for real-time global site data
+  try {
+    const apiResp = await fetch('/api/site-data');
+    if (apiResp.ok) {
+      const apiData = await apiResp.json();
+      if (apiData && apiData.projects && apiData.projects.length > 0) {
+        siteData = apiData;
+        try { localStorage.setItem('mt-portfolio-data', JSON.stringify(apiData)); } catch (_) {}
+        return;
+      }
+    }
+  } catch (err) {
+    console.warn('API /api/site-data unreachable, falling back to static files:', err);
+  }
+
+  // 2. Try static data.json file from server
   try {
     const res = await fetch('data.json');
-    siteData = await res.json();
-  } catch (_) {
-    siteData = getFallbackData();
+    if (res.ok) {
+      const fileData = await res.json();
+      if (fileData && fileData.projects && fileData.projects.length > 0) {
+        siteData = fileData;
+        return;
+      }
+    }
+  } catch (_) {}
+
+  // 3. Fall back to localStorage if offline/local cache exists
+  try {
+    const localDataStr = localStorage.getItem('mt-portfolio-data');
+    if (localDataStr) {
+      const parsed = JSON.parse(localDataStr);
+      if (parsed && parsed.projects && parsed.projects.length > 0) {
+        siteData = parsed;
+        return;
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to parse local siteData:', e);
   }
+
+  // 4. Default fallback memory data structure
+  siteData = getFallbackData();
 }
 
 function getFallbackData() {
@@ -433,11 +470,42 @@ function renderAccordion() {
   });
 }
 
+function checkIsVideoUrl(rawUrl) {
+  if (!rawUrl || typeof rawUrl !== 'string') return false;
+  if (typeof MediaStorageService !== 'undefined' && MediaStorageService.isDirectVideoUrl) {
+    return MediaStorageService.isDirectVideoUrl(rawUrl);
+  }
+  const url = rawUrl.trim().toLowerCase();
+  const cleanUrl = url.split('?')[0].split('#')[0];
+  if (/\.(mp4|webm|mov|m4v|ogg|mkv)$/i.test(cleanUrl)) return true;
+  if (url.includes('cloudinary.com/') && (url.includes('/video/upload/') || url.includes('/video/'))) return true;
+  if (url.includes('firebasestorage.googleapis.com') && (url.includes('.mp4') || url.includes('.webm') || url.includes('.mov') || url.includes('video'))) return true;
+  return false;
+}
+
+function formatEmbedIframeUrl(url) {
+  if (!url) return '';
+  // Convert standard YouTube watch URLs to embed format
+  if (url.includes('youtube.com/watch?v=')) {
+    const videoId = url.split('watch?v=')[1]?.split('&')[0];
+    if (videoId) return `https://www.youtube-nocookie.com/embed/${videoId}`;
+  }
+  if (url.includes('youtu.be/')) {
+    const videoId = url.split('youtu.be/')[1]?.split('?')[0];
+    if (videoId) return `https://www.youtube-nocookie.com/embed/${videoId}`;
+  }
+  // Convert Vimeo watch URLs to embed format
+  if (url.includes('vimeo.com/') && !url.includes('player.vimeo.com')) {
+    const videoId = url.split('vimeo.com/')[1]?.split('?')[0];
+    if (videoId && !isNaN(videoId)) return `https://player.vimeo.com/video/${videoId}`;
+  }
+  return url;
+}
+
 function renderVideoArea(p) {
   if (p.embedUrl && p.embedUrl.trim()) {
     const rawUrl = p.embedUrl.trim();
-    const url = rawUrl.toLowerCase();
-    const isDirectVideo = url.endsWith('.mp4') || url.endsWith('.webm') || url.endsWith('.mov') || url.includes('/media/videos/') || url.includes('cloudinary.com/') || url.includes('/video/upload/');
+    const isDirectVideo = checkIsVideoUrl(rawUrl);
     
     if (isDirectVideo) {
       return `
@@ -447,15 +515,36 @@ function renderVideoArea(p) {
           controls 
           preload="metadata" 
           playsinline 
-          style="width:100%;height:100%;object-fit:cover;border-radius:12px;"
+          style="width:100%;height:100%;object-fit:cover;border-radius:12px;background:#000;"
+          onerror="this.style.display='none'; const fb = this.nextElementSibling; if (fb) fb.style.display='flex';"
         ></video>
+        <div class="video-error-fallback" style="display:none;width:100%;height:100%;border-radius:12px;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;flex-direction:column;gap:8px;padding:20px;text-align:center;">
+          ${p.thumbnail ? `<img src="${escAttr(p.thumbnail)}" alt="${escAttr(p.title)}" style="max-height:140px;border-radius:8px;object-fit:cover;" />` : `<div style="font-size:2rem;">🎬</div>`}
+          <span style="font-size:0.75rem;color:var(--text-muted);">${escHtml(p.title)}</span>
+          <a href="${escAttr(rawUrl)}" target="_blank" rel="noopener noreferrer" style="font-size:0.72rem;color:var(--electric-blue);text-decoration:underline;">Watch Direct Video</a>
+        </div>
       `;
     }
-    return `<iframe src="${escAttr(p.embedUrl)}" allow="autoplay; encrypted-media" allowfullscreen title="${escAttr(p.title)}"></iframe>`;
+
+    const iframeUrl = formatEmbedIframeUrl(rawUrl);
+    return `<iframe src="${escAttr(iframeUrl)}" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen title="${escAttr(p.title)}" style="width:100%;height:100%;border-radius:12px;border:none;"></iframe>`;
   }
+
   if (p.thumbnail && p.thumbnail.trim()) {
-    return `<img src="${escAttr(p.thumbnail)}" alt="${escAttr(p.title)}" style="width:100%;height:100%;object-fit:cover;" />`;
+    return `
+      <img 
+        src="${escAttr(p.thumbnail)}" 
+        alt="${escAttr(p.title)}" 
+        style="width:100%;height:100%;object-fit:cover;border-radius:12px;" 
+        onerror="this.style.display='none'; const fb = this.nextElementSibling; if (fb) fb.style.display='flex';"
+      />
+      <div class="video-placeholder" style="display:none;">
+        <div class="play-icon">▶</div>
+        <span>${escHtml(p.title)}</span>
+      </div>
+    `;
   }
+
   return `
     <div class="video-placeholder">
       <div class="play-icon">▶</div>
