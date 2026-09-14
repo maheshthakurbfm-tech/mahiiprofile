@@ -35,16 +35,19 @@
   "projects": [
     {
       "id": 1,
-      "title": "Commercial & Brand Ads",
-      "description": "MY REAL SAVE TEST",
+      "title": "YOUTUBE DOCUMENTRY STYLE EDITS",
+      "description": "dited a short-form documentary story for DS Group, using narrative pacing, parallax effects and After Effects motion design to transform documentary footage into a cinematic visual experience.",
       "tools": [
         "Premiere Pro",
         "After Effects",
         "DaVinci Resolve"
       ],
-      "embedUrl": "https://res.cloudinary.com/esvwgoxe/video/upload/v1789095426/portfolio-projects/tduu0lc9ianrp2ia6c4r.mp4",
+      "embedUrl": "https://res.cloudinary.com/esvwgoxe/video/upload/v1789416404/DS_Group_Documentry.mp4",
       "videoId": "tduu0lc9ianrp2ia6c4r",
-      "thumbnail": ""
+      "thumbnail": "",
+      "category": "MOTION FILMS",
+      "client": "",
+      "year": "2026"
     },
     {
       "id": 2,
@@ -55,23 +58,26 @@
         "Premiere Pro",
         "Illustrator"
       ],
-      "embedUrl": "https://res.cloudinary.com/esvwgoxe/video/upload/v1789095943/real_estate_video_raw_vs_edited.mp4",
+      "embedUrl": "https://res.cloudinary.com/esvwgoxe/video/upload/v1789417121/trim_ui_ux_design_video.mp4",
       "thumbnail": "",
-      "category": "",
+      "category": "motion graph design",
       "client": "",
-      "year": ""
+      "year": "2025"
     },
     {
       "id": 3,
-      "title": "YouTube & Long-Form Edits",
-      "description": "Narrative documentary-style long-form content with retention-driven pacing and dynamic B-roll structure.",
+      "title": "UI/UX motion graphic",
+      "description": "Designed clean, intuitive and visually engaging user interfaces with a strong focus on layout, hierarchy, usability and responsive experiences. Combined visual design principles with creative interaction and motion to create polished digital experiences that are both functional and engaging.",
       "tools": [
         "Premiere Pro",
         "After Effects",
         "Audition"
       ],
-      "embedUrl": "",
-      "thumbnail": ""
+      "embedUrl": "https://res.cloudinary.com/esvwgoxe/video/upload/v1789418634/saas_animation_9340988063_3.mp4",
+      "thumbnail": "",
+      "category": "UI/UX",
+      "client": "",
+      "year": "2025"
     },
     {
       "id": 4,
@@ -101,10 +107,10 @@
   "showreelReels": [
     {
       "id": "reel-1",
-      "title": "Commercial & Brand Short-Form",
-      "category": "Commercial Ads",
-      "description": "High-retention vertical ad edit with kinetic pacing, beat-synced motion, and punchy hooks.",
-      "embedUrl": "https://res.cloudinary.com/esvwgoxe/video/upload/v1789095426/portfolio-projects/tduu0lc9ianrp2ia6c4r.mp4",
+      "title": "VOX STYLE Video",
+      "category": "motion graphic",
+      "description": "VOX-style editorial edit combining sharp pacing, kinetic typography, visual storytelling, and After Effects motion graphics for an engaging documentary-style presentation.",
+      "embedUrl": "https://res.cloudinary.com/esvwgoxe/video/upload/v1789417488/Vox_Documentary.mp4",
       "thumbnail": "",
       "videoId": "tduu0lc9ianrp2ia6c4r",
       "year": "2025"
@@ -121,78 +127,8 @@
     },
     {
       "id": "reel-3",
-      "title": "Kinetic Typography & Motion Reel",
-      "category": "Motion Graphics",
-      "description": "Bold title animations, custom After Effects MOGRTs, and retention-focused visual pacing.",
-      "embedUrl": "",
-      "thumbnail": "",
-      "videoId": "",
-      "year": "2025"
-    },
-    {
-      "id": "reel-1789389110255",
-      "title": "Vertical Reel 04",
-      "category": "Commercial",
-      "description": "",
-      "embedUrl": "",
-      "thumbnail": "",
-      "videoId": "",
-      "year": "2025"
-    },
-    {
-      "id": "reel-1789389111609",
-      "title": "Vertical Reel 05",
-      "category": "Commercial",
-      "description": "",
-      "embedUrl": "",
-      "thumbnail": "",
-      "videoId": "",
-      "year": "2025"
-    },
-    {
-      "id": "reel-1789389112677",
-      "title": "Vertical Reel 06",
-      "category": "Commercial",
-      "description": "",
-      "embedUrl": "",
-      "thumbnail": "",
-      "videoId": "",
-      "year": "2025"
-    },
-    {
-      "id": "reel-1789389118159",
-      "title": "Vertical Reel 07",
-      "category": "Commercial",
-      "description": "",
-      "embedUrl": "",
-      "thumbnail": "",
-      "videoId": "",
-      "year": "2025"
-    },
-    {
-      "id": "reel-1789389119101",
-      "title": "Vertical Reel 08",
-      "category": "Commercial",
-      "description": "",
-      "embedUrl": "",
-      "thumbnail": "",
-      "videoId": "",
-      "year": "2025"
-    },
-    {
-      "id": "reel-1789389124344",
-      "title": "Vertical Reel 09",
-      "category": "Commercial",
-      "description": "",
-      "embedUrl": "",
-      "thumbnail": "",
-      "videoId": "",
-      "year": "2025"
-    },
-    {
-      "id": "reel-1789389124524",
-      "title": "Vertical Reel 010",
-      "category": "Commercial",
+      "title": "Vertical Reel 03",
+      "category": "",
       "description": "",
       "embedUrl": "",
       "thumbnail": "",
@@ -205,6 +141,63 @@
     "linkedin": "https://www.linkedin.com/in/mahesh-thakur-317872277/",
     "instagram": "https://www.instagram.com/motion.mogrt"
   },
+  "software": [
+    {
+      "name": "Premiere Pro",
+      "icon": "assets/icons/premiere.svg",
+      "level": 95
+    },
+    {
+      "name": "After Effects",
+      "icon": "assets/icons/aftereffects.svg",
+      "level": 92
+    },
+    {
+      "name": "DaVinci Resolve",
+      "icon": "assets/icons/davinci.svg",
+      "level": 88
+    },
+    {
+      "name": "Lightroom",
+      "icon": "assets/icons/lightroom.svg",
+      "level": 85
+    },
+    {
+      "name": "CapCut",
+      "icon": "assets/icons/capcut.png",
+      "level": 90
+    },
+    {
+      "name": "CorelDRAW",
+      "icon": "assets/icons/coreldraw.png",
+      "level": 80
+    },
+    {
+      "name": "Illustrator",
+      "icon": "assets/icons/illustrator.svg",
+      "level": 88
+    },
+    {
+      "name": "Inkscape",
+      "icon": "assets/icons/inkscape.png",
+      "level": 78
+    },
+    {
+      "name": "Blender",
+      "icon": "assets/icons/blender.png",
+      "level": 65
+    },
+    {
+      "name": "Photoshop",
+      "icon": "assets/icons/photoshop.svg",
+      "level": 85
+    },
+    {
+      "name": "Canva",
+      "icon": "assets/icons/canva.png",
+      "level": 90
+    }
+  ],
   "resume": {
     "headline": "Video Editor | Motion Graphics Designer | Colorist",
     "location": "Durg, Chhattisgarh, India",
@@ -382,14 +375,30 @@
       }
     ],
     "languages": [
-      { "name": "Hindi", "level": "Fluent", "dots": 5 },
-      { "name": "English", "level": "Fluent", "dots": 4 },
-      { "name": "Chhattisgarhi", "level": "Native", "dots": 5 },
-      { "name": "Odia", "level": "Basic", "dots": 1 }
+      {
+        "name": "Hindi",
+        "level": "Fluent",
+        "dots": 5
+      },
+      {
+        "name": "English",
+        "level": "Fluent",
+        "dots": 4
+      },
+      {
+        "name": "Chhattisgarhi",
+        "level": "Native",
+        "dots": 5
+      },
+      {
+        "name": "Odia",
+        "level": "Basic",
+        "dots": 1
+      }
     ],
     "education": [
       {
-        "degree": "B.Sc. (Information Technology / IT)",
+        "degree": "B.Sc [Bechlore of Science]",
         "college": "Govt. V.Y.T. PG Autonomous Science College, Durg",
         "university": "Hemchand Yadav Vishwavidyalaya, Durg",
         "period": "2021 - 2023",
@@ -397,15 +406,15 @@
       },
       {
         "degree": "Schooling (Post-Metric / Higher Secondary 12th)",
-        "college": "High School / Higher Secondary",
-        "period": "Post-Metric",
         "detail": "Post-Metric — 62%"
       },
       {
         "degree": "Schooling (Pre-Metric / High School 10th)",
-        "college": "High School",
-        "period": "Pre-Metric",
         "detail": "Pre-Metric — 72%"
+      },
+      {
+        "degree": "IT (Information Technology)",
+        "detail": ""
       }
     ],
     "achievements": [
@@ -424,63 +433,6 @@
       "Exploring & Travel"
     ]
   },
-  "software": [
-    {
-      "name": "Premiere Pro",
-      "icon": "assets/icons/premiere.svg",
-      "level": 95
-    },
-    {
-      "name": "After Effects",
-      "icon": "assets/icons/aftereffects.svg",
-      "level": 92
-    },
-    {
-      "name": "DaVinci Resolve",
-      "icon": "assets/icons/davinci.svg",
-      "level": 88
-    },
-    {
-      "name": "Lightroom",
-      "icon": "assets/icons/lightroom.svg",
-      "level": 85
-    },
-    {
-      "name": "CapCut",
-      "icon": "assets/icons/capcut.png",
-      "level": 90
-    },
-    {
-      "name": "CorelDRAW",
-      "icon": "assets/icons/coreldraw.png",
-      "level": 80
-    },
-    {
-      "name": "Illustrator",
-      "icon": "assets/icons/illustrator.svg",
-      "level": 88
-    },
-    {
-      "name": "Inkscape",
-      "icon": "assets/icons/inkscape.png",
-      "level": 78
-    },
-    {
-      "name": "Blender",
-      "icon": "assets/icons/blender.png",
-      "level": 65
-    },
-    {
-      "name": "Photoshop",
-      "icon": "assets/icons/photoshop.svg",
-      "level": 85
-    },
-    {
-      "name": "Canva",
-      "icon": "assets/icons/canva.png",
-      "level": 90
-    }
-  ],
   "design": {
     "hero": {
       "subject": {
@@ -543,7 +495,40 @@
       "isExternal": false,
       "hosted": "Cloudinary",
       "uploadDate": "Published"
+    },
+    {
+      "id": "tduu0lc9ianrp2ia6c4r",
+      "publicId": "tduu0lc9ianrp2ia6c4r",
+      "name": "Commercial & Brand Ads (Video)",
+      "type": "video/mp4",
+      "size": "Cloudinary Hosted",
+      "publicUrl": "https://res.cloudinary.com/esvwgoxe/video/upload/v1789416404/DS_Group_Documentry.mp4",
+      "isExternal": false,
+      "hosted": "Cloudinary",
+      "uploadDate": "Published"
+    },
+    {
+      "id": "proj_vid_2",
+      "publicId": "",
+      "name": "Motion Graphics & MOGRT Packs (Video)",
+      "type": "video/mp4",
+      "size": "Cloudinary Hosted",
+      "publicUrl": "https://res.cloudinary.com/esvwgoxe/video/upload/v1789417121/trim_ui_ux_design_video.mp4",
+      "isExternal": false,
+      "hosted": "Cloudinary",
+      "uploadDate": "Published"
+    },
+    {
+      "id": "proj_vid_3",
+      "publicId": "",
+      "name": "UI/UX motion graphic (Video)",
+      "type": "video/mp4",
+      "size": "Cloudinary Hosted",
+      "publicUrl": "https://res.cloudinary.com/esvwgoxe/video/upload/v1789418634/saas_animation_9340988063_3.mp4",
+      "isExternal": false,
+      "hosted": "Cloudinary",
+      "uploadDate": "Published"
     }
   ],
-  "updatedAt": "2026-09-14T17:59:02Z"
+  "updatedAt": "2026-09-14T20:47:38.485Z"
 }

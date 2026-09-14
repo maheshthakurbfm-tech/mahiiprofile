@@ -370,7 +370,7 @@ function initMagneticGrid() {
 async function loadData() {
   // 1. Try server API endpoint first for real-time global site data
   try {
-    const apiResp = await fetch('/api/site-data');
+    const apiResp = await fetch('/api/site-data', { cache: 'no-cache' });
     if (apiResp.ok) {
       const apiData = await apiResp.json();
       if (apiData && apiData.projects && apiData.projects.length > 0) {
@@ -380,16 +380,17 @@ async function loadData() {
       }
     }
   } catch (err) {
-    console.warn('API /api/site-data unreachable, falling back to static files:', err);
+    console.warn('API /api/site-data unreachable, falling back to static data.json:', err);
   }
 
   // 2. Try static data.json file from server
   try {
-    const res = await fetch('data.json');
+    const res = await fetch('data.json', { cache: 'no-cache' });
     if (res.ok) {
       const fileData = await res.json();
       if (fileData && fileData.projects && fileData.projects.length > 0) {
         siteData = fileData;
+        try { localStorage.setItem('mt-portfolio-data', JSON.stringify(fileData)); } catch (_) {}
         return;
       }
     }

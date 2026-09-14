@@ -263,7 +263,7 @@ function renderLinks(target, links, compact = false) {
     const rel = link.external ? ' rel="noopener noreferrer"' : "";
     const targetAttr = link.external ? ' target="_blank"' : "";
     const label = compact
-      ? `<span>${escHtml(link.label)}</span><span class="resume-link-muted">${escHtml(link.text)}</span>`
+      ? `<span class="resume-link-label">${escHtml(link.label)}</span><span class="resume-link-muted">${escHtml(link.text)}</span>`
       : escHtml(link.text);
 
     return `<a class="resume-link" href="${escAttr(link.href)}"${targetAttr}${rel}>${label}</a>`;
@@ -472,8 +472,43 @@ function renderResume(data) {
   renderChips("interestList", resume.interests);
 }
 
+function initThemeSwitcher() {
+  const select = document.getElementById("themeSelect");
+  if (!select) return;
+
+  const savedTheme = localStorage.getItem("resume_theme") || "classic";
+  select.value = savedTheme;
+
+  const applyTheme = (theme) => {
+    if (theme === "cyan-glass") {
+      document.body.classList.add("theme-cyan-glass");
+    } else {
+      document.body.classList.remove("theme-cyan-glass");
+    }
+  };
+
+  applyTheme(savedTheme);
+
+  select.addEventListener("change", (e) => {
+    const selected = e.target.value;
+    applyTheme(selected);
+    localStorage.setItem("resume_theme", selected);
+  });
+
+  // Authentic Liquid Glass Scroll Physics
+  window.addEventListener("scroll", () => {
+    if (!document.body.classList.contains("theme-cyan-glass")) return;
+    const card = document.querySelector(".resume-page");
+    if (!card) return;
+    const scrolled = window.scrollY;
+    const shift = Math.sin(scrolled * 0.005) * 2;
+    card.style.transform = `translateY(${shift.toFixed(2)}px)`;
+  }, { passive: true });
+}
+
 async function bootResume() {
   initPrintButtons();
+  initThemeSwitcher();
   const data = await loadPortfolioData();
   renderResume(data);
   initReveal();

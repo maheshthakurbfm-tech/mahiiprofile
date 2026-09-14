@@ -18,6 +18,12 @@
 </head>
 
 <body>
+  <!-- BACKGROUND ENVIRONMENT GLOWS FOR LIQUID GLASS REFRACTION -->
+  <div class="resume-bg-glows" aria-hidden="true">
+    <div class="bg-glow bg-glow-left-red"></div>
+    <div class="bg-glow bg-glow-right-blue"></div>
+  </div>
+
   <a class="skip-link" href="#resume-content">Skip to resume content</a>
 
   <header class="resume-nav no-print" aria-label="Resume page navigation">
@@ -27,7 +33,16 @@
       <a href="./#software">Skills</a>
       <a href="./#contact">Contact</a>
     </nav>
-    <button class="resume-print-btn" id="printResume" type="button">Print / Save PDF</button>
+    <div class="header-action-group">
+      <div class="theme-select-wrapper">
+        <label for="themeSelect" class="sr-only">Choose Theme</label>
+        <select id="themeSelect" class="theme-select-btn" aria-label="Choose Theme">
+          <option value="classic">📄 Minimal Paper (Default)</option>
+          <option value="cyan-glass">💎 Cyan Liquid Glass (Uploaded Theme)</option>
+        </select>
+      </div>
+      <button class="resume-print-btn" id="printResume" type="button">Print / Save PDF</button>
+    </div>
   </header>
 
   <main class="resume-page" id="resume-content">

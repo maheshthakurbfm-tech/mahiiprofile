@@ -473,8 +473,8 @@ window.editProject = function(id) {
   const p = d.projects.find(x => String(x.id) === String(id));
   if (!p) return;
 
-  setVal('edit-proj-id', p.id);
-  setVal('edit-proj-selector', p.id);
+  setVal('edit-proj-id', String(p.id));
+  setVal('edit-proj-selector', String(p.id));
   setVal('edit-proj-title', p.title);
   setVal('edit-proj-category', p.category || '');
   setVal('edit-proj-desc', p.description);
@@ -496,7 +496,7 @@ window.uploadAndAttachToProject = async function(e, fieldType) {
   const file = e.target.files?.[0];
   if (!file) return;
 
-  const projId = getVal('edit-proj-id') || getVal('edit-proj-selector');
+  const rawProjId = getVal('edit-proj-id') || getVal('edit-proj-selector');
   const projTitle = getVal('edit-proj-title') || 'Selected Project';
 
   const progressBox = document.getElementById('proj-upload-progress');
@@ -550,8 +550,8 @@ window.uploadAndAttachToProject = async function(e, fieldType) {
 
     // Auto-save to project in siteData memory if a project is loaded
     const d = getSiteData();
-    if (d && d.projects && projId) {
-      const idx = d.projects.findIndex(x => String(x.id) === String(projId));
+    if (d && d.projects && rawProjId) {
+      const idx = d.projects.findIndex(x => String(x.id) === String(rawProjId));
       if (idx !== -1) {
         if (fieldType === 'video') {
           d.projects[idx].embedUrl = publicUrl;
@@ -559,9 +559,12 @@ window.uploadAndAttachToProject = async function(e, fieldType) {
         } else if (fieldType === 'thumb') {
           d.projects[idx].thumbnail = publicUrl;
         }
-        saveSiteData(d);
+        window.siteData = d;
+        try { localStorage.setItem('mt-portfolio-data', JSON.stringify(d)); } catch (_) {}
         renderAdminProjects(d.projects);
         refreshSiteUI();
+      } else {
+        showToast(`Warning: Active project ID ${rawProjId} not found in siteData. Save changes to create/update.`, 'warning');
       }
     }
 
