@@ -769,76 +769,197 @@ section {
 
 .focus-card {
   position: relative;
-  padding: 24px 22px;
+  padding: 20px 20px 16px 20px;
   border-radius: 16px;
-  background: var(--surface-1);
-  border: 1px solid var(--glass-border);
+  background: rgba(10, 18, 30, 0.72);
+  border: 1px solid rgba(0, 168, 255, 0.28);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: default;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .focus-card:hover {
-  border-color: rgba(0, 168, 255, 0.28);
-  background: var(--surface-2);
+  border-color: rgba(0, 216, 255, 0.65);
+  background: rgba(12, 22, 40, 0.88);
   transform: translateY(-3px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35), 0 0 20px rgba(0, 168, 255, 0.04);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55), 0 0 25px rgba(0, 168, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
-/* Subtle contextual background graphic */
-.card-bg-graphic {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 140px;
-  height: 60px;
-  color: var(--electric-blue);
-  opacity: 0.08;
-  pointer-events: none;
-  z-index: 1;
-  transition: opacity 0.35s, transform 0.35s;
+/* Card Header Layout */
+.focus-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 2;
 }
 
-.focus-card:hover .card-bg-graphic {
-  opacity: 0.14;
-  transform: scale(1.03);
-}
-
-/* Professional icon badge container */
+/* Icon Box matching reference image rounded square styling */
 .focus-icon-box {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: rgba(0, 168, 255, 0.08);
-  border: 1px solid rgba(0, 168, 255, 0.22);
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: linear-gradient(135deg, rgba(0, 168, 255, 0.2), rgba(0, 60, 120, 0.35));
+  border: 1px solid rgba(0, 168, 255, 0.45);
   color: var(--electric-blue);
-  margin-bottom: 12px;
-  position: relative;
-  z-index: 2;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 0 8px rgba(0, 168, 255, 0.04);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
-.focus-card h4 {
+.focus-icon-box svg {
+  filter: drop-shadow(0 0 6px rgba(0, 168, 255, 0.7));
+}
+
+/* Numbering & Line */
+.focus-card-num-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.focus-card-num {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: rgba(240, 244, 255, 0.9);
+  letter-spacing: 0.05em;
+}
+
+.focus-card-num-line {
+  width: 26px;
+  height: 1.5px;
+  background: rgba(240, 244, 255, 0.3);
+  display: inline-block;
+}
+
+/* Card Title */
+.focus-card-title {
   position: relative;
   z-index: 2;
   font-family: var(--font-display);
-  font-size: 0.84rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
+  font-size: 1.02rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--electric-blue);
+  color: #00D8FF;
   margin-bottom: 6px;
+  text-shadow: 0 0 14px rgba(0, 216, 255, 0.35);
 }
 
-.focus-card p {
+/* Card Description */
+.focus-card-desc {
   position: relative;
   z-index: 2;
-  font-size: 0.82rem;
-  color: var(--text-muted);
-  line-height: 1.6;
+  font-size: 0.81rem;
+  color: rgba(215, 228, 245, 0.78);
+  line-height: 1.55;
+  margin-bottom: 14px;
+}
+
+/* Card Footer */
+.focus-card-footer {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 10px;
+}
+
+.focus-card-tags {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  color: rgba(0, 195, 255, 0.85);
+  text-transform: uppercase;
+}
+
+.tag-sep {
+  color: rgba(255, 255, 255, 0.22);
+  font-weight: 300;
+}
+
+/* Round Arrow Action Button */
+.focus-card-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0, 168, 255, 0.55);
+  color: var(--electric-blue);
+  background: rgba(0, 168, 255, 0.08);
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px rgba(0, 168, 255, 0.15);
+}
+
+.focus-card:hover .focus-card-arrow {
+  background: var(--electric-blue);
+  color: #000;
+  border-color: var(--electric-blue);
+  transform: scale(1.08);
+  box-shadow: 0 0 16px rgba(0, 168, 255, 0.6);
+}
+
+/* High-prominence image + gradient background overlay */
+.focus-card-bg-layer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 85%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.68;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  background-size: cover;
+  background-position: center right;
+  mix-blend-mode: screen;
+  -webkit-mask-image: linear-gradient(to left, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.75) 55%, rgba(0, 0, 0, 0) 100%);
+  mask-image: linear-gradient(to left, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.75) 55%, rgba(0, 0, 0, 0) 100%);
+  filter: contrast(1.15) brightness(1.1) saturate(1.2);
+}
+
+.focus-card:hover .focus-card-bg-layer {
+  opacity: 0.92;
+  transform: scale(1.05);
+  filter: contrast(1.2) brightness(1.2) saturate(1.3);
+}
+
+.focus-card-bg-editing {
+  background-image: linear-gradient(to left, rgba(10, 18, 30, 0.2), rgba(10, 18, 30, 0.95)),
+                    url('assets/bg_editing.jpg');
+}
+
+.focus-card-bg-motion {
+  background-image: linear-gradient(to left, rgba(10, 18, 30, 0.15), rgba(10, 18, 30, 0.95)),
+                    url('assets/bg_motion.jpg');
+}
+
+.focus-card-bg-color {
+  background-image: linear-gradient(to left, rgba(10, 18, 30, 0.2), rgba(10, 18, 30, 0.95)),
+                    url('assets/bg_color.png');
+}
+
+.focus-card-bg-sound {
+  background-size: cover;
+  background-position: center right;
+  background-image: linear-gradient(to left, rgba(10, 18, 30, 0.1), rgba(10, 18, 30, 0.95)),
+                    url('assets/bg_sound.png');
 }
 
 /* STAT CARDS */

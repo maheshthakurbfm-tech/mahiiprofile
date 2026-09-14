@@ -61,7 +61,7 @@ const soundAssets = {
 
 // Preload & setup volume
 soundAssets.repulsor.volume = 0.75;
-soundAssets.magnetic.volume = 0.45;
+soundAssets.magnetic.volume = 0.18;
 soundAssets.click4.volume = 0.65;
 
 /**
@@ -96,7 +96,7 @@ function playClickSFX() {
   if (!audioEnabled) return;
   try {
     const snd = soundAssets.magnetic.cloneNode();
-    snd.volume = 0.45;
+    snd.volume = 0.18;
     snd.play().catch(() => {});
   } catch (_) {}
 }
@@ -105,7 +105,7 @@ function playHoverSFX() {
   if (!audioEnabled) return;
   try {
     const snd = soundAssets.magnetic.cloneNode();
-    snd.volume = 0.75;
+    snd.volume = 0.22;
     snd.play().catch(() => {});
   } catch (_) {}
 }
@@ -1163,6 +1163,7 @@ function initHeroAnimations() {
 
     // Section reveals are independent from the hero composition.
     gsap.utils.toArray('.reveal-up').forEach((el) => {
+      if (el.classList.contains('about-bio')) return; // Handled separately below for sentence-by-sentence reveal
       gsap.fromTo(el,
         { y: 48, opacity: 0 },
         {
@@ -1175,6 +1176,54 @@ function initHeroAnimations() {
         }
       );
     });
+
+    // CINEMATIC BLUR + SCALE REVEAL WITH RANDOM SENTENCE TIMING FOR ABOUT BIO
+    const aboutBio = document.querySelector('.about-bio');
+    if (aboutBio) {
+      aboutBio.classList.remove('reveal-up'); // Prevent conflict with general reveal-up loop
+      gsap.set(aboutBio, { opacity: 1, y: 0 }); // Ensure parent container is visible
+
+      // Split paragraph into distinct sentences/clauses while preserving HTML tags
+      const sentences = [
+        `I'm <strong>Mahesh Thakur</strong>, a Video Editor from India with 2.5+ years of experience.`,
+        `I work across video editing, motion graphics, color grading, and sound, with a focus on clean work, strong pacing, and attention to detail.`,
+        `I'm looking for a team where I can put my skills to their best use, keep learning, take on new challenges, and contribute to the growth of the work and the company along the way.`
+      ];
+
+      aboutBio.innerHTML = sentences.map(s => `<span class="bio-sentence" style="display:inline-block; will-change:transform,filter,opacity; margin-right: 0.35em;">${s}</span>`).join(' ');
+
+      const sentenceElements = aboutBio.querySelectorAll('.bio-sentence');
+
+      // Random delay timing array for each sentence
+      const sentenceDelays = [0.00, 0.32, 0.16];
+
+      sentenceElements.forEach((el, index) => {
+        const delay = sentenceDelays[index % sentenceDelays.length];
+
+        gsap.fromTo(el,
+          {
+            opacity: 0,
+            filter: 'blur(12px)',
+            scale: 0.92,
+            y: 16
+          },
+          {
+            opacity: 1,
+            filter: 'blur(0px)',
+            scale: 1.0,
+            y: 0,
+            duration: 0.85,
+            delay: delay,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: aboutBio,
+              start: 'top 85%',
+              toggleActions: 'play none none reverse'
+            }
+          }
+        );
+      });
+    }
 
     document.querySelectorAll('.skill-bar-fill').forEach(bar => {
       const level = bar.getAttribute('data-level');
