@@ -138,10 +138,10 @@ a {
 .resume-page {
   position: relative;
   z-index: 1;
-  width: min(794px, calc(100% - 40px));
+  width: min(1080px, calc(100% - 48px));
   min-height: 1123px;
   margin: 0 auto;
-  padding: 58px 62px 76px;
+  padding: 48px 52px 64px;
   background: #ffffff;
   color: #1f2937;
   box-shadow: 0 4px 22px rgba(15, 23, 42, 0.16);
@@ -291,8 +291,8 @@ h1 {
 
 .resume-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 190px;
-  gap: 28px;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 36px;
   align-items: start;
   margin-top: 28px;
 }
