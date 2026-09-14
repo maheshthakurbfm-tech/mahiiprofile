@@ -285,11 +285,23 @@
 
       <!-- 3D Cover-Flow Showreel Carousel -->
       <div class="showreel-carousel-wrapper reveal-up" id="showreel-carousel-wrapper">
+        <button class="showreel-arrow showreel-arrow-left" onclick="prevShowreel()" aria-label="Previous Reel">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+
         <div class="showreel-carousel-viewport" id="showreel-carousel-viewport">
           <div class="showreel-carousel-track" id="showreel-carousel-track">
             <!-- Dynamically rendered by script.js -->
           </div>
         </div>
+
+        <button class="showreel-arrow showreel-arrow-right" onclick="nextShowreel()" aria-label="Next Reel">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
 
         <!-- Carousel Status Indicator Dots -->
         <div class="showreel-carousel-controls">
@@ -383,9 +395,7 @@
           <!-- VS Code -->
           <div class="ai-tool-item glass-card">
             <div class="ai-tool-icon-wrap">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" class="ai-tool-svg">
-                <path d="M17.5 2.5L7.2 10.3 3.5 7.5 1.5 8.6l3.8 3.4-3.8 3.4 2 1.1 3.7-2.8 10.3 7.8 5-2.5V5l-5-2.5zm0 4.2v10.6l-6.8-5.3 6.8-5.3z" fill="#007ACC"/>
-              </svg>
+              <img src="assets/icons/vscode.png" alt="VS Code Logo" />
             </div>
             <div class="ai-tool-info">
               <span class="ai-tool-name">VS Code</span>
@@ -396,10 +406,7 @@
           <!-- Claude -->
           <div class="ai-tool-item glass-card">
             <div class="ai-tool-icon-wrap">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" class="ai-tool-svg">
-                <path d="M16.5 4.5l-3.8 7.2-2.2-4.2-4 9.5h3.2l1.6-4 2 3.8 4.2-8.3 3 8.5h3l-4.5-12.5h-2.5z" fill="#D97706"/>
-                <circle cx="12" cy="12" r="9" stroke="#D97706" stroke-width="1.5" stroke-dasharray="2 2" fill="none"/>
-              </svg>
+              <img src="assets/icons/claude.png" alt="Claude AI Logo" />
             </div>
             <div class="ai-tool-info">
               <span class="ai-tool-name">Claude</span>
@@ -410,10 +417,7 @@
           <!-- ChatGPT -->
           <div class="ai-tool-item glass-card">
             <div class="ai-tool-icon-wrap">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" class="ai-tool-svg">
-                <path d="M20.5 9.7a4.9 4.9 0 0 0-.4-3.8 5 5 0 0 0-4.6-2.5 5 5 0 0 0-1.8.3 5 5 0 0 0-3.6-1.7 5 5 0 0 0-4.8 3.5 5 5 0 0 0-3 2.2 5 5 0 0 0 .6 5.4 4.9 4.9 0 0 0 .4 3.8 5 5 0 0 0 4.6 2.5 5 5 0 0 0 1.8-.3 5 5 0 0 0 3.6 1.7 5 5 0 0 0 4.8-3.5 5 5 0 0 0 3-2.2 5 5 0 0 0-.6-5.4z" stroke="#10A37F" stroke-width="1.6" stroke-linejoin="round" fill="rgba(16,163,127,0.1)"/>
-                <path d="M12 8v8M8 12h8" stroke="#10A37F" stroke-width="1.6" stroke-linecap="round"/>
-              </svg>
+              <img src="assets/icons/chatgpt.png" alt="ChatGPT Logo" />
             </div>
             <div class="ai-tool-info">
               <span class="ai-tool-name">ChatGPT</span>
@@ -424,11 +428,7 @@
           <!-- Antigravity -->
           <div class="ai-tool-item glass-card">
             <div class="ai-tool-icon-wrap">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" class="ai-tool-svg">
-                <circle cx="12" cy="12" r="9" stroke="var(--electric-blue)" stroke-width="1.5"/>
-                <path d="M12 6v12M8 10l4-4 4 4" stroke="var(--electric-blue)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                <circle cx="12" cy="17" r="1.5" fill="var(--electric-blue)"/>
-              </svg>
+              <img src="assets/icons/antigravity.png" alt="Antigravity Logo" />
             </div>
             <div class="ai-tool-info">
               <span class="ai-tool-name">Antigravity</span>
@@ -439,10 +439,10 @@
           <!-- Google AI Studio -->
           <div class="ai-tool-item glass-card">
             <div class="ai-tool-icon-wrap">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" class="ai-tool-svg">
-                <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#ai-studio-grad)" stroke="#4285F4" stroke-width="1.2"/>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#ai-studio-grad-real)" stroke="#4285F4" stroke-width="1"/>
                 <defs>
-                  <linearGradient id="ai-studio-grad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                  <linearGradient id="ai-studio-grad-real" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
                     <stop stop-color="#4285F4"/>
                     <stop offset="0.5" stop-color="#9B72CB"/>
                     <stop offset="1" stop-color="#D96570"/>

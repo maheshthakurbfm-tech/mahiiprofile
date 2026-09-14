@@ -506,13 +506,16 @@ function renderShowreelReels() {
   initShowreelControls();
 }
 
+let showreelPointerArmed = true;
+let isShowreelTransitionLocked = false;
+let showreelTransitionTimeout = null;
+
 function initShowreelControls() {
   const wrapper = document.getElementById('showreel-carousel-wrapper');
   const viewport = document.getElementById('showreel-carousel-viewport');
   const container = wrapper || viewport;
   if (container && !container._hasPointerZoneTracker) {
     container._hasPointerZoneTracker = true;
-    let currentZone = 'center'; // 'left' | 'center' | 'right'
 
     container.addEventListener('mousemove', (e) => {
       // Only active on desktop viewports (skip on mobile touch devices)
@@ -524,31 +527,35 @@ function initShowreelControls() {
       const containerLeft = rect.left || 0;
       const relativeX = (e.clientX - containerLeft) / containerWidth;
 
-      // 36% to 64% is center dead-zone around active card to prevent jitter
+      // Center neutral / dead-zone: 36% to 64%
+      if (relativeX >= 0.36 && relativeX <= 0.64) {
+        // Re-arm pointer navigation whenever user returns pointer to neutral center
+        showreelPointerArmed = true;
+        return;
+      }
+
+      // If transition is currently running or pointer has not been re-armed in center, ignore
+      if (isShowreelTransitionLocked || !showreelPointerArmed) return;
+
       if (relativeX < 0.36) {
-        if (currentZone !== 'left') {
-          currentZone = 'left';
-          const leftIndex = (showreelActiveIndex - 1 + showreelReelsData.length) % showreelReelsData.length;
-          if (leftIndex !== showreelActiveIndex) {
-            goToShowreelIndex(leftIndex);
-          }
+        // LEFT ZONE -> ONE card backward
+        showreelPointerArmed = false; // disarm until pointer returns to center or transition finishes
+        const leftIndex = (showreelActiveIndex - 1 + showreelReelsData.length) % showreelReelsData.length;
+        if (leftIndex !== showreelActiveIndex) {
+          goToShowreelIndex(leftIndex);
         }
       } else if (relativeX > 0.64) {
-        if (currentZone !== 'right') {
-          currentZone = 'right';
-          const rightIndex = (showreelActiveIndex + 1) % showreelReelsData.length;
-          if (rightIndex !== showreelActiveIndex) {
-            goToShowreelIndex(rightIndex);
-          }
+        // RIGHT ZONE -> ONE card forward
+        showreelPointerArmed = false; // disarm until pointer returns to center or transition finishes
+        const rightIndex = (showreelActiveIndex + 1) % showreelReelsData.length;
+        if (rightIndex !== showreelActiveIndex) {
+          goToShowreelIndex(rightIndex);
         }
-      } else {
-        // Pointer is in center dead-zone
-        currentZone = 'center';
       }
     });
 
     container.addEventListener('mouseleave', () => {
-      currentZone = 'center';
+      showreelPointerArmed = true;
     });
   }
 
@@ -566,10 +573,8 @@ function initShowreelControls() {
       touchEndX = e.changedTouches[0].screenX;
       if (touchStartX - touchEndX > 45) {
         nextShowreel();
-        playClickSFX();
       } else if (touchEndX - touchStartX > 45) {
         prevShowreel();
-        playClickSFX();
       }
     }, { passive: true });
   }
@@ -584,10 +589,8 @@ function initShowreelControls() {
       if (!isHovered) return;
       if (e.key === 'ArrowLeft') {
         prevShowreel();
-        playClickSFX();
       } else if (e.key === 'ArrowRight') {
         nextShowreel();
-        playClickSFX();
       }
     });
   }
@@ -602,22 +605,32 @@ function initShowreelControls() {
 }
 
 function nextShowreel() {
-  if (showreelReelsData.length === 0) return;
-  showreelActiveIndex = (showreelActiveIndex + 1) % showreelReelsData.length;
-  updateShowreel3DPositions();
+  if (showreelReelsData.length === 0 || isShowreelTransitionLocked) return;
+  const nextIdx = (showreelActiveIndex + 1) % showreelReelsData.length;
+  goToShowreelIndex(nextIdx);
 }
 window.nextShowreel = nextShowreel;
 
 function prevShowreel() {
-  if (showreelReelsData.length === 0) return;
-  showreelActiveIndex = (showreelActiveIndex - 1 + showreelReelsData.length) % showreelReelsData.length;
-  updateShowreel3DPositions();
+  if (showreelReelsData.length === 0 || isShowreelTransitionLocked) return;
+  const prevIdx = (showreelActiveIndex - 1 + showreelReelsData.length) % showreelReelsData.length;
+  goToShowreelIndex(prevIdx);
 }
 window.prevShowreel = prevShowreel;
 
 function goToShowreelIndex(index) {
   if (index < 0 || index >= showreelReelsData.length) return;
+  if (isShowreelTransitionLocked && index !== showreelActiveIndex) return;
+
   showreelActiveIndex = index;
+
+  // Lock transitions during 3D CSS transform transition (380ms)
+  isShowreelTransitionLocked = true;
+  if (showreelTransitionTimeout) clearTimeout(showreelTransitionTimeout);
+  showreelTransitionTimeout = setTimeout(() => {
+    isShowreelTransitionLocked = false;
+  }, 380);
+
   updateShowreel3DPositions();
   playClickSFX();
 }

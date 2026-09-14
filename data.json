@@ -102,32 +102,102 @@
     {
       "id": "reel-1",
       "title": "Commercial & Brand Short-Form",
-      "description": "High-retention vertical ad edit with kinetic pacing, beat-synced motion, and punchy hooks.",
       "category": "Commercial Ads",
-      "year": "2025",
+      "description": "High-retention vertical ad edit with kinetic pacing, beat-synced motion, and punchy hooks.",
       "embedUrl": "https://res.cloudinary.com/esvwgoxe/video/upload/v1789095426/portfolio-projects/tduu0lc9ianrp2ia6c4r.mp4",
+      "thumbnail": "",
       "videoId": "tduu0lc9ianrp2ia6c4r",
-      "thumbnail": ""
+      "year": "2025"
     },
     {
       "id": "reel-2",
       "title": "Real Estate Dynamic Showcase",
-      "description": "Clean speed-ramped transitions, color-graded footage, and modern typography overlays.",
       "category": "Real Estate",
-      "year": "2025",
+      "description": "Clean speed-ramped transitions, color-graded footage, and modern typography overlays.",
       "embedUrl": "https://res.cloudinary.com/esvwgoxe/video/upload/v1789095943/real_estate_video_raw_vs_edited.mp4",
+      "thumbnail": "",
       "videoId": "real_estate_video_raw_vs_edited",
-      "thumbnail": ""
+      "year": "2025"
     },
     {
       "id": "reel-3",
       "title": "Kinetic Typography & Motion Reel",
-      "description": "Bold title animations, custom After Effects MOGRTs, and retention-focused visual pacing.",
       "category": "Motion Graphics",
-      "year": "2025",
+      "description": "Bold title animations, custom After Effects MOGRTs, and retention-focused visual pacing.",
       "embedUrl": "",
+      "thumbnail": "",
       "videoId": "",
-      "thumbnail": ""
+      "year": "2025"
+    },
+    {
+      "id": "reel-1789389110255",
+      "title": "Vertical Reel 04",
+      "category": "Commercial",
+      "description": "",
+      "embedUrl": "",
+      "thumbnail": "",
+      "videoId": "",
+      "year": "2025"
+    },
+    {
+      "id": "reel-1789389111609",
+      "title": "Vertical Reel 05",
+      "category": "Commercial",
+      "description": "",
+      "embedUrl": "",
+      "thumbnail": "",
+      "videoId": "",
+      "year": "2025"
+    },
+    {
+      "id": "reel-1789389112677",
+      "title": "Vertical Reel 06",
+      "category": "Commercial",
+      "description": "",
+      "embedUrl": "",
+      "thumbnail": "",
+      "videoId": "",
+      "year": "2025"
+    },
+    {
+      "id": "reel-1789389118159",
+      "title": "Vertical Reel 07",
+      "category": "Commercial",
+      "description": "",
+      "embedUrl": "",
+      "thumbnail": "",
+      "videoId": "",
+      "year": "2025"
+    },
+    {
+      "id": "reel-1789389119101",
+      "title": "Vertical Reel 08",
+      "category": "Commercial",
+      "description": "",
+      "embedUrl": "",
+      "thumbnail": "",
+      "videoId": "",
+      "year": "2025"
+    },
+    {
+      "id": "reel-1789389124344",
+      "title": "Vertical Reel 09",
+      "category": "Commercial",
+      "description": "",
+      "embedUrl": "",
+      "thumbnail": "",
+      "videoId": "",
+      "year": "2025"
+    },
+    {
+      "id": "reel-1789389124524",
+      "title": "Vertical Reel 010",
+      "category": "Commercial",
+      "description": "",
+      "embedUrl": "",
+      "thumbnail": "",
+      "videoId": "",
+      "year": "2025"
     }
   ],
   "contact": {
@@ -256,5 +326,5 @@
       "uploadDate": "Published"
     }
   ],
-  "updatedAt": "2026-09-14T09:40:37.570Z"
+  "updatedAt": "2026-09-14T12:32:12.631Z"
 }
