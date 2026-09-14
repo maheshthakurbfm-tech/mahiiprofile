@@ -120,6 +120,12 @@ const RESUME_DEFAULTS = {
     "Visual Design",
     "Creative Technology",
     "AI-assisted Creative Workflows"
+  ],
+  languages: [
+    { name: "Hindi", level: "Fluent", dots: 5 },
+    { name: "English", level: "Fluent", dots: 4 },
+    { name: "Chhattisgarhi", level: "Native", dots: 5 },
+    { name: "Odia", level: "Basic", dots: 1 }
   ]
 };
 
@@ -167,7 +173,8 @@ function mergeResumeData(data) {
     toolGroups: firstUsefulArray(source.toolGroups, RESUME_DEFAULTS.toolGroups),
     education: firstUsefulArray(source.education, RESUME_DEFAULTS.education),
     achievements: firstUsefulArray(source.achievements, RESUME_DEFAULTS.achievements),
-    interests: firstUsefulArray(source.interests, RESUME_DEFAULTS.interests)
+    interests: firstUsefulArray(source.interests, RESUME_DEFAULTS.interests),
+    languages: firstUsefulArray(source.languages, RESUME_DEFAULTS.languages)
   };
 }
 
@@ -371,6 +378,30 @@ function renderList(id, items) {
   target.innerHTML = items.map((item) => `<li>${escHtml(item)}</li>`).join("");
 }
 
+function renderLanguages(resume) {
+  const target = document.getElementById("languageList");
+  if (!target) return;
+
+  const languages = resume.languages || RESUME_DEFAULTS.languages;
+  target.innerHTML = languages.map((lang) => {
+    const totalDots = 5;
+    const filled = Math.min(Math.max(lang.dots || (lang.level === "Native" ? 5 : lang.level === "Fluent" ? 4 : 2), 1), 5);
+    const dotsHtml = Array.from({ length: totalDots }, (_, i) => 
+      `<span class="lang-dot ${i < filled ? 'is-filled' : ''}"></span>`
+    ).join("");
+
+    return `
+      <div class="language-item">
+        <div class="language-info">
+          <span class="language-name">${escHtml(lang.name)}</span>
+          <span class="language-level">${escHtml(lang.level)}</span>
+        </div>
+        <div class="language-dots" aria-hidden="true">${dotsHtml}</div>
+      </div>
+    `;
+  }).join("");
+}
+
 function renderChips(id, items) {
   const target = document.getElementById(id);
   if (!target) return;
@@ -424,6 +455,7 @@ function renderResume(data) {
   renderProjects(resume, data);
   renderToolGroups(resume);
   renderEducation(resume);
+  renderLanguages(resume);
   renderList("achievementList", resume.achievements);
   renderChips("interestList", resume.interests);
 }

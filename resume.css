@@ -479,6 +479,53 @@ h1 {
   color: #4b5563;
 }
 
+/* ── LANGUAGES DOT INDICATOR STYLES ── */
+.language-list {
+  display: grid;
+  gap: 12px;
+}
+
+.language-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.language-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.language-name {
+  color: #1f2937;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.language-level {
+  color: #6b7280;
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.language-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lang-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e2e8f0;
+}
+
+.lang-dot.is-filled {
+  background: #2563eb;
+}
+
 .compact-list {
   padding-left: 20px;
 }

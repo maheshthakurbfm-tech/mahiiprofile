@@ -244,7 +244,7 @@
         ]
       },
       {
-        "company": "Woodfield Natura",
+        "company": "Woodfield",
         "role": "Stencil Designer and Video Editor",
         "employmentType": "Full-time",
         "period": "2025 - 2026",
@@ -360,16 +360,24 @@
         ]
       },
       {
-        "title": "Design",
+        "title": "Design & Vector",
         "items": [
           "Adobe Photoshop",
           "Adobe Illustrator",
+          "CorelDRAW",
           "Canva",
           "Inkscape"
         ]
       },
       {
-        "title": "Creative / Development",
+        "title": "Operating Systems",
+        "items": [
+          "macOS",
+          "Windows"
+        ]
+      },
+      {
+        "title": "Creative / Tech",
         "items": [
           "VS Code",
           "GitHub",
@@ -378,16 +386,13 @@
           "Antigravity",
           "Google AI Studio"
         ]
-      },
-      {
-        "title": "Web / Digital",
-        "items": [
-          "HTML",
-          "CSS",
-          "JavaScript",
-          "Cloudinary"
-        ]
       }
+    ],
+    "languages": [
+      { "name": "Hindi", "level": "Fluent", "dots": 5 },
+      { "name": "English", "level": "Fluent", "dots": 4 },
+      { "name": "Chhattisgarhi", "level": "Native", "dots": 5 },
+      { "name": "Odia", "level": "Basic", "dots": 1 }
     ],
     "education": [
       {
@@ -405,13 +410,13 @@
     ],
     "interests": [
       "Video Editing",
-      "Motion Graphics",
-      "Color Grading",
-      "Sound Design",
-      "Cinematic Storytelling",
-      "Visual Design",
-      "Creative Technology",
-      "AI-assisted Creative Workflows"
+      "Photography",
+      "Sketching & Art",
+      "Poster & Painting",
+      "UI/UX Design",
+      "Singing & Music",
+      "Vector & Line Art",
+      "Exploring & Travel"
     ]
   },
   "software": [
