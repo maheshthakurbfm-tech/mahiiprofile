@@ -1,4 +1,19 @@
 {
-  "cleanUrls": true,
-  "trailingSlash": false
+  "version": 2,
+  "builds": [
+    { "src": "index.html", "use": "@vercel/static" },
+    { "src": "style.css", "use": "@vercel/static" },
+    { "src": "script.js", "use": "@vercel/static" },
+    { "src": "admin.html", "use": "@vercel/static" },
+    { "src": "admin.js", "use": "@vercel/static" },
+    { "src": "admin-dashboard.css", "use": "@vercel/static" },
+    { "src": "mediaStorageService.js", "use": "@vercel/static" },
+    { "src": "data.json", "use": "@vercel/static" },
+    { "src": "api/*.js", "use": "@vercel/node" },
+    { "src": "assets/**", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1.js" },
+    { "src": "/(.*)", "dest": "/$1" }
+  ]
 }

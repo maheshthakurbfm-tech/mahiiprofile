@@ -60,7 +60,7 @@ const soundAssets = {
 };
 
 // Preload & setup volume
-soundAssets.repulsor.volume = 0.35;
+soundAssets.repulsor.volume = 0.50;
 soundAssets.magnetic.volume = 0.45;
 soundAssets.click4.volume = 0.50;
 
@@ -84,6 +84,7 @@ function playRepulsorLandingSFX() {
   if (!audioEnabled) return;
   try {
     soundAssets.repulsor.currentTime = 0;
+    soundAssets.repulsor.volume = 0.50;
     soundAssets.repulsor.play().catch(() => {});
   } catch (_) {}
 }
@@ -104,7 +105,7 @@ function playHoverSFX() {
   if (!audioEnabled) return;
   try {
     const snd = soundAssets.magnetic.cloneNode();
-    snd.volume = 0.20;
+    snd.volume = 0.50;
     snd.play().catch(() => {});
   } catch (_) {}
 }
@@ -137,7 +138,7 @@ function playWhooshSFX(type = 'in', velocity = 1.0) {
     subOsc.frequency.exponentialRampToValueAtTime(subEnd, now + duration);
     
     subGain.gain.setValueAtTime(0.0001, now);
-    subGain.gain.linearRampToValueAtTime(0.065, now + (duration * 0.35));
+    subGain.gain.linearRampToValueAtTime(0.16, now + (duration * 0.35));
     subGain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
     
     subOsc.connect(subGain);
@@ -168,7 +169,7 @@ function playWhooshSFX(type = 'in', velocity = 1.0) {
 
     const gain = ctx.createGain();
     gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.linearRampToValueAtTime(0.075, now + (duration * 0.4));
+    gain.gain.linearRampToValueAtTime(0.18, now + (duration * 0.4));
     gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
     noise.connect(filter);

@@ -2,11 +2,10 @@
   "name": "mahesh-thakur-portfolio",
   "version": "1.0.0",
   "description": "Mahesh Thakur - Video Editor & Motion Graphics Portfolio",
-  "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js",
-    "dev:portfolio": "node server.js"
+    "start": "node server.local.js",
+    "dev": "node server.local.js",
+    "dev:portfolio": "node server.local.js"
   },
   "keywords": [
     "portfolio",
