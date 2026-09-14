@@ -391,9 +391,11 @@
     ],
     "education": [
       {
-        "institution": "Hemchand Yadav Vishwavidyalaya, Durg",
-        "period": "2021-2023",
-        "detail": "72%"
+        "degree": "B.Sc.",
+        "college": "Govt. V.Y.T. PG Autonomous Science College, Durg",
+        "university": "Hemchand Yadav Vishwavidyalaya, Durg",
+        "period": "2021 - 2023",
+        "detail": "B.Sc. — 72%"
       }
     ],
     "achievements": [

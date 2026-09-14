@@ -99,9 +99,11 @@ const RESUME_DEFAULTS = {
   ],
   education: [
     {
-      institution: "Hemchand Yadav Vishwavidyalaya, Durg",
-      period: "2021-2023",
-      detail: "72%"
+      degree: "B.Sc.",
+      college: "Govt. V.Y.T. PG Autonomous Science College, Durg",
+      university: "Hemchand Yadav Vishwavidyalaya, Durg",
+      period: "2021 - 2023",
+      detail: "B.Sc. — 72%"
     }
   ],
   achievements: [
@@ -342,16 +344,25 @@ function renderEducation(resume) {
   const target = document.getElementById("educationList");
   if (!target) return;
 
-  target.innerHTML = resume.education.map((item) => `
-    <article class="education-item">
-      <h3>${escHtml(item.institution)}</h3>
-      <div class="education-meta">
-        ${item.period ? `<span>${escHtml(item.period)}</span>` : ""}
-        ${item.detail ? `<span>${escHtml(item.detail)}</span>` : ""}
-      </div>
-      ${item.note ? `<p>${escHtml(item.note)}</p>` : ""}
-    </article>
-  `).join("");
+  target.innerHTML = resume.education.map((item) => {
+    const title = item.degree 
+      ? `${item.degree}${item.college ? ` — ${item.college}` : ''}`
+      : (item.college || item.institution || item.university || 'Education');
+    
+    const subTitle = (item.degree && item.university) ? item.university : (item.institution !== item.college ? item.institution : '');
+
+    return `
+      <article class="education-item">
+        <h3>${escHtml(title)}</h3>
+        ${subTitle ? `<p class="education-sub">${escHtml(subTitle)}</p>` : ""}
+        <div class="education-meta">
+          ${item.period ? `<span>${escHtml(item.period)}</span>` : ""}
+          ${item.detail ? `<span>${escHtml(item.detail)}</span>` : ""}
+        </div>
+        ${item.note ? `<p>${escHtml(item.note)}</p>` : ""}
+      </article>
+    `;
+  }).join("");
 }
 
 function renderList(id, items) {
