@@ -474,9 +474,9 @@ function renderShowreelReels() {
 
   showreelReelsData = rawReels;
 
-  // Render cards
+  // Render cards with mouseenter hover trigger & click/tap fallback
   track.innerHTML = showreelReelsData.map((r, idx) => `
-    <div class="reel-card" data-index="${idx}" data-reel-id="${escAttr(r.id || `reel-${idx + 1}`)}" onclick="handleReelCardClick(${idx})">
+    <div class="reel-card" data-index="${idx}" data-reel-id="${escAttr(r.id || `reel-${idx + 1}`)}" onmouseenter="handleReelCardHover(${idx})" onclick="handleReelCardClick(${idx})">
       <div class="reel-video-viewport">
         <span class="reel-slot-badge">REEL 0${idx + 1}</span>
         ${r.category ? `<span class="reel-category-pill">${escHtml(r.category)}</span>` : ''}
@@ -496,7 +496,7 @@ function renderShowreelReels() {
     `).join('');
   }
 
-  // Setup navigation buttons once
+  // Setup navigation & interaction listeners
   initShowreelControls();
 
   // Position cards in 3D space
@@ -504,26 +504,7 @@ function renderShowreelReels() {
 }
 
 function initShowreelControls() {
-  const prevBtn = document.getElementById('reel-prev-btn');
-  const nextBtn = document.getElementById('reel-next-btn');
-
-  if (prevBtn && !prevBtn._hasListener) {
-    prevBtn._hasListener = true;
-    prevBtn.addEventListener('click', () => {
-      prevShowreel();
-      playClickSFX();
-    });
-  }
-
-  if (nextBtn && !nextBtn._hasListener) {
-    nextBtn._hasListener = true;
-    nextBtn.addEventListener('click', () => {
-      nextShowreel();
-      playClickSFX();
-    });
-  }
-
-  // Touch / Drag swipe support
+  // Touch / Drag swipe support for mobile/tablet fallback
   const viewport = document.getElementById('showreel-carousel-viewport');
   if (viewport && !viewport._hasTouch) {
     viewport._hasTouch = true;
@@ -573,6 +554,22 @@ function initShowreelControls() {
     });
   }
 }
+
+let hoverDebounceTimer = null;
+window.handleReelCardHover = function(index) {
+  // Only trigger hover reveal on non-touch desktop devices
+  if (window.innerWidth <= 768) return;
+  if (index === showreelActiveIndex) return;
+
+  clearTimeout(hoverDebounceTimer);
+  hoverDebounceTimer = setTimeout(() => {
+    if (index !== showreelActiveIndex) {
+      showreelActiveIndex = index;
+      updateShowreel3DPositions();
+      playCardOpenSFX();
+    }
+  }, 90);
+};
 
 window.nextShowreel = function() {
   if (showreelReelsData.length === 0) return;
