@@ -1059,20 +1059,20 @@ function initHeroAnimations() {
     tl.fromTo(cineBlurTexts,
       {
         opacity: 0,
-        filter: 'blur(14px)',
-        scale: 0.88,
-        y: 18
+        filter: 'blur(20px)',
+        scale: 0.82,
+        y: 28
       },
       {
         opacity: 1,
         filter: 'blur(0px)',
         scale: 1.0,
         y: 0,
-        duration: 0.85,
-        stagger: 0.16,
+        duration: 1.15,
+        stagger: 0.22,
         ease: 'power3.out'
       },
-      0.1
+      0.2
     );
   }
 
