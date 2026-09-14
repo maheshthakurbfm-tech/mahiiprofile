@@ -985,6 +985,10 @@ section {
   cursor: pointer;
 }
 
+.reel-card.is-side * {
+  pointer-events: none;
+}
+
 .reel-card.is-side:hover {
   border-color: rgba(0, 168, 255, 0.4);
   filter: brightness(0.9) !important;

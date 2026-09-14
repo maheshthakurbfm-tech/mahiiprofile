@@ -501,6 +501,39 @@ function renderShowreelReels() {
 
   // Position cards in 3D space
   updateShowreel3DPositions();
+
+  // Attach robust direct pointerenter listeners on every card
+  bindShowreelCardHoverEvents();
+}
+
+let isShowreelTransitioning = false;
+let showreelTransitionTimeout = null;
+
+function bindShowreelCardHoverEvents() {
+  const cards = document.querySelectorAll('.showreel-carousel-track .reel-card');
+  cards.forEach(card => {
+    const idx = parseInt(card.getAttribute('data-index'), 10);
+    
+    // Use pointerenter directly on the card
+    card.onpointerenter = (e) => {
+      // Ignore on touch devices
+      if (e.pointerType === 'touch' || window.innerWidth <= 768) return;
+      if (idx === showreelActiveIndex || isShowreelTransitioning) return;
+
+      // Lock transition during animation to prevent jitter / infinite loop
+      isShowreelTransitioning = true;
+      clearTimeout(showreelTransitionTimeout);
+
+      showreelActiveIndex = idx;
+      updateShowreel3DPositions();
+      playCardOpenSFX();
+
+      // Release lock after transition completes (matching 0.65s CSS transition)
+      showreelTransitionTimeout = setTimeout(() => {
+        isShowreelTransitioning = false;
+      }, 550);
+    };
+  });
 }
 
 function initShowreelControls() {
@@ -555,20 +588,20 @@ function initShowreelControls() {
   }
 }
 
-let hoverDebounceTimer = null;
 window.handleReelCardHover = function(index) {
-  // Only trigger hover reveal on non-touch desktop devices
   if (window.innerWidth <= 768) return;
-  if (index === showreelActiveIndex) return;
+  if (index === showreelActiveIndex || isShowreelTransitioning) return;
 
-  clearTimeout(hoverDebounceTimer);
-  hoverDebounceTimer = setTimeout(() => {
-    if (index !== showreelActiveIndex) {
-      showreelActiveIndex = index;
-      updateShowreel3DPositions();
-      playCardOpenSFX();
-    }
-  }, 90);
+  isShowreelTransitioning = true;
+  clearTimeout(showreelTransitionTimeout);
+
+  showreelActiveIndex = index;
+  updateShowreel3DPositions();
+  playCardOpenSFX();
+
+  showreelTransitionTimeout = setTimeout(() => {
+    isShowreelTransitioning = false;
+  }, 550);
 };
 
 window.nextShowreel = function() {
