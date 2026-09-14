@@ -474,9 +474,9 @@ function renderShowreelReels() {
 
   showreelReelsData = rawReels;
 
-  // Render cards with mouseenter hover trigger & click/tap fallback
+  // Render cards with direct click/tap fallback
   track.innerHTML = showreelReelsData.map((r, idx) => `
-    <div class="reel-card" data-index="${idx}" data-reel-id="${escAttr(r.id || `reel-${idx + 1}`)}" onmouseenter="handleReelCardHover(${idx})" onclick="handleReelCardClick(${idx})">
+    <div class="reel-card" data-index="${idx}" data-reel-id="${escAttr(r.id || `reel-${idx + 1}`)}" onclick="handleReelCardClick(${idx})">
       <div class="reel-video-viewport">
         <span class="reel-slot-badge">REEL 0${idx + 1}</span>
         ${r.category ? `<span class="reel-category-pill">${escHtml(r.category)}</span>` : ''}
@@ -502,37 +502,21 @@ function renderShowreelReels() {
   // Position cards in 3D space
   updateShowreel3DPositions();
 
-  // Attach robust direct pointerenter listeners on every card
+  // Attach direct mouseenter listener matching Creative Passions mechanism
   bindShowreelCardHoverEvents();
 }
-
-let isShowreelTransitioning = false;
-let showreelTransitionTimeout = null;
 
 function bindShowreelCardHoverEvents() {
   const cards = document.querySelectorAll('.showreel-carousel-track .reel-card');
   cards.forEach(card => {
     const idx = parseInt(card.getAttribute('data-index'), 10);
-    
-    // Use pointerenter directly on the card
-    card.onpointerenter = (e) => {
-      // Ignore on touch devices
-      if (e.pointerType === 'touch' || window.innerWidth <= 768) return;
-      if (idx === showreelActiveIndex || isShowreelTransitioning) return;
-
-      // Lock transition during animation to prevent jitter / infinite loop
-      isShowreelTransitioning = true;
-      clearTimeout(showreelTransitionTimeout);
-
-      showreelActiveIndex = idx;
-      updateShowreel3DPositions();
-      playCardOpenSFX();
-
-      // Release lock after transition completes (matching 0.65s CSS transition)
-      showreelTransitionTimeout = setTimeout(() => {
-        isShowreelTransitioning = false;
-      }, 550);
-    };
+    card.addEventListener('mouseenter', () => {
+      // Only on desktop non-touch screens
+      if (window.innerWidth <= 768) return;
+      if (idx !== showreelActiveIndex) {
+        goToShowreelIndex(idx);
+      }
+    });
   });
 }
 
@@ -588,40 +572,27 @@ function initShowreelControls() {
   }
 }
 
-window.handleReelCardHover = function(index) {
-  if (window.innerWidth <= 768) return;
-  if (index === showreelActiveIndex || isShowreelTransitioning) return;
-
-  isShowreelTransitioning = true;
-  clearTimeout(showreelTransitionTimeout);
-
-  showreelActiveIndex = index;
-  updateShowreel3DPositions();
-  playCardOpenSFX();
-
-  showreelTransitionTimeout = setTimeout(() => {
-    isShowreelTransitioning = false;
-  }, 550);
-};
-
-window.nextShowreel = function() {
+function nextShowreel() {
   if (showreelReelsData.length === 0) return;
   showreelActiveIndex = (showreelActiveIndex + 1) % showreelReelsData.length;
   updateShowreel3DPositions();
-};
+}
+window.nextShowreel = nextShowreel;
 
-window.prevShowreel = function() {
+function prevShowreel() {
   if (showreelReelsData.length === 0) return;
   showreelActiveIndex = (showreelActiveIndex - 1 + showreelReelsData.length) % showreelReelsData.length;
   updateShowreel3DPositions();
-};
+}
+window.prevShowreel = prevShowreel;
 
-window.goToShowreelIndex = function(index) {
+function goToShowreelIndex(index) {
   if (index < 0 || index >= showreelReelsData.length) return;
   showreelActiveIndex = index;
   updateShowreel3DPositions();
   playClickSFX();
-};
+}
+window.goToShowreelIndex = goToShowreelIndex;
 
 window.handleReelCardClick = function(index) {
   if (index !== showreelActiveIndex) {

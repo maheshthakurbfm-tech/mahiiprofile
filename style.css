@@ -975,6 +975,10 @@ section {
   cursor: default;
 }
 
+.reel-card.is-center * {
+  pointer-events: auto;
+}
+
 .reel-card.is-center .reel-slot-badge {
   background: rgba(0, 168, 255, 0.25);
   border-color: rgba(0, 168, 255, 0.6);
