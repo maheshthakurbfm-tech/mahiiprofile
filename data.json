@@ -3,7 +3,7 @@
     "greeting": "Hi I'm",
     "firstName": "Mahesh",
     "lastName": "Thakur",
-    "bio": "Retention-focused video edits, After Effects MOGRTs, color grading, sound design — crafting visuals that move people. (Live CMS sync test 1789419265003)",
+    "bio": "Retention-focused video edits, After Effects MOGRTs, color grading, sound design — crafting visuals that move people.",
     "roles": [
       "VIDEO EDITOR",
       "MOTION DESIGNER",
@@ -530,5 +530,5 @@
       "uploadDate": "Published"
     }
   ],
-  "updatedAt": "2026-09-14T20:54:25.004Z"
+  "updatedAt": "2026-09-14T20:54:51.016Z"
 }
