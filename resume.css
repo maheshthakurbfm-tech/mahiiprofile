@@ -394,15 +394,16 @@ h1 {
 .education-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 6px;
-  color: var(--text-muted);
-  font-size: 0.82rem;
-  font-weight: 700;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  color: #4b5563;
+  font-size: 0.84rem;
+  font-weight: 600;
 }
 
 .timeline-meta span + span::before {
-  content: " · ";
+  content: "•";
   color: #9ca3af;
   margin: 0 4px;
 }
@@ -410,20 +411,21 @@ h1 {
 .timeline-item p,
 .project-card p,
 .education-item p {
-  margin: 12px 0 0;
-  color: #4b5563;
+  margin: 6px 0 0;
+  color: #374151;
+  line-height: 1.5;
 }
 
 .timeline-item ul,
 .compact-list {
-  margin: 12px 0 0;
+  margin: 6px 0 0;
   padding-left: 18px;
-  color: #4b5563;
+  color: #374151;
 }
 
 .timeline-item li,
 .compact-list li {
-  margin: 8px 0;
+  margin: 4px 0;
 }
 
 .project-meta {

@@ -236,35 +236,28 @@
     "experience": [
       {
         "company": "Siyaram Developers",
-        "role": "Video editor & graphic designer",
+        "role": "Video Editor & Graphic Designer",
         "employmentType": "Part-time",
-        "period": "Jan 2026 - Present · 9 mos",
+        "period": "2026 - Present (Jan 2026 - Present)",
         "points": [
-          "Created video edits and graphic design work for Siyaram Developers."
+          "Created video edits and graphic design work for real estate projects."
         ]
       },
       {
-        "company": "Woodfield",
-        "role": "Stencil Designer and Video Editor",
+        "company": "Woodfield Natura",
+        "role": "Stencil Designer & Video Editor",
         "employmentType": "Full-time",
         "period": "2025 - 2026",
-        "location": "Durg, Chhattisgarh, India · Hybrid",
-        "summary": "Designed stencil art, wooden engravings, wooden crafts, line art, LED lamps, and portraits using Adobe Illustrator and CorelDRAW.",
-        "points": [
-          "Video Editing"
-        ]
+        "location": "Durg, Chhattisgarh, India",
+        "summary": "Designed stencil art, wooden engravings, line art, LED lamps, and video edits using Adobe Illustrator and CorelDRAW."
       },
       {
         "company": "Chalchitra Studios",
         "role": "Video Editor",
         "employmentType": "Part-time",
-        "period": "Feb 2024 - Aug 2025 · 1 yr 7 mos",
+        "period": "2024 - 2025 (Feb 2024 - Aug 2025)",
         "location": "Durg, Chhattisgarh, India",
-        "summary": "Created cinematic wedding, birthday, pre-wedding, event, and other social-event videos.",
-        "points": [
-          "Video Editing",
-          "Storytelling"
-        ]
+        "summary": "Created cinematic wedding, pre-wedding, birthday, and social event videos with story-focused pacing and sound."
       }
     ],
     "selectedProjects": [
