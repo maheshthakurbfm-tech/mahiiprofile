@@ -185,6 +185,38 @@ function playScrollTick() {
   playHoverSFX();
 }
 
+/**
+ * Play subtle, comfortable high-tech tick SFX for 0 to 100+ stat counter roll
+ * Soft pitch rising frequency sweep, volume kept gentle & non-harsh (0.12)
+ */
+function playCounterTickSFX(progress = 0) {
+  if (!audioEnabled) return;
+  try {
+    const ctx = getAudioCtx();
+    if (ctx.state === 'suspended') ctx.resume();
+    const now = ctx.currentTime;
+    
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    
+    // Sine tone rising gently from 380Hz up to 920Hz as counter reaches 100
+    osc.type = 'sine';
+    const pitch = 380 + (progress * 540);
+    osc.frequency.setValueAtTime(pitch, now);
+    
+    // Very gentle volume envelope (max 0.12)
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.linearRampToValueAtTime(0.12, now + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.035);
+    
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    osc.start(now);
+    osc.stop(now + 0.04);
+  } catch (_) {}
+}
+
 /* ─── SOUND TOGGLE ─── */
 function initSoundToggle() {
   const stored = localStorage.getItem('mt-sound');
@@ -1255,6 +1287,42 @@ function initHeroAnimations() {
         start: 'top 90%',
         onEnter: () => gsap.to(bar, { width: level + '%', duration: 1.2, ease: 'power2.out' }),
         once: true
+      });
+    });
+
+    // 0 to 100+ STAT COUNTER ROLL ANIMATION WITH SOFT SUBTLE SFX
+    document.querySelectorAll('.stat-value[data-count]').forEach((statEl) => {
+      const targetVal = parseInt(statEl.getAttribute('data-count'), 10) || 100;
+      const suffix = statEl.getAttribute('data-suffix') || '+';
+      const counterObj = { val: 0 };
+
+      let lastSoundVal = -1;
+
+      ScrollTrigger.create({
+        trigger: statEl,
+        start: 'top 90%',
+        once: true,
+        onEnter: () => {
+          gsap.to(counterObj, {
+            val: targetVal,
+            duration: 1.8,
+            ease: 'power2.out',
+            onUpdate: () => {
+              const currentVal = Math.floor(counterObj.val);
+              statEl.textContent = currentVal + suffix;
+
+              // Play soft tick sound every 5-6 steps to keep volume subtle and not harsh
+              if (currentVal !== lastSoundVal && currentVal % 6 === 0) {
+                lastSoundVal = currentVal;
+                playCounterTickSFX(currentVal / targetVal);
+              }
+            },
+            onComplete: () => {
+              statEl.textContent = targetVal + suffix;
+              playClickSFX(); // Final crisp completion click
+            }
+          });
+        }
       });
     });
   }
