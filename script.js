@@ -502,27 +502,57 @@ function renderShowreelReels() {
   // Position cards in 3D space
   updateShowreel3DPositions();
 
-  // Attach direct mouseenter listener matching Creative Passions mechanism
-  bindShowreelCardHoverEvents();
-}
-
-function bindShowreelCardHoverEvents() {
-  const cards = document.querySelectorAll('.showreel-carousel-track .reel-card');
-  cards.forEach(card => {
-    const idx = parseInt(card.getAttribute('data-index'), 10);
-    card.addEventListener('mouseenter', () => {
-      // Only on desktop non-touch screens
-      if (window.innerWidth <= 768) return;
-      if (idx !== showreelActiveIndex) {
-        goToShowreelIndex(idx);
-      }
-    });
-  });
+  // Initialize carousel viewport pointer tracking and controls
+  initShowreelControls();
 }
 
 function initShowreelControls() {
-  // Touch / Drag swipe support for mobile/tablet fallback
+  const wrapper = document.getElementById('showreel-carousel-wrapper');
   const viewport = document.getElementById('showreel-carousel-viewport');
+  const container = wrapper || viewport;
+  if (container && !container._hasPointerZoneTracker) {
+    container._hasPointerZoneTracker = true;
+    let currentZone = 'center'; // 'left' | 'center' | 'right'
+
+    container.addEventListener('mousemove', (e) => {
+      // Only active on desktop viewports (skip on mobile touch devices)
+      if (window.innerWidth <= 768 && 'ontouchstart' in window) return;
+      if (!showreelReelsData || showreelReelsData.length <= 1) return;
+
+      const rect = container.getBoundingClientRect();
+      const containerWidth = rect.width || container.offsetWidth || window.innerWidth || 1000;
+      const containerLeft = rect.left || 0;
+      const relativeX = (e.clientX - containerLeft) / containerWidth;
+
+      // 36% to 64% is center dead-zone around active card to prevent jitter
+      if (relativeX < 0.36) {
+        if (currentZone !== 'left') {
+          currentZone = 'left';
+          const leftIndex = (showreelActiveIndex - 1 + showreelReelsData.length) % showreelReelsData.length;
+          if (leftIndex !== showreelActiveIndex) {
+            goToShowreelIndex(leftIndex);
+          }
+        }
+      } else if (relativeX > 0.64) {
+        if (currentZone !== 'right') {
+          currentZone = 'right';
+          const rightIndex = (showreelActiveIndex + 1) % showreelReelsData.length;
+          if (rightIndex !== showreelActiveIndex) {
+            goToShowreelIndex(rightIndex);
+          }
+        }
+      } else {
+        // Pointer is in center dead-zone
+        currentZone = 'center';
+      }
+    });
+
+    container.addEventListener('mouseleave', () => {
+      currentZone = 'center';
+    });
+  }
+
+  // Touch / Drag swipe support for mobile/tablet fallback
   if (viewport && !viewport._hasTouch) {
     viewport._hasTouch = true;
     let touchStartX = 0;
@@ -545,7 +575,6 @@ function initShowreelControls() {
   }
 
   // Keyboard arrow navigation when hovering over carousel
-  const wrapper = document.getElementById('showreel-carousel-wrapper');
   if (wrapper && !wrapper._hasKeyNav) {
     wrapper._hasKeyNav = true;
     let isHovered = false;
