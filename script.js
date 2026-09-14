@@ -433,19 +433,24 @@ function getFallbackData() {
   };
 }
 
-/* ─── RENDER 3 VERTICAL SHOWREEL REELS ─── */
-function renderShowreelReels() {
-  const container = document.getElementById('showreel-vertical-container');
-  if (!container || !siteData) return;
+/* ─── DYNAMIC 3D COVER-FLOW SHOWREEL CAROUSEL ─── */
+let showreelActiveIndex = 0;
+let showreelReelsData = [];
 
-  const reels = Array.isArray(siteData.showreelReels) && siteData.showreelReels.length > 0
-    ? siteData.showreelReels.slice(0, 3)
+function renderShowreelReels() {
+  const track = document.getElementById('showreel-carousel-track');
+  const dotsContainer = document.getElementById('reel-carousel-dots');
+  const wrapper = document.getElementById('showreel-carousel-wrapper');
+  if (!track || !siteData) return;
+
+  const rawReels = Array.isArray(siteData.showreelReels) && siteData.showreelReels.length > 0
+    ? siteData.showreelReels
     : [
         {
           id: "reel-1",
           title: "Short-Form Reel 01",
           description: "High-retention vertical edit with dynamic pacing.",
-          category: "Reel 01",
+          category: "Commercial Ads",
           embedUrl: "",
           thumbnail: ""
         },
@@ -453,7 +458,7 @@ function renderShowreelReels() {
           id: "reel-2",
           title: "Short-Form Reel 02",
           description: "Beat-synced motion graphics and clean cuts.",
-          category: "Reel 02",
+          category: "Real Estate",
           embedUrl: "",
           thumbnail: ""
         },
@@ -461,31 +466,21 @@ function renderShowreelReels() {
           id: "reel-3",
           title: "Short-Form Reel 03",
           description: "Color-graded vertical showcase and visual storytelling.",
-          category: "Reel 03",
+          category: "Motion Graphics",
           embedUrl: "",
           thumbnail: ""
         }
       ];
 
-  // Fill up to 3 slots
-  while (reels.length < 3) {
-    const num = reels.length + 1;
-    reels.push({
-      id: `reel-${num}`,
-      title: `Vertical Reel 0${num}`,
-      description: "Vertical showcase video. Add video URL via Admin Panel.",
-      category: `Reel 0${num}`,
-      embedUrl: "",
-      thumbnail: ""
-    });
-  }
+  showreelReelsData = rawReels;
 
-  container.innerHTML = reels.map((r, idx) => `
-    <div class="reel-card" data-reel-id="${escAttr(r.id || `reel-${idx + 1}`)}">
+  // Render cards
+  track.innerHTML = showreelReelsData.map((r, idx) => `
+    <div class="reel-card" data-index="${idx}" data-reel-id="${escAttr(r.id || `reel-${idx + 1}`)}" onclick="handleReelCardClick(${idx})">
       <div class="reel-video-viewport">
         <span class="reel-slot-badge">REEL 0${idx + 1}</span>
         ${r.category ? `<span class="reel-category-pill">${escHtml(r.category)}</span>` : ''}
-        ${renderReelMedia(r)}
+        ${renderReelMedia(r, idx)}
       </div>
       <div class="reel-card-body">
         <h3 class="reel-card-title">${escHtml(r.title || `Vertical Reel 0${idx + 1}`)}</h3>
@@ -493,9 +488,201 @@ function renderShowreelReels() {
       </div>
     </div>
   `).join('');
+
+  // Render navigation dots
+  if (dotsContainer) {
+    dotsContainer.innerHTML = showreelReelsData.map((_, idx) => `
+      <div class="reel-dot ${idx === showreelActiveIndex ? 'active' : ''}" onclick="goToShowreelIndex(${idx})" aria-label="Go to Reel ${idx + 1}"></div>
+    `).join('');
+  }
+
+  // Setup navigation buttons once
+  initShowreelControls();
+
+  // Position cards in 3D space
+  updateShowreel3DPositions();
 }
 
-function renderReelMedia(r) {
+function initShowreelControls() {
+  const prevBtn = document.getElementById('reel-prev-btn');
+  const nextBtn = document.getElementById('reel-next-btn');
+
+  if (prevBtn && !prevBtn._hasListener) {
+    prevBtn._hasListener = true;
+    prevBtn.addEventListener('click', () => {
+      prevShowreel();
+      playClickSFX();
+    });
+  }
+
+  if (nextBtn && !nextBtn._hasListener) {
+    nextBtn._hasListener = true;
+    nextBtn.addEventListener('click', () => {
+      nextShowreel();
+      playClickSFX();
+    });
+  }
+
+  // Touch / Drag swipe support
+  const viewport = document.getElementById('showreel-carousel-viewport');
+  if (viewport && !viewport._hasTouch) {
+    viewport._hasTouch = true;
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    viewport.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    viewport.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      if (touchStartX - touchEndX > 45) {
+        nextShowreel();
+        playClickSFX();
+      } else if (touchEndX - touchStartX > 45) {
+        prevShowreel();
+        playClickSFX();
+      }
+    }, { passive: true });
+  }
+
+  // Keyboard arrow navigation when hovering over carousel
+  const wrapper = document.getElementById('showreel-carousel-wrapper');
+  if (wrapper && !wrapper._hasKeyNav) {
+    wrapper._hasKeyNav = true;
+    let isHovered = false;
+    wrapper.addEventListener('mouseenter', () => { isHovered = true; });
+    wrapper.addEventListener('mouseleave', () => { isHovered = false; });
+    document.addEventListener('keydown', (e) => {
+      if (!isHovered) return;
+      if (e.key === 'ArrowLeft') {
+        prevShowreel();
+        playClickSFX();
+      } else if (e.key === 'ArrowRight') {
+        nextShowreel();
+        playClickSFX();
+      }
+    });
+  }
+
+  // Window resize handler for responsive 3D carousel spacing
+  if (!window._hasShowreelResize) {
+    window._hasShowreelResize = true;
+    window.addEventListener('resize', () => {
+      updateShowreel3DPositions();
+    });
+  }
+}
+
+window.nextShowreel = function() {
+  if (showreelReelsData.length === 0) return;
+  showreelActiveIndex = (showreelActiveIndex + 1) % showreelReelsData.length;
+  updateShowreel3DPositions();
+};
+
+window.prevShowreel = function() {
+  if (showreelReelsData.length === 0) return;
+  showreelActiveIndex = (showreelActiveIndex - 1 + showreelReelsData.length) % showreelReelsData.length;
+  updateShowreel3DPositions();
+};
+
+window.goToShowreelIndex = function(index) {
+  if (index < 0 || index >= showreelReelsData.length) return;
+  showreelActiveIndex = index;
+  updateShowreel3DPositions();
+  playClickSFX();
+};
+
+window.handleReelCardClick = function(index) {
+  if (index !== showreelActiveIndex) {
+    goToShowreelIndex(index);
+  }
+};
+
+function updateShowreel3DPositions() {
+  const cards = document.querySelectorAll('.showreel-carousel-track .reel-card');
+  const dots = document.querySelectorAll('.reel-carousel-dots .reel-dot');
+  const total = showreelReelsData.length;
+  if (!cards.length || total === 0) return;
+
+  // Screen adaptive card spacing step (px)
+  const isMobile = window.innerWidth <= 768;
+  const isTablet = window.innerWidth <= 1024 && !isMobile;
+  const stepX = isMobile ? 120 : (isTablet ? 170 : 210);
+
+  cards.forEach((card, idx) => {
+    // Calculate circular shortest relative distance from active index
+    let offset = idx - showreelActiveIndex;
+    if (total > 2) {
+      if (offset > total / 2) offset -= total;
+      if (offset < -total / 2) offset += total;
+    }
+
+    // Reset base classes
+    card.classList.remove('is-center', 'is-side', 'is-hidden');
+
+    if (offset === 0) {
+      // CENTER CARD: foreground, full scale, prominent
+      card.classList.add('is-center');
+      card.style.transform = `translateX(0px) translateZ(60px) scale(1)`;
+      card.style.opacity = '1';
+      card.style.filter = 'brightness(1)';
+      card.style.zIndex = '15';
+      card.style.pointerEvents = 'auto';
+
+      // Auto-play / enable video interaction if center
+      const vid = card.querySelector('video');
+      if (vid && vid.paused && vid.hasAttribute('data-autoplay-on-focus')) {
+        vid.play().catch(() => {});
+      }
+    } else if (Math.abs(offset) === 1) {
+      // IMMEDIATE SIDE CARDS: scale down, lower z-index, offset behind center
+      card.classList.add('is-side');
+      const translateX = offset * stepX;
+      const rotY = offset * -8; // subtle 3D angle
+      card.style.transform = `translateX(${translateX}px) translateZ(-40px) scale(0.82) rotateY(${rotY}deg)`;
+      card.style.opacity = '0.65';
+      card.style.filter = 'brightness(0.7)';
+      card.style.zIndex = '8';
+      card.style.pointerEvents = 'auto';
+
+      // Pause non-center video
+      const vid = card.querySelector('video');
+      if (vid && !vid.paused) vid.pause();
+    } else if (Math.abs(offset) === 2) {
+      // DEEPER SIDE CARDS: progressively smaller and more transparent
+      card.classList.add('is-side');
+      const translateX = offset * (stepX * 0.95);
+      const rotY = offset * -14;
+      card.style.transform = `translateX(${translateX}px) translateZ(-110px) scale(0.68) rotateY(${rotY}deg)`;
+      card.style.opacity = '0.35';
+      card.style.filter = 'brightness(0.5)';
+      card.style.zIndex = '4';
+      card.style.pointerEvents = 'auto';
+
+      const vid = card.querySelector('video');
+      if (vid && !vid.paused) vid.pause();
+    } else {
+      // FARTHER CARDS: fully behind / hidden from view
+      card.classList.add('is-hidden');
+      const sign = offset > 0 ? 1 : -1;
+      card.style.transform = `translateX(${sign * stepX * 2.2}px) translateZ(-200px) scale(0.5)`;
+      card.style.opacity = '0';
+      card.style.zIndex = '1';
+      card.style.pointerEvents = 'none';
+
+      const vid = card.querySelector('video');
+      if (vid && !vid.paused) vid.pause();
+    }
+  });
+
+  // Update dots active class
+  dots.forEach((dot, idx) => {
+    dot.classList.toggle('active', idx === showreelActiveIndex);
+  });
+}
+
+function renderReelMedia(r, idx) {
   if (r.embedUrl && r.embedUrl.trim()) {
     const rawUrl = r.embedUrl.trim();
     const isDirectVideo = checkIsVideoUrl(rawUrl);
