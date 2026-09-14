@@ -60,9 +60,9 @@ const soundAssets = {
 };
 
 // Preload & setup volume
-soundAssets.repulsor.volume = 0.50;
+soundAssets.repulsor.volume = 0.75;
 soundAssets.magnetic.volume = 0.45;
-soundAssets.click4.volume = 0.50;
+soundAssets.click4.volume = 0.65;
 
 /**
  * Play Click 4 SFX (assets/click_4.mp3) EXCLUSIVELY for opening Intro cards/boxes
@@ -72,7 +72,7 @@ function playCardOpenSFX() {
   if (!audioEnabled) return;
   try {
     const snd = soundAssets.click4.cloneNode();
-    snd.volume = 0.50;
+    snd.volume = 0.65;
     snd.play().catch(() => {});
   } catch (_) {}
 }
@@ -84,7 +84,7 @@ function playRepulsorLandingSFX() {
   if (!audioEnabled) return;
   try {
     soundAssets.repulsor.currentTime = 0;
-    soundAssets.repulsor.volume = 0.50;
+    soundAssets.repulsor.volume = 0.75;
     soundAssets.repulsor.play().catch(() => {});
   } catch (_) {}
 }
@@ -105,7 +105,7 @@ function playHoverSFX() {
   if (!audioEnabled) return;
   try {
     const snd = soundAssets.magnetic.cloneNode();
-    snd.volume = 0.50;
+    snd.volume = 0.75;
     snd.play().catch(() => {});
   } catch (_) {}
 }
@@ -138,7 +138,7 @@ function playWhooshSFX(type = 'in', velocity = 1.0) {
     subOsc.frequency.exponentialRampToValueAtTime(subEnd, now + duration);
     
     subGain.gain.setValueAtTime(0.0001, now);
-    subGain.gain.linearRampToValueAtTime(0.16, now + (duration * 0.35));
+    subGain.gain.linearRampToValueAtTime(0.28, now + (duration * 0.35));
     subGain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
     
     subOsc.connect(subGain);
@@ -169,7 +169,7 @@ function playWhooshSFX(type = 'in', velocity = 1.0) {
 
     const gain = ctx.createGain();
     gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.linearRampToValueAtTime(0.18, now + (duration * 0.4));
+    gain.gain.linearRampToValueAtTime(0.32, now + (duration * 0.4));
     gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
     noise.connect(filter);
@@ -1531,11 +1531,11 @@ function initLenis() {
 /* ─── FUTURISTIC SUBTLE UI SFX BINDINGS ─── */
 function initClickSFX() {
   const isInteractive = (target) => {
-    // Exclude Beyond The Edit (#interests / .passion-card) and Showreel Accordion (#projects / .accordion-item)
+    // Exclude Creative Passions (.passion-card) and Showreel Accordion (#projects / .accordion-item)
     if (target.closest('#interests, .passion-card, #projects, .accordion-item, .accordion-trigger')) {
       return null;
     }
-    return target.closest('button, a, .btn-primary, .btn-ghost, .social-btn, .focus-card, .software-card, .nav-links a, .stat-card, .role-pill, .hero-scroll-hint');
+    return target.closest('button, a, .btn-primary, .btn-ghost, .social-btn, .focus-card, .software-card, .nav-links a, .stat-card, .role-pill, .hero-scroll-hint, .dev-project-card, .ai-tool-item');
   };
 
   // Global event delegation for clicks
