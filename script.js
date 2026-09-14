@@ -1053,6 +1053,29 @@ function initHeroAnimations() {
     }, 0.15);
   }
 
+  // CINEMATIC BLUR + SCALE + STAGGER REVEAL FOR "Hi", "I'm", "Mahesh", "Thakur"
+  const cineBlurTexts = document.querySelectorAll('.cine-blur-text');
+  if (cineBlurTexts.length) {
+    tl.fromTo(cineBlurTexts,
+      {
+        opacity: 0,
+        filter: 'blur(14px)',
+        scale: 0.88,
+        y: 18
+      },
+      {
+        opacity: 1,
+        filter: 'blur(0px)',
+        scale: 1.0,
+        y: 0,
+        duration: 0.85,
+        stagger: 0.16,
+        ease: 'power3.out'
+      },
+      0.1
+    );
+  }
+
   if (heroCenter) {
     tl.fromTo(heroCenter, { y: 20 }, {
       y: 0, duration: 0.8, ease: 'power3.out'

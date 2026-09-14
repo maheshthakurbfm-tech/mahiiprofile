@@ -329,6 +329,11 @@ body:has(button:hover) #cursor-ring {
   margin-bottom: 2px;
 }
 
+.cine-blur-text {
+  display: inline-block;
+  will-change: transform, filter, opacity;
+}
+
 .hero-greeting::before {
   display: none;
 }
