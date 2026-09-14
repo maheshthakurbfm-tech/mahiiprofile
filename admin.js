@@ -809,16 +809,31 @@ function initSaveButton() {
 
     try {
       console.log('[SAVE REQUEST STARTED]');
-      const saved = await saveSiteData(d);
+      // Stage 1: Saving...
+      btn.innerHTML = `<span style="display:inline-block;animation:spin 1s linear infinite;">⏳</span> Saving...`;
+      btn.style.background = '#2563eb';
+      btn.style.borderColor = '#3b82f6';
+
+      const saveResult = await saveSiteData(d);
       renderAdminProjects(d.projects);
       refreshSiteUI();
 
-      if (saved) {
-        btn.innerHTML = `✓ Saved to data.json!`;
-        btn.style.background = '#00c853';
-        btn.style.borderColor = '#00c853';
-        playClickSFX();
-        showToast('Site data saved to data.json on disk!');
+      if (saveResult && saveResult.success) {
+        if (saveResult.published) {
+          // Stage 4: Published
+          btn.innerHTML = `✓ Published`;
+          btn.style.background = '#00c853';
+          btn.style.borderColor = '#00c853';
+          playClickSFX();
+          showToast('Site data saved, committed to Git & published to Vercel production!');
+        } else {
+          // Stage 2: Saved locally (production sync pending/failed)
+          btn.innerHTML = `✓ Saved locally`;
+          btn.style.background = '#10b981';
+          btn.style.borderColor = '#10b981';
+          playClickSFX();
+          showToast('Saved locally — production update failed or remote offline.');
+        }
       } else {
         btn.innerHTML = `⚠ Local only`;
         btn.style.background = '#f59e0b';
@@ -831,7 +846,7 @@ function initSaveButton() {
         btn.innerHTML = originalContent;
         btn.style.background = '';
         btn.style.borderColor = '';
-      }, 2400);
+      }, 3000);
     } catch (err) {
       console.error('[CMS Save Error]', err);
       btn.disabled = false;
@@ -876,7 +891,7 @@ function getSiteData() {
 
 async function saveSiteData(data) {
   window.siteData = data;
-  let serverSaved = false;
+  let saveResult = { success: false, published: false };
 
   // Always update local cache
   try {
@@ -902,7 +917,9 @@ async function saveSiteData(data) {
     }
 
     if (resp.ok && result && result.success) {
-      serverSaved = true;
+      saveResult.success = true;
+      saveResult.published = !!result.published;
+      saveResult.publishDetails = result.publishDetails;
     } else if (result && result.error) {
       console.warn('Server save error:', result.error);
     }
@@ -910,7 +927,7 @@ async function saveSiteData(data) {
     console.warn('Server save endpoint unreachable:', err.message);
   }
 
-  return serverSaved;
+  return saveResult;
 }
 
 /* ─── REFRESH SITE UI ─── */

@@ -97,6 +97,62 @@ const server = http.createServer((req, res) => {
     }
   }
 
+const { execSync } = require('child_process');
+
+function autoPublishToGitAndVercel() {
+  const result = {
+    gitCommitted: false,
+    gitPushed: false,
+    vercelDeployed: false,
+    details: ''
+  };
+
+  try {
+    // Check if data.json was modified in Git
+    const statusOutput = execSync('git status --porcelain data.json', {
+      cwd: ROOT_DIR,
+      encoding: 'utf8',
+      stdio: ['pipe', 'pipe', 'pipe']
+    }).trim();
+
+    if (statusOutput) {
+      // Stage only data.json
+      execSync('git add data.json', { cwd: ROOT_DIR, stdio: ['pipe', 'pipe', 'pipe'] });
+      // Commit only data.json
+      execSync('git commit -m "cms: update site data"', { cwd: ROOT_DIR, stdio: ['pipe', 'pipe', 'pipe'] });
+      result.gitCommitted = true;
+      console.log('[CMS AUTO-GIT] Committed data.json changes.');
+    } else {
+      console.log('[CMS AUTO-GIT] data.json has no uncommitted changes.');
+    }
+
+    // Attempt Git Push if origin remote exists
+    try {
+      execSync('git push origin main', { cwd: ROOT_DIR, stdio: ['pipe', 'pipe', 'pipe'] });
+      result.gitPushed = true;
+      console.log('[CMS AUTO-GIT] Pushed data.json to GitHub main branch.');
+    } catch (pushErr) {
+      console.warn('[CMS AUTO-GIT WARNING] Git push failed or remote not reachable:', pushErr.message);
+    }
+
+    // Direct Vercel Production Deployment Sync
+    try {
+      execSync('vercel deploy --prod --yes', { cwd: ROOT_DIR, stdio: ['pipe', 'pipe', 'pipe'], timeout: 60000 });
+      result.vercelDeployed = true;
+      console.log('[CMS AUTO-VERCEL] Production deployment synced to Vercel (https://mahiiprofile.vercel.app).');
+    } catch (vErr) {
+      console.warn('[CMS AUTO-VERCEL WARNING] Vercel deploy command warning:', vErr.message);
+    }
+
+    result.details = `Git: ${result.gitPushed ? 'pushed' : (result.gitCommitted ? 'committed' : 'synced')}, Vercel: ${result.vercelDeployed ? 'deployed' : 'pending'}`;
+  } catch (err) {
+    console.error('[CMS AUTO-PUBLISH ERROR]', err);
+    result.details = err.message;
+  }
+
+  return result;
+}
+
   // 2. POST /api/save-data
   if (req.method === 'POST' && pathname === '/api/save-data') {
     let body = '';
@@ -132,10 +188,16 @@ const server = http.createServer((req, res) => {
         fs.renameSync(TMP_FILE, DATA_FILE);
 
         console.log(`[DATA SAVED] data.json updated at ${data.updatedAt}`);
+
+        // Trigger automatic publishing to Git and Vercel Production
+        const publishResult = autoPublishToGitAndVercel();
+
         return sendJson(res, 200, {
           success: true,
-          message: 'Site data saved successfully to data.json',
-          updatedAt: data.updatedAt
+          message: 'Site data saved and published successfully',
+          updatedAt: data.updatedAt,
+          published: publishResult.gitPushed || publishResult.vercelDeployed,
+          publishDetails: publishResult
         });
       } catch (err) {
         console.error('[SAVE ERROR]', err);
