@@ -99,11 +99,23 @@ const RESUME_DEFAULTS = {
   ],
   education: [
     {
-      degree: "B.Sc.",
+      degree: "B.Sc. (Information Technology / IT)",
       college: "Govt. V.Y.T. PG Autonomous Science College, Durg",
       university: "Hemchand Yadav Vishwavidyalaya, Durg",
       period: "2021 - 2023",
-      detail: "B.Sc. — 72%"
+      detail: "B.Sc. (IT) — 72%"
+    },
+    {
+      degree: "Schooling (Post-Metric / Higher Secondary 12th)",
+      college: "High School / Higher Secondary",
+      period: "Post-Metric",
+      detail: "Post-Metric — 62%"
+    },
+    {
+      degree: "Schooling (Pre-Metric / High School 10th)",
+      college: "High School",
+      period: "Pre-Metric",
+      detail: "Pre-Metric — 72%"
     }
   ],
   achievements: [
