@@ -98,6 +98,38 @@
       "thumbnail": ""
     }
   ],
+  "showreelReels": [
+    {
+      "id": "reel-1",
+      "title": "Commercial & Brand Short-Form",
+      "description": "High-retention vertical ad edit with kinetic pacing, beat-synced motion, and punchy hooks.",
+      "category": "Commercial Ads",
+      "year": "2025",
+      "embedUrl": "https://res.cloudinary.com/esvwgoxe/video/upload/v1789095426/portfolio-projects/tduu0lc9ianrp2ia6c4r.mp4",
+      "videoId": "tduu0lc9ianrp2ia6c4r",
+      "thumbnail": ""
+    },
+    {
+      "id": "reel-2",
+      "title": "Real Estate Dynamic Showcase",
+      "description": "Clean speed-ramped transitions, color-graded footage, and modern typography overlays.",
+      "category": "Real Estate",
+      "year": "2025",
+      "embedUrl": "https://res.cloudinary.com/esvwgoxe/video/upload/v1789095943/real_estate_video_raw_vs_edited.mp4",
+      "videoId": "real_estate_video_raw_vs_edited",
+      "thumbnail": ""
+    },
+    {
+      "id": "reel-3",
+      "title": "Kinetic Typography & Motion Reel",
+      "description": "Bold title animations, custom After Effects MOGRTs, and retention-focused visual pacing.",
+      "category": "Motion Graphics",
+      "year": "2025",
+      "embedUrl": "",
+      "videoId": "",
+      "thumbnail": ""
+    }
+  ],
   "contact": {
     "email": "mahesh19031@govtsciencecollegedurg.ac.in",
     "linkedin": "https://www.linkedin.com/in/mahesh-thakur-317872277/",

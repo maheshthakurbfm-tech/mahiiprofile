@@ -47,6 +47,7 @@
       <li><a href="#hero">Home</a></li>
       <li><a href="#about">About</a></li>
       <li><a href="#projects">Work</a></li>
+      <li><a href="#beyond-the-edit">Beyond The Edit</a></li>
       <li><a href="#interests">Interests</a></li>
       <li><a href="#software">Skills</a></li>
       <li><a href="#contact">Contact</a></li>
@@ -272,16 +273,22 @@
 
   <div class="section-divider"></div>
 
-  <!-- ╔══ PROJECTS ══╗ -->
+  <!-- ╔══ PROJECTS / SHOWREEL ACCORDION ══╗ -->
   <section id="projects">
     <div class="section-container">
 
       <div class="reveal-up">
-        <p class="section-label">Featured Work</p>
+        <p class="section-label">// FEATURED SHOWCASE</p>
         <h2 class="section-title">Showreel <span>Accordion</span></h2>
-        <p class="section-sub">Click any project to expand and preview. Add your videos through the Admin Panel.</p>
+        <p class="section-sub">High-impact 9:16 vertical reels & motion edits. Managed directly via Admin Panel & Cloudinary.</p>
       </div>
 
+      <!-- 3 Vertical Video Reels Container -->
+      <div class="showreel-vertical-container reveal-up" id="showreel-vertical-container">
+        <!-- Dynamically filled by script.js with 3 vertical reel cards -->
+      </div>
+
+      <!-- Projects Accordion Breakdown -->
       <div class="accordion-wrap" id="accordion-wrap">
         <!-- Dynamically filled by script.js from data.json -->
       </div>
@@ -291,7 +298,162 @@
 
   <div class="section-divider"></div>
 
-  <!-- ╔══ INTERESTS / BEYOND THE CODE ══╗ -->
+  <!-- ╔══ BEYOND THE EDIT (CREATIVE TECH & DEV) ══╗ -->
+  <section id="beyond-the-edit">
+    <!-- BG WATERMARK -->
+    <div class="beyond-bg-text" id="beyond-bg-text">DEV & AI</div>
+
+    <div class="section-container">
+      <div class="reveal-up">
+        <p class="section-label">// CREATIVE TECHNOLOGIST</p>
+        <h2 class="section-title">Beyond The <span>Edit</span></h2>
+        <p class="section-sub">Extending beyond video timelines into full-stack web engineering, custom CRM architecture, and AI-accelerated product development.</p>
+      </div>
+
+      <!-- DEV PROJECTS GRID -->
+      <div class="dev-projects-grid reveal-up">
+        
+        <!-- PROJECT 01: MAH-CRM -->
+        <div class="dev-project-card glass-card" tabindex="0">
+          <div class="dev-project-badge-row">
+            <span class="dev-project-num">PROJECT 01</span>
+            <span class="dev-status-pill"><span class="status-indicator-dot"></span>Production Ready</span>
+          </div>
+          <div class="dev-project-header">
+            <h3 class="dev-project-title">MAH-CRM</h3>
+            <span class="dev-project-label">CRM Tool for Real Estate</span>
+          </div>
+          <p class="dev-project-desc">
+            Automated AI-integrated CRM tool engineered specifically for high-velocity real-estate workflows, lead management, and automated client communication pipelines.
+          </p>
+          <div class="dev-project-tech-stack">
+            <span class="tech-tag">React / Vite</span>
+            <span class="tech-tag">TypeScript</span>
+            <span class="tech-tag">Cloud Storage CDN</span>
+            <span class="tech-tag">AI Workflows</span>
+            <span class="tech-tag">REST APIs</span>
+          </div>
+        </div>
+
+        <!-- PROJECT 02: MY PORTFOLIO -->
+        <div class="dev-project-card glass-card" tabindex="0">
+          <div class="dev-project-badge-row">
+            <span class="dev-project-num">PROJECT 02</span>
+            <span class="dev-status-pill"><span class="status-indicator-dot"></span>Live & Interactive</span>
+          </div>
+          <div class="dev-project-header">
+            <h3 class="dev-project-title">MY PORTFOLIO</h3>
+            <span class="dev-project-label">Creative Tech Showcase</span>
+          </div>
+          <p class="dev-project-desc">
+            Custom portfolio website with interactive UI, animations and CMS-style content management. Features direct Cloudinary uploads, persistent data layer, and visual layout editing.
+          </p>
+          <div class="dev-project-tech-stack">
+            <span class="tech-tag">JavaScript (ES6+)</span>
+            <span class="tech-tag">Custom CMS Dashboard</span>
+            <span class="tech-tag">Cloudinary API</span>
+            <span class="tech-tag">GSAP / Lenis Motion</span>
+            <span class="tech-tag">Web Audio API</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- AI TOOLS & DEVELOPMENT WORKFLOW SUBSECTION -->
+      <div class="ai-tools-subsection reveal-up">
+        <div class="ai-tools-header">
+          <span class="ai-tools-tag">// STACK ARCHITECTURE</span>
+          <h3 class="ai-tools-title">AI Tools & Development Workflow</h3>
+          <p class="ai-tools-sub">Engineered with modern AI toolchains and developer environments to accelerate delivery.</p>
+        </div>
+
+        <div class="ai-tools-grid">
+          
+          <!-- VS Code -->
+          <div class="ai-tool-item glass-card">
+            <div class="ai-tool-icon-wrap">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" class="ai-tool-svg">
+                <path d="M17.5 2.5L7.2 10.3 3.5 7.5 1.5 8.6l3.8 3.4-3.8 3.4 2 1.1 3.7-2.8 10.3 7.8 5-2.5V5l-5-2.5zm0 4.2v10.6l-6.8-5.3 6.8-5.3z" fill="#007ACC"/>
+              </svg>
+            </div>
+            <div class="ai-tool-info">
+              <span class="ai-tool-name">VS Code</span>
+              <span class="ai-tool-role">Primary IDE & Workspace</span>
+            </div>
+          </div>
+
+          <!-- Claude -->
+          <div class="ai-tool-item glass-card">
+            <div class="ai-tool-icon-wrap">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" class="ai-tool-svg">
+                <path d="M16.5 4.5l-3.8 7.2-2.2-4.2-4 9.5h3.2l1.6-4 2 3.8 4.2-8.3 3 8.5h3l-4.5-12.5h-2.5z" fill="#D97706"/>
+                <circle cx="12" cy="12" r="9" stroke="#D97706" stroke-width="1.5" stroke-dasharray="2 2" fill="none"/>
+              </svg>
+            </div>
+            <div class="ai-tool-info">
+              <span class="ai-tool-name">Claude</span>
+              <span class="ai-tool-role">Architecture & Code Synthesis</span>
+            </div>
+          </div>
+
+          <!-- ChatGPT -->
+          <div class="ai-tool-item glass-card">
+            <div class="ai-tool-icon-wrap">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" class="ai-tool-svg">
+                <path d="M20.5 9.7a4.9 4.9 0 0 0-.4-3.8 5 5 0 0 0-4.6-2.5 5 5 0 0 0-1.8.3 5 5 0 0 0-3.6-1.7 5 5 0 0 0-4.8 3.5 5 5 0 0 0-3 2.2 5 5 0 0 0 .6 5.4 4.9 4.9 0 0 0 .4 3.8 5 5 0 0 0 4.6 2.5 5 5 0 0 0 1.8-.3 5 5 0 0 0 3.6 1.7 5 5 0 0 0 4.8-3.5 5 5 0 0 0 3-2.2 5 5 0 0 0-.6-5.4z" stroke="#10A37F" stroke-width="1.6" stroke-linejoin="round" fill="rgba(16,163,127,0.1)"/>
+                <path d="M12 8v8M8 12h8" stroke="#10A37F" stroke-width="1.6" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="ai-tool-info">
+              <span class="ai-tool-name">ChatGPT</span>
+              <span class="ai-tool-role">Algorithm & Logic Prototyping</span>
+            </div>
+          </div>
+
+          <!-- Antigravity -->
+          <div class="ai-tool-item glass-card">
+            <div class="ai-tool-icon-wrap">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" class="ai-tool-svg">
+                <circle cx="12" cy="12" r="9" stroke="var(--electric-blue)" stroke-width="1.5"/>
+                <path d="M12 6v12M8 10l4-4 4 4" stroke="var(--electric-blue)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="17" r="1.5" fill="var(--electric-blue)"/>
+              </svg>
+            </div>
+            <div class="ai-tool-info">
+              <span class="ai-tool-name">Antigravity</span>
+              <span class="ai-tool-role">Agentic Development & Automation</span>
+            </div>
+          </div>
+
+          <!-- Google AI Studio -->
+          <div class="ai-tool-item glass-card">
+            <div class="ai-tool-icon-wrap">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" class="ai-tool-svg">
+                <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#ai-studio-grad)" stroke="#4285F4" stroke-width="1.2"/>
+                <defs>
+                  <linearGradient id="ai-studio-grad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#4285F4"/>
+                    <stop offset="0.5" stop-color="#9B72CB"/>
+                    <stop offset="1" stop-color="#D96570"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            <div class="ai-tool-info">
+              <span class="ai-tool-name">Google AI Studio</span>
+              <span class="ai-tool-role">Multimodal AI Engineering</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ╔══ INTERESTS / PASSIONS ══╗ -->
   <section id="interests">
     <!-- BG WATERMARK -->
     <div class="interests-bg-text" id="interests-bg-text">PASSIONS</div>
@@ -299,7 +461,7 @@
     <div class="section-container">
       <div class="reveal-up">
         <p class="section-label">// MY PASSIONS</p>
-        <h2 class="section-title">Beyond The <span>Edit</span></h2>
+        <h2 class="section-title">Creative <span>Passions</span></h2>
         <p class="section-sub">What fuels my creative energy, focus, and perspective outside the timeline.</p>
       </div>
 

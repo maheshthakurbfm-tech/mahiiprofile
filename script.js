@@ -391,6 +391,38 @@ function getFallbackData() {
       { id:4, title:"Reels & Short-Form Content", description:"Beat-synced high-energy short-form edits.", tools:["Premiere Pro","CapCut"], embedUrl:"", thumbnail:"" },
       { id:5, title:"Cinematic Short Film / Music Video", description:"Cinematic storytelling with Log footage.", tools:["DaVinci Resolve","After Effects"], embedUrl:"", thumbnail:"" }
     ],
+    showreelReels: [
+      {
+        id: "reel-1",
+        title: "Commercial & Brand Short-Form",
+        description: "High-retention vertical ad edit with kinetic pacing, beat-synced motion, and punchy hooks.",
+        category: "Commercial Ads",
+        year: "2025",
+        embedUrl: "https://res.cloudinary.com/esvwgoxe/video/upload/v1789095426/portfolio-projects/tduu0lc9ianrp2ia6c4r.mp4",
+        videoId: "tduu0lc9ianrp2ia6c4r",
+        thumbnail: ""
+      },
+      {
+        id: "reel-2",
+        title: "Real Estate Dynamic Showcase",
+        description: "Clean speed-ramped transitions, color-graded footage, and modern typography overlays.",
+        category: "Real Estate",
+        year: "2025",
+        embedUrl: "https://res.cloudinary.com/esvwgoxe/video/upload/v1789095943/real_estate_video_raw_vs_edited.mp4",
+        videoId: "real_estate_video_raw_vs_edited",
+        thumbnail: ""
+      },
+      {
+        id: "reel-3",
+        title: "Kinetic Typography & Motion Reel",
+        description: "Bold title animations, custom After Effects MOGRTs, and retention-focused visual pacing.",
+        category: "Motion Graphics",
+        year: "2025",
+        embedUrl: "",
+        videoId: "",
+        thumbnail: ""
+      }
+    ],
     contact: { email:"mahesh19031@govtsciencecollegedurg.ac.in", linkedin:"https://www.linkedin.com/in/mahesh-thakur-317872277/", instagram:"https://www.instagram.com/motion.mogrt" },
     software: [
       {name:"Premiere Pro",icon:"🎬",level:95},{name:"After Effects",icon:"⚡",level:92},
@@ -401,8 +433,120 @@ function getFallbackData() {
   };
 }
 
+/* ─── RENDER 3 VERTICAL SHOWREEL REELS ─── */
+function renderShowreelReels() {
+  const container = document.getElementById('showreel-vertical-container');
+  if (!container || !siteData) return;
+
+  const reels = Array.isArray(siteData.showreelReels) && siteData.showreelReels.length > 0
+    ? siteData.showreelReels.slice(0, 3)
+    : [
+        {
+          id: "reel-1",
+          title: "Short-Form Reel 01",
+          description: "High-retention vertical edit with dynamic pacing.",
+          category: "Reel 01",
+          embedUrl: "",
+          thumbnail: ""
+        },
+        {
+          id: "reel-2",
+          title: "Short-Form Reel 02",
+          description: "Beat-synced motion graphics and clean cuts.",
+          category: "Reel 02",
+          embedUrl: "",
+          thumbnail: ""
+        },
+        {
+          id: "reel-3",
+          title: "Short-Form Reel 03",
+          description: "Color-graded vertical showcase and visual storytelling.",
+          category: "Reel 03",
+          embedUrl: "",
+          thumbnail: ""
+        }
+      ];
+
+  // Fill up to 3 slots
+  while (reels.length < 3) {
+    const num = reels.length + 1;
+    reels.push({
+      id: `reel-${num}`,
+      title: `Vertical Reel 0${num}`,
+      description: "Vertical showcase video. Add video URL via Admin Panel.",
+      category: `Reel 0${num}`,
+      embedUrl: "",
+      thumbnail: ""
+    });
+  }
+
+  container.innerHTML = reels.map((r, idx) => `
+    <div class="reel-card" data-reel-id="${escAttr(r.id || `reel-${idx + 1}`)}">
+      <div class="reel-video-viewport">
+        <span class="reel-slot-badge">REEL 0${idx + 1}</span>
+        ${r.category ? `<span class="reel-category-pill">${escHtml(r.category)}</span>` : ''}
+        ${renderReelMedia(r)}
+      </div>
+      <div class="reel-card-body">
+        <h3 class="reel-card-title">${escHtml(r.title || `Vertical Reel 0${idx + 1}`)}</h3>
+        <p class="reel-card-desc">${escHtml(r.description || '')}</p>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderReelMedia(r) {
+  if (r.embedUrl && r.embedUrl.trim()) {
+    const rawUrl = r.embedUrl.trim();
+    const isDirectVideo = checkIsVideoUrl(rawUrl);
+
+    if (isDirectVideo) {
+      return `
+        <video 
+          src="${escAttr(rawUrl)}" 
+          poster="${escAttr(r.thumbnail || '')}" 
+          controls 
+          preload="metadata" 
+          playsinline 
+          onerror="this.style.display='none'; const fb = this.nextElementSibling; if (fb) fb.style.display='flex';"
+        ></video>
+        <div class="reel-placeholder" style="display:none;">
+          <div class="play-icon">▶</div>
+          <span>${escHtml(r.title || 'Vertical Reel')}</span>
+          <a href="${escAttr(rawUrl)}" target="_blank" rel="noopener noreferrer" style="font-size:0.75rem;color:var(--electric-blue);text-decoration:underline;">Watch Direct Video</a>
+        </div>
+      `;
+    }
+
+    const iframeUrl = formatEmbedIframeUrl(rawUrl);
+    return `<iframe src="${escAttr(iframeUrl)}" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen title="${escAttr(r.title || 'Vertical Reel')}"></iframe>`;
+  }
+
+  if (r.thumbnail && r.thumbnail.trim()) {
+    return `
+      <img 
+        src="${escAttr(r.thumbnail)}" 
+        alt="${escAttr(r.title || 'Vertical Reel')}" 
+        onerror="this.style.display='none'; const fb = this.nextElementSibling; if (fb) fb.style.display='flex';"
+      />
+      <div class="reel-placeholder" style="display:none;">
+        <div class="play-icon">▶</div>
+        <span>${escHtml(r.title || 'Vertical Reel')}</span>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="reel-placeholder">
+      <div class="play-icon">▶</div>
+      <span>Add 9:16 Vertical Reel<br />via Admin Panel</span>
+    </div>
+  `;
+}
+
 /* ─── RENDER ACCORDION ─── */
 function renderAccordion() {
+  renderShowreelReels();
   const wrap = document.getElementById('accordion-wrap');
   if (!wrap || !siteData) return;
 

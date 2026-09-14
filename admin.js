@@ -154,8 +154,9 @@ function loadAdminFields() {
   setVal('edit-linkedin', d.contact?.linkedin);
   setVal('edit-instagram', d.contact?.instagram);
 
-  // Projects tab
+  // Projects & Reels tab
   renderAdminProjects(d.projects || []);
+  loadAdminReels(d.showreelReels || []);
 }
 
 function setVal(id, val) {
@@ -167,6 +168,123 @@ function getVal(id) {
   const el = document.getElementById(id);
   return el ? el.value.trim() : '';
 }
+
+/* ─── ADMIN SHOWREEL 3 REELS MANAGEMENT ─── */
+function loadAdminReels(reels) {
+  const reelList = Array.isArray(reels) ? reels : [];
+  for (let i = 0; i < 3; i++) {
+    const r = reelList[i] || {};
+    setVal(`reel-title-${i}`, r.title || '');
+    setVal(`reel-category-${i}`, r.category || '');
+    setVal(`reel-desc-${i}`, r.description || '');
+    setVal(`reel-url-${i}`, r.embedUrl || '');
+    setVal(`reel-thumb-${i}`, r.thumbnail || '');
+    updateReelSlotPreview(i);
+  }
+}
+
+window.updateReelSlotPreview = function(slotIdx) {
+  const previewBox = document.getElementById(`reel-preview-${slotIdx}`);
+  if (!previewBox) return;
+
+  const url = getVal(`reel-url-${slotIdx}`);
+  const thumb = getVal(`reel-thumb-${slotIdx}`);
+
+  if (url) {
+    const isDirect = (typeof MediaStorageService !== 'undefined' && MediaStorageService.isDirectVideoUrl)
+      ? MediaStorageService.isDirectVideoUrl(url)
+      : (typeof checkIsVideoUrl === 'function' ? checkIsVideoUrl(url) : /\.(mp4|webm|mov|m4v)($|\?|#)/i.test(url));
+
+    if (isDirect) {
+      previewBox.innerHTML = `
+        <video src="${escAttr(url)}" poster="${escAttr(thumb)}" controls preload="metadata" playsinline style="width:100%;height:100%;object-fit:cover;"></video>
+      `;
+      return;
+    } else {
+      const iframeUrl = typeof formatEmbedIframeUrl === 'function' ? formatEmbedIframeUrl(url) : url;
+      previewBox.innerHTML = `
+        <iframe src="${escAttr(iframeUrl)}" style="width:100%;height:100%;border:none;" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+      `;
+      return;
+    }
+  }
+
+  if (thumb) {
+    previewBox.innerHTML = `
+      <img src="${escAttr(thumb)}" style="width:100%;height:100%;object-fit:cover;" />
+    `;
+    return;
+  }
+
+  previewBox.innerHTML = `<span style="font-size:0.72rem;color:var(--text-muted);">Preview 0${slotIdx + 1}</span>`;
+};
+
+window.clearReelSlot = function(slotIdx) {
+  setVal(`reel-title-${slotIdx}`, '');
+  setVal(`reel-category-${slotIdx}`, '');
+  setVal(`reel-desc-${slotIdx}`, '');
+  setVal(`reel-url-${slotIdx}`, '');
+  setVal(`reel-thumb-${slotIdx}`, '');
+  updateReelSlotPreview(slotIdx);
+  showToast(`Reel slot 0${slotIdx + 1} cleared.`);
+  playClickSFX();
+};
+
+window.uploadReelFile = async function(e, slotIdx, fieldType) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  showToast(`Uploading Reel 0${slotIdx + 1} (${file.name})...`);
+
+  try {
+    const uploadRes = await MediaStorageService.uploadMediaFile(
+      file,
+      'portfolio-reels',
+      (percent, loaded, total) => {
+        showToast(`Uploading Reel 0${slotIdx + 1}: ${percent}%`);
+      }
+    );
+
+    const publicUrl = uploadRes.url;
+    const assetId = uploadRes.assetId;
+
+    if (fieldType === 'video') {
+      setVal(`reel-url-${slotIdx}`, publicUrl);
+    } else {
+      setVal(`reel-thumb-${slotIdx}`, publicUrl);
+    }
+
+    updateReelSlotPreview(slotIdx);
+
+    // Auto-sync into Media Library list
+    try {
+      const items = getMediaItems();
+      items.unshift({
+        id: assetId,
+        publicId: uploadRes.publicId,
+        name: `Reel 0${slotIdx + 1} - ${file.name}`,
+        type: uploadRes.type === 'video' ? 'video/mp4' : 'image/png',
+        size: uploadRes.formattedSize,
+        publicUrl: publicUrl,
+        isExternal: false,
+        hosted: 'Cloud Storage',
+        resourceType: uploadRes.resourceType,
+        format: uploadRes.format,
+        uploadDate: new Date().toLocaleDateString()
+      });
+      saveMediaItems(items);
+      renderMediaLibraryUI();
+      updateDashboardMetrics();
+    } catch (_) {}
+
+    showToast(`Reel 0${slotIdx + 1} uploaded & attached successfully!`);
+    playClickSFX();
+  } catch (err) {
+    showToast(`Upload failed: ${err.message}`);
+    console.error('Reel upload error:', err);
+  }
+  e.target.value = '';
+};
 
 /* ─── ADMIN PROJECT LIST ─── */
 function renderAdminProjects(projects) {
@@ -467,8 +585,8 @@ function initSaveButton() {
       hero: { ...(fallback.hero || {}), ...(existingData.hero || {}) },
       about: existingData.about || fallback.about || {},
       software: (Array.isArray(existingData.software) && existingData.software.length > 0) ? existingData.software : (fallback.software || []),
-      contact: { ...(fallback.contact || {}), ...(existingData.contact || {}) },
       projects: Array.isArray(existingData.projects) ? [...existingData.projects] : (fallback.projects || []),
+      showreelReels: Array.isArray(existingData.showreelReels) ? [...existingData.showreelReels] : (fallback.showreelReels || []),
       design: existingData.design || fallback.design || {},
       mediaLibrary: getMediaItems() || existingData.mediaLibrary || []
     };
@@ -492,6 +610,26 @@ function initSaveButton() {
     if (email) d.contact.email = email;
     if (linkedin) d.contact.linkedin = linkedin;
     if (instagram) d.contact.instagram = instagram;
+
+    // Showreel 3 Reels fields
+    const reelSlots = [];
+    for (let i = 0; i < 3; i++) {
+      const rTitle = getVal(`reel-title-${i}`);
+      const rCat = getVal(`reel-category-${i}`);
+      const rDesc = getVal(`reel-desc-${i}`);
+      const rUrl = getVal(`reel-url-${i}`);
+      const rThumb = getVal(`reel-thumb-${i}`);
+      reelSlots.push({
+        id: `reel-${i + 1}`,
+        title: rTitle || `Vertical Reel 0${i + 1}`,
+        category: rCat || '',
+        description: rDesc || '',
+        embedUrl: rUrl || '',
+        thumbnail: rThumb || '',
+        year: '2025'
+      });
+    }
+    d.showreelReels = reelSlots;
 
     // Project Editor fields
     const projTitle = getVal('edit-proj-title');
