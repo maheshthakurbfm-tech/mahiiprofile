@@ -989,18 +989,14 @@ function applyHeroData() {
   const fn = document.querySelector('.hero-name .first');
   const ln = document.querySelector('.hero-name .last');
   const bio = document.querySelector('.hero-bio');
-  const greet = document.querySelector('.hero-greeting');
+  const greetBold = document.querySelector('.hero-greeting .greet-bold');
+  const greetThin = document.querySelector('.hero-greeting .greet-thin');
+
   if (fn && h.firstName) fn.textContent = h.firstName;
   if (ln && h.lastName) ln.textContent = h.lastName;
   if (bio && h.bio) bio.textContent = h.bio;
-  if (greet) {
-    const rawGreeting = h.greeting || "Hi I'm";
-    if (rawGreeting.trim().toLowerCase().startsWith("hi i'm") || rawGreeting.trim().toLowerCase().startsWith("hi, i'm")) {
-      greet.innerHTML = `<span class="greet-bold">Hi</span> <span class="greet-thin">I'm</span>`;
-    } else {
-      greet.textContent = rawGreeting;
-    }
-  }
+  if (greetBold) greetBold.textContent = 'Hi';
+  if (greetThin) greetThin.textContent = "I'm";
 
   // Contact
   if (siteData.contact && siteData.contact.email) {
@@ -1080,31 +1076,38 @@ function initHeroAnimations() {
   }
 
   if (heroLeft) {
-    tl.fromTo(heroLeft, { y: 20 }, {
-      y: 0, duration: 0.8, ease: 'power3.out'
-    }, 0.15);
+    tl.fromTo(heroLeft, { opacity: 1 }, {
+      opacity: 1, duration: 0.8, ease: 'power3.out'
+    }, 0);
   }
 
-  // CINEMATIC BLUR + SCALE + STAGGER REVEAL FOR "Hi", "I'm", "Mahesh", "Thakur"
-  const cineBlurTexts = document.querySelectorAll('.cine-blur-text');
-  if (cineBlurTexts.length) {
-    tl.fromTo(cineBlurTexts,
-      {
-        opacity: 0,
-        filter: 'blur(20px)',
-        scale: 0.82,
-        y: 28
-      },
-      {
-        opacity: 1,
-        filter: 'blur(0px)',
-        scale: 1.0,
-        y: 0,
-        duration: 1.15,
-        stagger: 0.22,
-        ease: 'power3.out'
-      },
-      0.2
+  // INDEPENDENT CINEMATIC REVEAL: "Hi I'm" (Block 1) -> "Mahesh Thakur" (Block 2)
+  const block1 = document.querySelector('.cine-block-1');
+  const block2 = document.querySelector('.cine-block-2');
+
+  if (block1 || block2) {
+    gsap.killTweensOf('.cine-block-1, .cine-block-2');
+    gsap.set('.cine-block-1, .cine-block-2', {
+      autoAlpha: 0,
+      opacity: 0,
+      filter: 'blur(20px)',
+      scale: 0.90,
+      y: 24,
+      visibility: 'visible'
+    });
+  }
+
+  if (block1) {
+    tl.to(block1,
+      { autoAlpha: 1, opacity: 1, filter: 'blur(0px)', scale: 1.0, y: 0, duration: 1.0, ease: 'power3.out' },
+      0.15
+    );
+  }
+
+  if (block2) {
+    tl.to(block2,
+      { autoAlpha: 1, opacity: 1, filter: 'blur(0px)', scale: 1.0, y: 0, duration: 1.0, ease: 'power3.out' },
+      0.50
     );
   }
 
@@ -1737,7 +1740,9 @@ function hideLoader() {
     setTimeout(() => {
       loader.classList.add('hidden');
       try { playRepulsorLandingSFX(); } catch (_) {}
-    }, 1500);
+      // Trigger Hero cinematic intro right as loader disappears
+      try { if (typeof initHeroAnimations === 'function') initHeroAnimations(); } catch (e) {}
+    }, 1200);
   }
 }
 

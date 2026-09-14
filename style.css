@@ -329,12 +329,13 @@ body:has(button:hover) #cursor-ring {
   margin-bottom: 2px;
 }
 
-.cine-blur-text {
-  display: inline-block;
+.cine-block-1,
+.cine-block-2 {
   opacity: 0;
-  filter: blur(16px);
-  transform: translateY(20px) scale(0.85);
-  will-change: transform, filter, opacity;
+  visibility: hidden;
+  filter: blur(20px);
+  transform: translateY(24px) scale(0.90);
+  will-change: transform, filter, opacity, visibility;
 }
 
 .hero-greeting::before {
@@ -611,10 +612,96 @@ section {
   padding: 120px 0;
 }
 
+/* ── REUSABLE SECTION AMBIENT NEON GLOW SYSTEM (BEHIND CARDS) ── */
+.section-ambient-glow {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  z-index: 1;
+  will-change: transform, opacity;
+  transform: translate3d(0, 0, 0);
+}
+
+.section-ambient-glow.glow-red {
+  background: radial-gradient(circle, rgba(235, 20, 60, 0.45) 0%, rgba(190, 10, 45, 0.20) 45%, rgba(130, 0, 30, 0) 70%);
+  filter: blur(100px);
+}
+
+.section-ambient-glow.glow-blue {
+  background: radial-gradient(circle, rgba(0, 150, 255, 0.45) 0%, rgba(0, 95, 225, 0.20) 45%, rgba(0, 55, 165, 0) 70%);
+  filter: blur(100px);
+}
+
+/* QUADRANT / CARD GROUP POSITIONS */
+.glow-top-left {
+  top: 5%;
+  left: 0%;
+  width: 550px;
+  height: 550px;
+  opacity: 0.40;
+}
+
+.glow-top-right {
+  top: 5%;
+  right: 0%;
+  width: 550px;
+  height: 550px;
+  opacity: 0.40;
+}
+
+.glow-bottom-left {
+  bottom: 5%;
+  left: 2%;
+  width: 580px;
+  height: 580px;
+  opacity: 0.42;
+}
+
+.glow-bottom-right {
+  bottom: 5%;
+  right: 2%;
+  width: 580px;
+  height: 580px;
+  opacity: 0.42;
+}
+
+.glow-center-right {
+  top: 40%;
+  right: -2%;
+  width: 550px;
+  height: 550px;
+  opacity: 0.38;
+}
+
+@media (max-width: 992px) {
+  .section-ambient-glow {
+    filter: blur(75px);
+  }
+  .glow-top-left, .glow-top-right, .glow-bottom-left, .glow-bottom-right, .glow-center-right {
+    width: 380px;
+    height: 380px;
+    opacity: 0.35;
+  }
+}
+
+@media (max-width: 576px) {
+  .section-ambient-glow {
+    filter: blur(55px);
+  }
+  .glow-top-left, .glow-top-right, .glow-bottom-left, .glow-bottom-right, .glow-center-right {
+    width: 260px;
+    height: 260px;
+    opacity: 0.30;
+  }
+}
+
 .section-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 48px;
+  position: relative;
+  z-index: 2;
 }
 
 .section-label {
