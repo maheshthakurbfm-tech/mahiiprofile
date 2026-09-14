@@ -205,6 +205,213 @@
     "linkedin": "https://www.linkedin.com/in/mahesh-thakur-317872277/",
     "instagram": "https://www.instagram.com/motion.mogrt"
   },
+  "resume": {
+    "headline": "Video Editor | Motion Graphics Designer | Colorist",
+    "location": "Durg, Chhattisgarh, India",
+    "summary": "Video Editor from India with 2.5+ years of experience across video editing, motion graphics, color grading, and sound design. Focused on clean work, strong pacing, visual storytelling, retention-focused editing, and professional post-production for commercial, brand, YouTube, short-form, and cinematic content.",
+    "links": {
+      "portfolio": "/"
+    },
+    "expertiseGroups": [
+      {
+        "title": "Editing & Story",
+        "items": [
+          "Video Editing",
+          "Commercial & Brand Content",
+          "YouTube / Long-Form Editing",
+          "Short-Form / Reels",
+          "Visual Storytelling"
+        ]
+      },
+      {
+        "title": "Post-Production",
+        "items": [
+          "Motion Graphics",
+          "Color Grading",
+          "Sound Design",
+          "Post-Production"
+        ]
+      }
+    ],
+    "experience": [
+      {
+        "company": "Siyaram Developers",
+        "role": "Video editor & graphic designer",
+        "employmentType": "Part-time",
+        "period": "Jan 2026 - Present · 9 mos",
+        "points": [
+          "Created video edits and graphic design work for Siyaram Developers."
+        ]
+      },
+      {
+        "company": "Woodfield Natura",
+        "role": "Stencil Designer and Video Editor",
+        "employmentType": "Full-time",
+        "period": "2025 - 2026",
+        "location": "Durg, Chhattisgarh, India · Hybrid",
+        "summary": "Designed stencil art, wooden engravings, wooden crafts, line art, LED lamps, and portraits using Adobe Illustrator and CorelDRAW.",
+        "points": [
+          "Video Editing"
+        ]
+      },
+      {
+        "company": "Chalchitra Studios",
+        "role": "Video Editor",
+        "employmentType": "Part-time",
+        "period": "Feb 2024 - Aug 2025 · 1 yr 7 mos",
+        "location": "Durg, Chhattisgarh, India",
+        "summary": "Created cinematic wedding, birthday, pre-wedding, event, and other social-event videos.",
+        "points": [
+          "Video Editing",
+          "Storytelling"
+        ]
+      }
+    ],
+    "selectedProjects": [
+      {
+        "title": "Commercial & Brand Ads",
+        "category": "Commercial / Brand",
+        "description": "Retention-focused commercial and branded video editing combining story structure, pacing, motion graphics, color treatment, and sound design for polished promotional content.",
+        "tools": [
+          "Premiere Pro",
+          "After Effects",
+          "DaVinci Resolve"
+        ],
+        "portfolioAnchor": "./#projects"
+      },
+      {
+        "title": "Motion Graphics & MOGRT Packs",
+        "category": "Motion Graphics",
+        "description": "Kinetic typography, animated lower thirds, logo reveals, and reusable Premiere-ready motion templates built around clear hierarchy and edit-friendly timing.",
+        "tools": [
+          "After Effects",
+          "Premiere Pro",
+          "Illustrator"
+        ],
+        "portfolioAnchor": "./#projects"
+      },
+      {
+        "title": "YouTube & Long-Form Edits",
+        "category": "Long-Form",
+        "description": "Long-form edits structured around clean pacing, B-roll rhythm, narrative continuity, audio cleanup, and watchable visual storytelling.",
+        "tools": [
+          "Premiere Pro",
+          "After Effects",
+          "Audition"
+        ],
+        "portfolioAnchor": "./#projects"
+      },
+      {
+        "title": "Reels & Short-Form Content",
+        "category": "Short-Form",
+        "description": "High-energy vertical edits for short-form platforms with fast hooks, beat-synced cuts, titles, and compact visual storytelling.",
+        "tools": [
+          "Premiere Pro",
+          "After Effects",
+          "CapCut"
+        ],
+        "portfolioAnchor": "./#projects"
+      },
+      {
+        "title": "Cinematic Short Film / Music Video",
+        "category": "Cinematic",
+        "description": "Cinematic editing with color-graded footage, atmospheric sound, foley-style polish, and story-led scene flow.",
+        "tools": [
+          "DaVinci Resolve",
+          "After Effects",
+          "Audition"
+        ],
+        "portfolioAnchor": "./#projects"
+      },
+      {
+        "title": "MAH-CRM",
+        "category": "Creative Technology",
+        "description": "AI-integrated CRM tool for real-estate workflows, supporting lead management and automated client communication pipelines.",
+        "tools": [
+          "React / Vite",
+          "TypeScript",
+          "Cloud Storage CDN",
+          "AI Workflows"
+        ]
+      },
+      {
+        "title": "Personal Portfolio",
+        "category": "Creative Technology",
+        "description": "Interactive portfolio with CMS-style content management, Cloudinary media integration, visual editing controls, and motion-driven presentation.",
+        "tools": [
+          "JavaScript",
+          "Custom CMS",
+          "Cloudinary",
+          "GSAP / Lenis"
+        ],
+        "portfolioAnchor": "./"
+      }
+    ],
+    "toolGroups": [
+      {
+        "title": "Video / Post Production",
+        "items": [
+          "Adobe Premiere Pro",
+          "Adobe After Effects",
+          "DaVinci Resolve",
+          "Adobe Audition",
+          "CapCut",
+          "Blender"
+        ]
+      },
+      {
+        "title": "Design",
+        "items": [
+          "Adobe Photoshop",
+          "Adobe Illustrator",
+          "Canva",
+          "Inkscape"
+        ]
+      },
+      {
+        "title": "Creative / Development",
+        "items": [
+          "VS Code",
+          "GitHub",
+          "Claude",
+          "ChatGPT",
+          "Antigravity",
+          "Google AI Studio"
+        ]
+      },
+      {
+        "title": "Web / Digital",
+        "items": [
+          "HTML",
+          "CSS",
+          "JavaScript",
+          "Cloudinary"
+        ]
+      }
+    ],
+    "education": [
+      {
+        "institution": "Hemchand Yadav Vishwavidyalaya, Durg",
+        "period": "2021-2023",
+        "detail": "72%"
+      }
+    ],
+    "achievements": [
+      "100+ videos edited.",
+      "2.5+ years of video editing and post-production experience.",
+      "Portfolio work spans commercial ads, motion graphics, long-form edits, reels, and cinematic storytelling."
+    ],
+    "interests": [
+      "Video Editing",
+      "Motion Graphics",
+      "Color Grading",
+      "Sound Design",
+      "Cinematic Storytelling",
+      "Visual Design",
+      "Creative Technology",
+      "AI-assisted Creative Workflows"
+    ]
+  },
   "software": [
     {
       "name": "Premiere Pro",
@@ -326,5 +533,5 @@
       "uploadDate": "Published"
     }
   ],
-  "updatedAt": "2026-09-14T12:32:12.631Z"
+  "updatedAt": "2026-09-14T17:59:02Z"
 }

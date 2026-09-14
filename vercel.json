@@ -2,8 +2,11 @@
   "version": 2,
   "builds": [
     { "src": "index.html", "use": "@vercel/static" },
+    { "src": "resume.html", "use": "@vercel/static" },
     { "src": "style.css", "use": "@vercel/static" },
+    { "src": "resume.css", "use": "@vercel/static" },
     { "src": "script.js", "use": "@vercel/static" },
+    { "src": "resume.js", "use": "@vercel/static" },
     { "src": "admin.html", "use": "@vercel/static" },
     { "src": "admin.js", "use": "@vercel/static" },
     { "src": "admin-dashboard.css", "use": "@vercel/static" },
@@ -14,6 +17,7 @@
   ],
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1.js" },
+    { "src": "/resume/?", "dest": "/resume.html" },
     { "src": "/(.*)", "dest": "/$1" }
   ]
 }

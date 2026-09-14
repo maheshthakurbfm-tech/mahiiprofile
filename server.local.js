@@ -182,6 +182,10 @@ const server = http.createServer((req, res) => {
     pathname = '/index.html';
   }
 
+  if (pathname === '/resume' || pathname === '/resume/') {
+    pathname = '/resume.html';
+  }
+
   const safePath = path.normalize(path.join(ROOT_DIR, pathname));
 
   // Prevent directory traversal attacks

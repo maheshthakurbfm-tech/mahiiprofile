@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mahesh Thakur - Video Editor & Motion Graphics Designer Resume</title>
+  <meta name="description" content="Resume for Mahesh Thakur, a Video Editor, Motion Graphics Designer, Colorist, and post-production creative from Durg, Chhattisgarh, India." />
+  <link rel="icon" href="data:," />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="resume.css" />
+</head>
+<body>
+  <a class="skip-link" href="#resume-content">Skip to resume content</a>
+
+  <header class="resume-nav no-print" aria-label="Resume page navigation">
+    <a class="nav-brand" href="./#hero" aria-label="Back to portfolio home">resume.pdf</a>
+    <nav class="nav-mini-links" aria-label="Portfolio sections">
+      <a href="./#projects">Work</a>
+      <a href="./#software">Skills</a>
+      <a href="./#contact">Contact</a>
+    </nav>
+    <button class="resume-print-btn" id="printResume" type="button">Print / Save PDF</button>
+  </header>
+
+  <main class="resume-page" id="resume-content">
+    <section class="resume-hero reveal" aria-labelledby="resumeName">
+      <div class="resume-hero-copy">
+        <p class="resume-kicker">Professional Resume</p>
+        <h1 id="resumeName">Mahesh Thakur</h1>
+        <p class="resume-headline" id="resumeHeadline">Video Editor | Motion Graphics Designer | Colorist</p>
+        <p class="resume-location" id="resumeLocation">Durg, Chhattisgarh, India</p>
+      </div>
+      <div class="resume-hero-actions">
+        <div class="resume-contact-row" id="resumeTopLinks" aria-label="Primary resume links"></div>
+        <button class="resume-print-btn resume-print-btn-inline no-print" id="printResumeInline" type="button">Download Resume</button>
+      </div>
+    </section>
+
+    <section class="resume-snapshot reveal" aria-label="Resume snapshot">
+      <div class="snapshot-item">
+        <span class="snapshot-value">2.5+</span>
+        <span class="snapshot-label">Years Experience</span>
+      </div>
+      <div class="snapshot-item">
+        <span class="snapshot-value">100+</span>
+        <span class="snapshot-label">Videos Edited</span>
+      </div>
+      <div class="snapshot-item">
+        <span class="snapshot-value">4</span>
+        <span class="snapshot-label">Post-Production Focus Areas</span>
+      </div>
+    </section>
+
+    <div class="resume-layout">
+      <div class="resume-main-column">
+        <section class="resume-section reveal" id="summary" aria-labelledby="summaryTitle">
+          <p class="section-eyebrow">Profile</p>
+          <h2 id="summaryTitle">Professional Summary</h2>
+          <p class="resume-summary" id="resumeSummary"></p>
+        </section>
+
+        <section class="resume-section reveal" id="expertise" aria-labelledby="expertiseTitle">
+          <p class="section-eyebrow">Core Skills</p>
+          <h2 id="expertiseTitle">Core Expertise</h2>
+          <div class="expertise-grid" id="expertiseGrid"></div>
+        </section>
+
+        <section class="resume-section reveal" id="experience" aria-labelledby="experienceTitle">
+          <p class="section-eyebrow">Experience</p>
+          <h2 id="experienceTitle">Professional Experience</h2>
+          <div class="timeline-list" id="experienceList"></div>
+        </section>
+
+        <section class="resume-section reveal" id="projects" aria-labelledby="projectsTitle">
+          <p class="section-eyebrow">Selected Work</p>
+          <h2 id="projectsTitle">Selected Projects</h2>
+          <div class="project-list" id="resumeProjects"></div>
+        </section>
+      </div>
+
+      <aside class="resume-side-column" aria-label="Additional resume details">
+        <section class="side-section reveal" id="tools" aria-labelledby="toolsTitle">
+          <p class="section-eyebrow">Stack</p>
+          <h2 id="toolsTitle">Tools / Software</h2>
+          <div class="tool-groups" id="toolGroups"></div>
+        </section>
+
+        <section class="side-section reveal" id="education" aria-labelledby="educationTitle">
+          <p class="section-eyebrow">Education</p>
+          <h2 id="educationTitle">Education</h2>
+          <div id="educationList"></div>
+        </section>
+
+        <section class="side-section reveal" id="achievements" aria-labelledby="achievementsTitle">
+          <p class="section-eyebrow">Highlights</p>
+          <h2 id="achievementsTitle">Key Achievements</h2>
+          <ul class="compact-list" id="achievementList"></ul>
+        </section>
+
+        <section class="side-section reveal" id="interests" aria-labelledby="interestsTitle">
+          <p class="section-eyebrow">Interests</p>
+          <h2 id="interestsTitle">Interests</h2>
+          <div class="chip-list" id="interestList"></div>
+        </section>
+
+        <section class="side-section reveal" id="links" aria-labelledby="linksTitle">
+          <p class="section-eyebrow">Contact</p>
+          <h2 id="linksTitle">Contact / Links</h2>
+          <div class="contact-list" id="resumeContactList"></div>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <script src="resume.js" defer></script>
+</body>
+</html>
