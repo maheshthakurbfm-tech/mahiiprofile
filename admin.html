@@ -210,142 +210,19 @@
             <button class="btn-dash-action" id="admin-add-proj-btn">+ Add Project</button>
           </div>
 
-          <!-- ╔══ SHOWREEL 3 VERTICAL REELS SECTION ══╗ -->
+          <!-- ╔══ SHOWREEL DYNAMIC REELS SECTION ══╗ -->
           <div class="editor-card" style="margin-bottom:28px;border-color:rgba(0,168,255,0.3);">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
               <div>
-                <h3 style="margin:0;color:var(--electric-blue);font-size:1.15rem;">🎬 Showreel — 3 Vertical Reels (9:16)</h3>
-                <p style="margin:4px 0 0 0;font-size:0.8rem;color:var(--text-muted);">Manage exactly 3 vertical video reel cards displayed in the public Showreel Accordion.</p>
+                <h3 style="margin:0;color:var(--electric-blue);font-size:1.15rem;">🎬 Showreel — Dynamic Reels (9:16)</h3>
+                <p style="margin:4px 0 0 0;font-size:0.8rem;color:var(--text-muted);">Manage vertical video reel cards displayed dynamically in the public Showreel Accordion.</p>
               </div>
-              <span class="status-indicator-dot"></span>
+              <button type="button" class="btn-dash-action" onclick="addAdminReel()" style="padding:6px 14px;font-size:0.8rem;">+ Add New Reel</button>
             </div>
 
-            <!-- 3 Reel Slot Columns/Tabs -->
-            <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:16px;" id="admin-reels-slots-grid">
-              
-              <!-- REEL SLOT 1 -->
-              <div class="reel-slot-editor-box" style="background:rgba(0,0,0,0.3);border:1px solid var(--glass-border);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px;">
-                <div style="display:flex;align-items:center;justify-content:space-between;">
-                  <span style="font-weight:800;font-size:0.82rem;color:var(--electric-blue);">REEL 01</span>
-                  <button type="button" class="btn-dash-action secondary" style="padding:2px 8px;font-size:0.68rem;color:#ff5555;border-color:rgba(255,85,85,0.3);" onclick="clearReelSlot(0)">Clear</button>
-                </div>
-                <div class="form-group" style="margin-bottom:0;">
-                  <label style="font-size:0.75rem;">Title</label>
-                  <input type="text" id="reel-title-0" placeholder="Reel 1 Title" style="font-size:0.82rem;padding:6px 10px;" />
-                </div>
-                <div class="form-group" style="margin-bottom:0;">
-                  <label style="font-size:0.75rem;">Category / Tag</label>
-                  <input type="text" id="reel-category-0" placeholder="e.g. Commercial Reel" style="font-size:0.82rem;padding:6px 10px;" />
-                </div>
-                <div class="form-group" style="margin-bottom:0;">
-                  <label style="font-size:0.75rem;">Description</label>
-                  <textarea id="reel-desc-0" rows="2" placeholder="Short description..." style="font-size:0.8rem;padding:6px 10px;"></textarea>
-                </div>
-                <div class="form-group" style="margin-bottom:0;">
-                  <label style="font-size:0.75rem;">Cloudinary Video URL</label>
-                  <div style="display:flex;gap:6px;">
-                    <input type="text" id="reel-url-0" placeholder="https://..." style="flex:1;font-size:0.78rem;padding:6px 8px;" oninput="updateReelSlotPreview(0)" />
-                    <button type="button" class="btn-dash-action secondary" onclick="openMediaPicker('reel-url-0')" style="padding:6px 8px;font-size:0.72rem;">📁</button>
-                  </div>
-                  <label class="btn-dash-action" style="cursor:pointer;margin-top:6px;font-size:0.72rem;padding:6px 10px;text-align:center;">
-                    ⬆ Upload Reel Video
-                    <input type="file" accept="video/*" style="display:none;" onchange="uploadReelFile(event, 0, 'video')" />
-                  </label>
-                </div>
-                <div class="form-group" style="margin-bottom:0;">
-                  <label style="font-size:0.75rem;">Poster Image (Optional)</label>
-                  <div style="display:flex;gap:6px;">
-                    <input type="text" id="reel-thumb-0" placeholder="https://..." style="flex:1;font-size:0.78rem;padding:6px 8px;" oninput="updateReelSlotPreview(0)" />
-                    <button type="button" class="btn-dash-action secondary" onclick="openMediaPicker('reel-thumb-0')" style="padding:6px 8px;font-size:0.72rem;">📁</button>
-                  </div>
-                </div>
-                <div id="reel-preview-0" style="aspect-ratio:9/16;border-radius:8px;background:#000;overflow:hidden;display:flex;align-items:center;justify-content:center;border:1px solid var(--glass-border);max-height:180px;">
-                  <span style="font-size:0.72rem;color:var(--text-muted);">Preview 01</span>
-                </div>
-              </div>
-
-              <!-- REEL SLOT 2 -->
-              <div class="reel-slot-editor-box" style="background:rgba(0,0,0,0.3);border:1px solid var(--glass-border);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px;">
-                <div style="display:flex;align-items:center;justify-content:space-between;">
-                  <span style="font-weight:800;font-size:0.82rem;color:var(--electric-blue);">REEL 02</span>
-                  <button type="button" class="btn-dash-action secondary" style="padding:2px 8px;font-size:0.68rem;color:#ff5555;border-color:rgba(255,85,85,0.3);" onclick="clearReelSlot(1)">Clear</button>
-                </div>
-                <div class="form-group" style="margin-bottom:0;">
-                  <label style="font-size:0.75rem;">Title</label>
-                  <input type="text" id="reel-title-1" placeholder="Reel 2 Title" style="font-size:0.82rem;padding:6px 10px;" />
-                </div>
-                <div class="form-group" style="margin-bottom:0;">
-                  <label style="font-size:0.75rem;">Category / Tag</label>
-                  <input type="text" id="reel-category-1" placeholder="e.g. Real Estate" style="font-size:0.82rem;padding:6px 10px;" />
-                </div>
-                <div class="form-group" style="margin-bottom:0;">
-                  <label style="font-size:0.75rem;">Description</label>
-                  <textarea id="reel-desc-1" rows="2" placeholder="Short description..." style="font-size:0.8rem;padding:6px 10px;"></textarea>
-                </div>
-                <div class="form-group" style="margin-bottom:0;">
-                  <label style="font-size:0.75rem;">Cloudinary Video URL</label>
-                  <div style="display:flex;gap:6px;">
-                    <input type="text" id="reel-url-1" placeholder="https://..." style="flex:1;font-size:0.78rem;padding:6px 8px;" oninput="updateReelSlotPreview(1)" />
-                    <button type="button" class="btn-dash-action secondary" onclick="openMediaPicker('reel-url-1')" style="padding:6px 8px;font-size:0.72rem;">📁</button>
-                  </div>
-                  <label class="btn-dash-action" style="cursor:pointer;margin-top:6px;font-size:0.72rem;padding:6px 10px;text-align:center;">
-                    ⬆ Upload Reel Video
-                    <input type="file" accept="video/*" style="display:none;" onchange="uploadReelFile(event, 1, 'video')" />
-                  </label>
-                </div>
-                <div class="form-group" style="margin-bottom:0;">
-                  <label style="font-size:0.75rem;">Poster Image (Optional)</label>
-                  <div style="display:flex;gap:6px;">
-                    <input type="text" id="reel-thumb-1" placeholder="https://..." style="flex:1;font-size:0.78rem;padding:6px 8px;" oninput="updateReelSlotPreview(1)" />
-                    <button type="button" class="btn-dash-action secondary" onclick="openMediaPicker('reel-thumb-1')" style="padding:6px 8px;font-size:0.72rem;">📁</button>
-                  </div>
-                </div>
-                <div id="reel-preview-1" style="aspect-ratio:9/16;border-radius:8px;background:#000;overflow:hidden;display:flex;align-items:center;justify-content:center;border:1px solid var(--glass-border);max-height:180px;">
-                  <span style="font-size:0.72rem;color:var(--text-muted);">Preview 02</span>
-                </div>
-              </div>
-
-              <!-- REEL SLOT 3 -->
-              <div class="reel-slot-editor-box" style="background:rgba(0,0,0,0.3);border:1px solid var(--glass-border);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px;">
-                <div style="display:flex;align-items:center;justify-content:space-between;">
-                  <span style="font-weight:800;font-size:0.82rem;color:var(--electric-blue);">REEL 03</span>
-                  <button type="button" class="btn-dash-action secondary" style="padding:2px 8px;font-size:0.68rem;color:#ff5555;border-color:rgba(255,85,85,0.3);" onclick="clearReelSlot(2)">Clear</button>
-                </div>
-                <div class="form-group" style="margin-bottom:0;">
-                  <label style="font-size:0.75rem;">Title</label>
-                  <input type="text" id="reel-title-2" placeholder="Reel 3 Title" style="font-size:0.82rem;padding:6px 10px;" />
-                </div>
-                <div class="form-group" style="margin-bottom:0;">
-                  <label style="font-size:0.75rem;">Category / Tag</label>
-                  <input type="text" id="reel-category-2" placeholder="e.g. Motion Graphics" style="font-size:0.82rem;padding:6px 10px;" />
-                </div>
-                <div class="form-group" style="margin-bottom:0;">
-                  <label style="font-size:0.75rem;">Description</label>
-                  <textarea id="reel-desc-2" rows="2" placeholder="Short description..." style="font-size:0.8rem;padding:6px 10px;"></textarea>
-                </div>
-                <div class="form-group" style="margin-bottom:0;">
-                  <label style="font-size:0.75rem;">Cloudinary Video URL</label>
-                  <div style="display:flex;gap:6px;">
-                    <input type="text" id="reel-url-2" placeholder="https://..." style="flex:1;font-size:0.78rem;padding:6px 8px;" oninput="updateReelSlotPreview(2)" />
-                    <button type="button" class="btn-dash-action secondary" onclick="openMediaPicker('reel-url-2')" style="padding:6px 8px;font-size:0.72rem;">📁</button>
-                  </div>
-                  <label class="btn-dash-action" style="cursor:pointer;margin-top:6px;font-size:0.72rem;padding:6px 10px;text-align:center;">
-                    ⬆ Upload Reel Video
-                    <input type="file" accept="video/*" style="display:none;" onchange="uploadReelFile(event, 2, 'video')" />
-                  </label>
-                </div>
-                <div class="form-group" style="margin-bottom:0;">
-                  <label style="font-size:0.75rem;">Poster Image (Optional)</label>
-                  <div style="display:flex;gap:6px;">
-                    <input type="text" id="reel-thumb-2" placeholder="https://..." style="flex:1;font-size:0.78rem;padding:6px 8px;" oninput="updateReelSlotPreview(2)" />
-                    <button type="button" class="btn-dash-action secondary" onclick="openMediaPicker('reel-thumb-2')" style="padding:6px 8px;font-size:0.72rem;">📁</button>
-                  </div>
-                </div>
-                <div id="reel-preview-2" style="aspect-ratio:9/16;border-radius:8px;background:#000;overflow:hidden;display:flex;align-items:center;justify-content:center;border:1px solid var(--glass-border);max-height:180px;">
-                  <span style="font-size:0.72rem;color:var(--text-muted);">Preview 03</span>
-                </div>
-              </div>
-
+            <!-- Dynamic Reel Slot Cards Grid -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:16px;" id="admin-reels-slots-grid">
+              <!-- Dynamically rendered by admin.js -->
             </div>
           </div>
 

@@ -169,26 +169,139 @@ function getVal(id) {
   return el ? el.value.trim() : '';
 }
 
-/* ─── ADMIN SHOWREEL 3 REELS MANAGEMENT ─── */
+/* ─── ADMIN SHOWREEL DYNAMIC REELS MANAGEMENT ─── */
+let currentAdminReels = [];
+
 function loadAdminReels(reels) {
-  const reelList = Array.isArray(reels) ? reels : [];
-  for (let i = 0; i < 3; i++) {
-    const r = reelList[i] || {};
-    setVal(`reel-title-${i}`, r.title || '');
-    setVal(`reel-category-${i}`, r.category || '');
-    setVal(`reel-desc-${i}`, r.description || '');
-    setVal(`reel-url-${i}`, r.embedUrl || '');
-    setVal(`reel-thumb-${i}`, r.thumbnail || '');
-    updateReelSlotPreview(i);
-  }
+  currentAdminReels = Array.isArray(reels) ? JSON.parse(JSON.stringify(reels)) : [];
+  renderAdminReels();
 }
+
+function renderAdminReels() {
+  const container = document.getElementById('admin-reels-slots-grid');
+  if (!container) return;
+
+  if (currentAdminReels.length === 0) {
+    container.innerHTML = `
+      <div style="grid-column: 1 / -1; padding: 24px; text-align: center; background: rgba(0,0,0,0.2); border: 1px dashed var(--glass-border); border-radius: 12px;">
+        <p style="margin: 0 0 10px 0; color: var(--text-muted); font-size: 0.85rem;">No vertical reels added yet.</p>
+        <button type="button" class="btn-dash-action" onclick="addAdminReel()" style="padding: 6px 14px; font-size: 0.8rem;">+ Add First Reel</button>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = currentAdminReels.map((r, i) => {
+    const reelNum = (i + 1).toString().padStart(2, '0');
+    return `
+      <div class="reel-slot-editor-box" data-reel-index="${i}" style="background:rgba(0,0,0,0.3);border:1px solid var(--glass-border);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px;position:relative;">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
+          <span style="font-weight:800;font-size:0.82rem;color:var(--electric-blue);">REEL ${reelNum}</span>
+          <div style="display:flex;gap:4px;align-items:center;">
+            ${i > 0 ? `<button type="button" class="btn-dash-action secondary" style="padding:2px 6px;font-size:0.68rem;" onclick="moveAdminReel(${i}, -1)" title="Move Left/Up">◀</button>` : ''}
+            ${i < currentAdminReels.length - 1 ? `<button type="button" class="btn-dash-action secondary" style="padding:2px 6px;font-size:0.68rem;" onclick="moveAdminReel(${i}, 1)" title="Move Right/Down">▶</button>` : ''}
+            <button type="button" class="btn-dash-action secondary" style="padding:2px 6px;font-size:0.68rem;color:#ffaa00;border-color:rgba(255,170,0,0.3);" onclick="clearReelSlot(${i})" title="Clear fields">Clear</button>
+            <button type="button" class="btn-dash-action secondary" style="padding:2px 6px;font-size:0.68rem;color:#ff5555;border-color:rgba(255,85,85,0.3);" onclick="deleteAdminReel(${i})" title="Delete reel">🗑️</button>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label style="font-size:0.75rem;">Title</label>
+          <input type="text" id="reel-title-${i}" value="${escAttr(r.title || '')}" placeholder="Reel Title" style="font-size:0.82rem;padding:6px 10px;" oninput="updateAdminReelData(${i}, 'title', this.value)" />
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label style="font-size:0.75rem;">Category / Tag</label>
+          <input type="text" id="reel-category-${i}" value="${escAttr(r.category || '')}" placeholder="e.g. Commercial Reel" style="font-size:0.82rem;padding:6px 10px;" oninput="updateAdminReelData(${i}, 'category', this.value)" />
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label style="font-size:0.75rem;">Description</label>
+          <textarea id="reel-desc-${i}" rows="2" placeholder="Short description..." style="font-size:0.8rem;padding:6px 10px;" oninput="updateAdminReelData(${i}, 'description', this.value)">${escHtml(r.description || '')}</textarea>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label style="font-size:0.75rem;">Cloudinary Video URL</label>
+          <div style="display:flex;gap:6px;">
+            <input type="text" id="reel-url-${i}" value="${escAttr(r.embedUrl || '')}" placeholder="https://..." style="flex:1;font-size:0.78rem;padding:6px 8px;" oninput="updateAdminReelData(${i}, 'embedUrl', this.value); updateReelSlotPreview(${i})" />
+            <button type="button" class="btn-dash-action secondary" onclick="openMediaPickerForReel(${i}, 'embedUrl')" style="padding:6px 8px;font-size:0.72rem;">📁</button>
+          </div>
+          <label class="btn-dash-action" style="cursor:pointer;margin-top:6px;font-size:0.72rem;padding:6px 10px;text-align:center;display:block;">
+            ⬆ Upload Reel Video
+            <input type="file" accept="video/*" style="display:none;" onchange="uploadReelFile(event, ${i}, 'video')" />
+          </label>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label style="font-size:0.75rem;">Poster Image (Optional)</label>
+          <div style="display:flex;gap:6px;">
+            <input type="text" id="reel-thumb-${i}" value="${escAttr(r.thumbnail || '')}" placeholder="https://..." style="flex:1;font-size:0.78rem;padding:6px 8px;" oninput="updateAdminReelData(${i}, 'thumbnail', this.value); updateReelSlotPreview(${i})" />
+            <button type="button" class="btn-dash-action secondary" onclick="openMediaPickerForReel(${i}, 'thumbnail')" style="padding:6px 8px;font-size:0.72rem;">📁</button>
+          </div>
+        </div>
+        <div id="reel-preview-${i}" style="aspect-ratio:9/16;border-radius:8px;background:#000;overflow:hidden;display:flex;align-items:center;justify-content:center;border:1px solid var(--glass-border);max-height:180px;">
+          <!-- Live Preview -->
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Update previews for all rendered slots
+  currentAdminReels.forEach((_, i) => {
+    updateReelSlotPreview(i);
+  });
+}
+
+window.addAdminReel = function() {
+  const newIndex = currentAdminReels.length + 1;
+  const newReel = {
+    id: `reel-${Date.now()}`,
+    title: `Vertical Reel 0${newIndex}`,
+    category: 'Commercial',
+    description: '',
+    embedUrl: '',
+    thumbnail: '',
+    year: '2025'
+  };
+  currentAdminReels.push(newReel);
+  renderAdminReels();
+  showToast(`Reel 0${newIndex} added to collection!`);
+  playClickSFX();
+};
+
+window.deleteAdminReel = function(index) {
+  if (index < 0 || index >= currentAdminReels.length) return;
+  const removed = currentAdminReels.splice(index, 1);
+  renderAdminReels();
+  showToast(`Deleted Reel (${removed[0]?.title || 'Reel'}).`);
+  playClickSFX();
+};
+
+window.moveAdminReel = function(index, direction) {
+  const newIndex = index + direction;
+  if (newIndex < 0 || newIndex >= currentAdminReels.length) return;
+  const [item] = currentAdminReels.splice(index, 1);
+  currentAdminReels.splice(newIndex, 0, item);
+  renderAdminReels();
+  playClickSFX();
+};
+
+window.updateAdminReelData = function(index, field, value) {
+  if (currentAdminReels[index]) {
+    currentAdminReels[index][field] = value;
+  }
+};
+
+window.openMediaPickerForReel = function(slotIdx, fieldType) {
+  if (fieldType === 'embedUrl') {
+    openMediaPicker(`reel-url-${slotIdx}`);
+  } else {
+    openMediaPicker(`reel-thumb-${slotIdx}`);
+  }
+};
 
 window.updateReelSlotPreview = function(slotIdx) {
   const previewBox = document.getElementById(`reel-preview-${slotIdx}`);
   if (!previewBox) return;
 
-  const url = getVal(`reel-url-${slotIdx}`);
-  const thumb = getVal(`reel-thumb-${slotIdx}`);
+  const r = currentAdminReels[slotIdx] || {};
+  const url = getVal(`reel-url-${slotIdx}`) || r.embedUrl || '';
+  const thumb = getVal(`reel-thumb-${slotIdx}`) || r.thumbnail || '';
 
   if (url) {
     const isDirect = (typeof MediaStorageService !== 'undefined' && MediaStorageService.isDirectVideoUrl)
@@ -220,6 +333,13 @@ window.updateReelSlotPreview = function(slotIdx) {
 };
 
 window.clearReelSlot = function(slotIdx) {
+  if (currentAdminReels[slotIdx]) {
+    currentAdminReels[slotIdx].title = '';
+    currentAdminReels[slotIdx].category = '';
+    currentAdminReels[slotIdx].description = '';
+    currentAdminReels[slotIdx].embedUrl = '';
+    currentAdminReels[slotIdx].thumbnail = '';
+  }
   setVal(`reel-title-${slotIdx}`, '');
   setVal(`reel-category-${slotIdx}`, '');
   setVal(`reel-desc-${slotIdx}`, '');
@@ -250,8 +370,15 @@ window.uploadReelFile = async function(e, slotIdx, fieldType) {
 
     if (fieldType === 'video') {
       setVal(`reel-url-${slotIdx}`, publicUrl);
+      if (currentAdminReels[slotIdx]) {
+        currentAdminReels[slotIdx].embedUrl = publicUrl;
+        currentAdminReels[slotIdx].videoId = assetId;
+      }
     } else {
       setVal(`reel-thumb-${slotIdx}`, publicUrl);
+      if (currentAdminReels[slotIdx]) {
+        currentAdminReels[slotIdx].thumbnail = publicUrl;
+      }
     }
 
     updateReelSlotPreview(slotIdx);
@@ -611,24 +738,25 @@ function initSaveButton() {
     if (linkedin) d.contact.linkedin = linkedin;
     if (instagram) d.contact.instagram = instagram;
 
-    // Showreel 3 Reels fields
+    // Showreel Dynamic Reels collection
     const reelSlots = [];
-    for (let i = 0; i < 3; i++) {
-      const rTitle = getVal(`reel-title-${i}`);
-      const rCat = getVal(`reel-category-${i}`);
-      const rDesc = getVal(`reel-desc-${i}`);
-      const rUrl = getVal(`reel-url-${i}`);
-      const rThumb = getVal(`reel-thumb-${i}`);
+    currentAdminReels.forEach((r, i) => {
+      const rTitle = getVal(`reel-title-${i}`) || r.title;
+      const rCat = getVal(`reel-category-${i}`) || r.category;
+      const rDesc = getVal(`reel-desc-${i}`) !== undefined ? getVal(`reel-desc-${i}`) : r.description;
+      const rUrl = getVal(`reel-url-${i}`) || r.embedUrl;
+      const rThumb = getVal(`reel-thumb-${i}`) || r.thumbnail;
       reelSlots.push({
-        id: `reel-${i + 1}`,
+        id: r.id || `reel-${i + 1}`,
         title: rTitle || `Vertical Reel 0${i + 1}`,
         category: rCat || '',
         description: rDesc || '',
         embedUrl: rUrl || '',
         thumbnail: rThumb || '',
-        year: '2025'
+        videoId: r.videoId || '',
+        year: r.year || '2025'
       });
-    }
+    });
     d.showreelReels = reelSlots;
 
     // Project Editor fields
