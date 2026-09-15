@@ -279,7 +279,7 @@ body:has(button:hover) #cursor-ring {
   align-items: flex-end;
   gap: 40px;
   min-height: calc(100vh - 60px);
-  transform: translateY(-220px);
+  transform: translateY(-150px);
 }
 
 /* BG WATERMARK */
@@ -678,7 +678,12 @@ section {
   .section-ambient-glow {
     filter: blur(75px);
   }
-  .glow-top-left, .glow-top-right, .glow-bottom-left, .glow-bottom-right, .glow-center-right {
+
+  .glow-top-left,
+  .glow-top-right,
+  .glow-bottom-left,
+  .glow-bottom-right,
+  .glow-center-right {
     width: 380px;
     height: 380px;
     opacity: 0.35;
@@ -689,7 +694,12 @@ section {
   .section-ambient-glow {
     filter: blur(55px);
   }
-  .glow-top-left, .glow-top-right, .glow-bottom-left, .glow-bottom-right, .glow-center-right {
+
+  .glow-top-left,
+  .glow-top-right,
+  .glow-bottom-left,
+  .glow-bottom-right,
+  .glow-center-right {
     width: 260px;
     height: 260px;
     opacity: 0.30;
@@ -1037,24 +1047,24 @@ section {
 
 .focus-card-bg-editing {
   background-image: linear-gradient(to left, rgba(10, 18, 30, 0.2), rgba(10, 18, 30, 0.95)),
-                    url('assets/bg_editing.jpg');
+    url('assets/bg_editing.jpg');
 }
 
 .focus-card-bg-motion {
   background-image: linear-gradient(to left, rgba(10, 18, 30, 0.15), rgba(10, 18, 30, 0.95)),
-                    url('assets/bg_motion.jpg');
+    url('assets/bg_motion.jpg');
 }
 
 .focus-card-bg-color {
   background-image: linear-gradient(to left, rgba(10, 18, 30, 0.2), rgba(10, 18, 30, 0.95)),
-                    url('assets/bg_color.png');
+    url('assets/bg_color.png');
 }
 
 .focus-card-bg-sound {
   background-size: cover;
   background-position: center right;
   background-image: linear-gradient(to left, rgba(10, 18, 30, 0.1), rgba(10, 18, 30, 0.95)),
-                    url('assets/bg_sound.png');
+    url('assets/bg_sound.png');
 }
 
 /* STAT CARDS */
@@ -1157,9 +1167,9 @@ section {
   opacity: 0.75;
   backdrop-filter: blur(10px);
   transition: opacity 0.3s var(--ease-smooth),
-              transform 0.3s var(--ease-smooth),
-              border-color 0.3s var(--ease-smooth),
-              color 0.3s var(--ease-smooth);
+    transform 0.3s var(--ease-smooth),
+    border-color 0.3s var(--ease-smooth),
+    color 0.3s var(--ease-smooth);
 }
 
 .showreel-arrow-left {
@@ -1193,18 +1203,24 @@ section {
 }
 
 @keyframes showreelWiggleLeft {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(-50%) translateX(0);
   }
+
   50% {
     transform: translateY(-50%) translateX(-4px);
   }
 }
 
 @keyframes showreelWiggleRight {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(-50%) translateX(0);
   }
+
   50% {
     transform: translateY(-50%) translateX(4px);
   }
@@ -1215,9 +1231,11 @@ section {
     width: 38px;
     height: 38px;
   }
+
   .showreel-arrow-left {
     left: 4px;
   }
+
   .showreel-arrow-right {
     right: 4px;
   }
@@ -1261,10 +1279,10 @@ section {
   cursor: pointer;
   transform-origin: center center;
   transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1),
-              opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 0.4s var(--ease-smooth),
-              box-shadow 0.4s var(--ease-smooth),
-              filter 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.4s var(--ease-smooth),
+    box-shadow 0.4s var(--ease-smooth),
+    filter 0.65s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform, opacity, filter;
 }
 
@@ -1420,6 +1438,7 @@ section {
   line-height: 1.35;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -1489,10 +1508,12 @@ section {
   .showreel-carousel-viewport {
     height: 420px;
   }
+
   .reel-card {
     width: 210px;
     height: 380px;
   }
+
   .reel-nav-btn {
     padding: 6px 14px;
     font-size: 0.72rem;
@@ -2052,6 +2073,7 @@ section {
   color: var(--electric-blue);
   background: linear-gradient(135deg, #00a8ff 0%, #0066ff 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   text-shadow: 0 0 35px rgba(0, 168, 255, 0.4);
 }
@@ -3129,8 +3151,10 @@ footer {
 
 /* ── DEDICATED MOBILE BREAKPOINTS (<= 768px & <= 480px) ── */
 @media (max-width: 768px) {
+
   /* GLOBAL SAFETY */
-  html, body {
+  html,
+  body {
     overflow-x: hidden !important;
     max-width: 100vw !important;
   }

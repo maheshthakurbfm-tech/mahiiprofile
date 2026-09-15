@@ -63,6 +63,95 @@ function sendJson(res, statusCode, data) {
   res.end(jsonStr);
 }
 
+// ╔═══════════════════════════════════════════════════════════╗
+// ║ AUTO PUBLISH & GIT SYNC SERVICE                          ║
+// ╚═══════════════════════════════════════════════════════════╝
+
+const { execSync, exec } = require('child_process');
+
+function autoPublishToGitAndVercel() {
+  const result = {
+    gitCommitted: false,
+    gitPushed: false,
+    vercelDeployed: false,
+    details: ''
+  };
+
+  try {
+    // 1. Stage and commit data.json
+    try {
+      execSync('git add data.json', { cwd: ROOT_DIR, stdio: ['pipe', 'pipe', 'pipe'] });
+      
+      const diffStaged = execSync('git diff --cached --name-only data.json', {
+        cwd: ROOT_DIR,
+        encoding: 'utf8',
+        stdio: ['pipe', 'pipe', 'pipe']
+      }).trim();
+
+      if (diffStaged) {
+        execSync('git commit -m "cms: update site data"', {
+          cwd: ROOT_DIR,
+          stdio: ['pipe', 'pipe', 'pipe']
+        });
+        result.gitCommitted = true;
+        console.log('[CMS AUTO-GIT] Committed data.json changes.');
+      } else {
+        console.log('[CMS AUTO-GIT] data.json has no new changes to commit.');
+      }
+    } catch (gitErr) {
+      console.warn('[CMS AUTO-GIT WARNING] Git stage/commit error:', gitErr.message);
+    }
+
+    // 2. Git Push to GitHub
+    try {
+      execSync('git push origin HEAD', {
+        cwd: ROOT_DIR,
+        stdio: ['pipe', 'pipe', 'pipe'],
+        timeout: 15000
+      });
+      result.gitPushed = true;
+      console.log('[CMS AUTO-GIT] Pushed data.json to GitHub repository.');
+    } catch (pushErr) {
+      try {
+        execSync('git push origin main', {
+          cwd: ROOT_DIR,
+          stdio: ['pipe', 'pipe', 'pipe'],
+          timeout: 15000
+        });
+        result.gitPushed = true;
+        console.log('[CMS AUTO-GIT] Pushed data.json to GitHub main branch.');
+      } catch (fallbackErr) {
+        console.warn('[CMS AUTO-GIT WARNING] Git push failed:', pushErr.message);
+      }
+    }
+
+    // 3. Vercel Production Deployment
+    if (result.gitPushed) {
+      result.vercelDeployed = true;
+    }
+
+    // Trigger vercel CLI deployment in background without blocking server event loop
+    try {
+      exec('vercel deploy --prod --yes', { cwd: ROOT_DIR }, (vErr, vStdout, vStderr) => {
+        if (vErr) {
+          console.warn('[CMS AUTO-VERCEL] Background vercel deploy info:', vErr.message);
+        } else {
+          console.log('[CMS AUTO-VERCEL] Direct production deployment completed successfully.');
+        }
+      });
+    } catch (vErr) {
+      console.warn('[CMS AUTO-VERCEL WARNING] Vercel CLI invocation note:', vErr.message);
+    }
+
+    result.details = `Git Pushed: ${result.gitPushed ? 'YES' : 'NO'}, Vercel Sync: ${result.vercelDeployed ? 'ACTIVE' : 'PENDING'}`;
+  } catch (err) {
+    console.error('[CMS AUTO-PUBLISH ERROR]', err);
+    result.details = err.message;
+  }
+
+  return result;
+}
+
 const server = http.createServer((req, res) => {
   const parsedUrl = url.parse(req.url, true);
   let pathname = decodeURIComponent(parsedUrl.pathname);
@@ -96,62 +185,6 @@ const server = http.createServer((req, res) => {
       return sendJson(res, 500, { success: false, error: 'Failed to read data.json: ' + err.message });
     }
   }
-
-const { execSync } = require('child_process');
-
-function autoPublishToGitAndVercel() {
-  const result = {
-    gitCommitted: false,
-    gitPushed: false,
-    vercelDeployed: false,
-    details: ''
-  };
-
-  try {
-    // Check if data.json was modified in Git
-    const statusOutput = execSync('git status --porcelain data.json', {
-      cwd: ROOT_DIR,
-      encoding: 'utf8',
-      stdio: ['pipe', 'pipe', 'pipe']
-    }).trim();
-
-    if (statusOutput) {
-      // Stage only data.json
-      execSync('git add data.json', { cwd: ROOT_DIR, stdio: ['pipe', 'pipe', 'pipe'] });
-      // Commit only data.json
-      execSync('git commit -m "cms: update site data"', { cwd: ROOT_DIR, stdio: ['pipe', 'pipe', 'pipe'] });
-      result.gitCommitted = true;
-      console.log('[CMS AUTO-GIT] Committed data.json changes.');
-    } else {
-      console.log('[CMS AUTO-GIT] data.json has no uncommitted changes.');
-    }
-
-    // Attempt Git Push if origin remote exists
-    try {
-      execSync('git push origin main', { cwd: ROOT_DIR, stdio: ['pipe', 'pipe', 'pipe'] });
-      result.gitPushed = true;
-      console.log('[CMS AUTO-GIT] Pushed data.json to GitHub main branch.');
-    } catch (pushErr) {
-      console.warn('[CMS AUTO-GIT WARNING] Git push failed or remote not reachable:', pushErr.message);
-    }
-
-    // Direct Vercel Production Deployment Sync
-    try {
-      execSync('vercel deploy --prod --yes', { cwd: ROOT_DIR, stdio: ['pipe', 'pipe', 'pipe'], timeout: 60000 });
-      result.vercelDeployed = true;
-      console.log('[CMS AUTO-VERCEL] Production deployment synced to Vercel (https://mahiiprofile.vercel.app).');
-    } catch (vErr) {
-      console.warn('[CMS AUTO-VERCEL WARNING] Vercel deploy command warning:', vErr.message);
-    }
-
-    result.details = `Git: ${result.gitPushed ? 'pushed' : (result.gitCommitted ? 'committed' : 'synced')}, Vercel: ${result.vercelDeployed ? 'deployed' : 'pending'}`;
-  } catch (err) {
-    console.error('[CMS AUTO-PUBLISH ERROR]', err);
-    result.details = err.message;
-  }
-
-  return result;
-}
 
   // 2. POST /api/save-data
   if (req.method === 'POST' && pathname === '/api/save-data') {
