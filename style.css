@@ -279,7 +279,7 @@ body:has(button:hover) #cursor-ring {
   align-items: flex-end;
   gap: 40px;
   min-height: calc(100vh - 60px);
-  transform: translateY(-150px);
+  transform: translateY(-60px);
 }
 
 /* BG WATERMARK */
