@@ -909,24 +909,33 @@ section {
   }
 }
 
-.stage-label-text {
+.stage-heading-title {
   font-family: var(--font-display);
-  font-size: 0.88rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-size: clamp(1.8rem, 3.2vw, 2.6rem);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
   color: #ffffff;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+}
+
+.stage-heading-title span {
+  color: var(--electric-blue);
+  margin-left: 0.28em;
 }
 
 .stage-header-badge {
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--electric-blue);
   background: rgba(0, 168, 255, 0.08);
-  border: 1px solid rgba(0, 168, 255, 0.22);
-  padding: 4px 12px;
+  border: 1px solid rgba(0, 168, 255, 0.25);
+  box-shadow: 0 0 15px rgba(0, 168, 255, 0.1);
+  padding: 6px 14px;
   border-radius: 100px;
 }
 
