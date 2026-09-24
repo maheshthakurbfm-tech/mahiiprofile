@@ -999,6 +999,14 @@ function applyHeroData() {
   if (greetBold) greetBold.textContent = 'Hi';
   if (greetThin) greetThin.textContent = "I'm";
 
+  // Role pills in Hero Right
+  if (h.roles && Array.isArray(h.roles) && h.roles.length > 0) {
+    const heroRight = document.getElementById('hero-right') || document.querySelector('.hero-right');
+    if (heroRight) {
+      heroRight.innerHTML = h.roles.map(r => `<span class="role-pill">${r}</span>`).join('\n        ');
+    }
+  }
+
   // Contact
   if (siteData.contact && siteData.contact.email) {
     const emailLinks = document.querySelectorAll('.contact-email, [href^="mailto:"]');
