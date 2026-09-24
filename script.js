@@ -1017,6 +1017,133 @@ function applyHeroData() {
       }
     });
   }
+
+  // Sync Featured Video in About section
+  if (siteData.about && siteData.about.featuredWork) {
+    const fw = siteData.about.featuredWork;
+    const video = document.getElementById('about-highlight-video');
+    const titleEl = document.getElementById('about-highlight-title');
+    if (video && fw.videoUrl && video.src !== fw.videoUrl) {
+      video.src = fw.videoUrl;
+    }
+    if (titleEl && fw.title) {
+      titleEl.textContent = fw.title;
+    }
+  }
+}
+
+/* ─── ABOUT FEATURED HIGHLIGHT VIDEO PLAYER ─── */
+function initAboutHighlightPlayer() {
+  const container = document.getElementById('about-video-container');
+  const video = document.getElementById('about-highlight-video');
+  const muteBtn = document.getElementById('about-mute-btn');
+  const fullscreenBtn = document.getElementById('about-fullscreen-btn');
+  const progressFill = document.getElementById('about-video-progress');
+  const titleEl = document.getElementById('about-highlight-title');
+
+  if (!video) return;
+
+  // Sync dynamic video source from siteData if provided
+  if (siteData && siteData.about && siteData.about.featuredWork) {
+    const fw = siteData.about.featuredWork;
+    if (fw.videoUrl && video.src !== fw.videoUrl) {
+      video.src = fw.videoUrl;
+    }
+    if (fw.title && titleEl) {
+      titleEl.textContent = fw.title;
+    }
+  }
+
+  // Play/Pause on container click
+  if (container) {
+    container.addEventListener('click', (e) => {
+      if (e.target.closest('.highlight-progress-bar')) return;
+
+      if (video.paused) {
+        video.play().then(() => {
+          container.classList.remove('is-paused');
+        }).catch(() => {});
+      } else {
+        video.pause();
+        container.classList.add('is-paused');
+      }
+    });
+  }
+
+  video.addEventListener('play', () => {
+    if (container) container.classList.remove('is-paused');
+  });
+
+  video.addEventListener('pause', () => {
+    if (container) container.classList.add('is-paused');
+  });
+
+  // Mute / Unmute Toggle
+  if (muteBtn) {
+    muteBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      video.muted = !video.muted;
+      const icon = muteBtn.querySelector('.audio-icon');
+      if (icon) {
+        icon.textContent = video.muted ? '🔇' : '🔊';
+      }
+      muteBtn.style.color = video.muted ? '' : 'var(--electric-blue)';
+      muteBtn.style.borderColor = video.muted ? '' : 'var(--electric-blue)';
+    });
+  }
+
+  // Fullscreen Toggle
+  if (fullscreenBtn) {
+    fullscreenBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!document.fullscreenElement) {
+        if (container.requestFullscreen) container.requestFullscreen();
+        else if (video.requestFullscreen) video.requestFullscreen();
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    });
+  }
+
+  // Progress update
+  video.addEventListener('timeupdate', () => {
+    if (progressFill && video.duration) {
+      const pct = (video.currentTime / video.duration) * 100;
+      progressFill.style.width = `${pct}%`;
+    }
+  });
+
+  // Progress bar scrub
+  const progressBar = document.querySelector('.highlight-progress-bar');
+  if (progressBar) {
+    progressBar.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const rect = progressBar.getBoundingClientRect();
+      const pos = (e.clientX - rect.left) / rect.width;
+      if (video.duration) {
+        video.currentTime = pos * video.duration;
+      }
+    });
+  }
+
+  // Auto play/pause with IntersectionObserver for smooth performance
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          if (video.paused && !container.classList.contains('is-paused')) {
+            video.play().catch(() => {});
+          }
+        } else {
+          if (!video.paused) {
+            video.pause();
+          }
+        }
+      });
+    }, { threshold: 0.25 });
+
+    observer.observe(video);
+  }
 }
 
 /* ─── GSAP HERO ANIMATIONS ─── */
@@ -1775,6 +1902,7 @@ async function boot() {
   try {
     await loadData();
     try { applyHeroData(); } catch (e) { console.error('Error applying hero data:', e); }
+    try { initAboutHighlightPlayer(); } catch (e) { console.error('Error init about highlight player:', e); }
     try { renderAccordion(); } catch (e) { console.error('Error rendering accordion:', e); }
     try { renderSoftware(); } catch (e) { console.error('Error rendering software grid:', e); }
     try { initSoundToggle(); } catch (e) { console.error('Error init sound toggle:', e); }

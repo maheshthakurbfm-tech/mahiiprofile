@@ -155,170 +155,86 @@
           second earns its place on screen.</p>
       </div>
 
-      <div class="about-grid">
+      <div class="about-main-wrapper">
+        <!-- Bio text -->
+        <p class="about-bio reveal-up">
+          I'm <strong>Mahesh Thakur</strong>, a Video Editor from India with 2.5+ years of experience. I work across
+          video editing, motion graphics, color grading, and sound, with a focus on clean work, strong pacing, and
+          attention to detail. I'm looking for a team where I can put my skills to their best use, keep learning, take
+          on new challenges, and contribute to the growth of the work and the company along the way.
+        </p>
 
-        <!-- Portrait -->
-        <div class="about-portrait-col reveal-up">
-          <div class="about-portrait-frame">
-            <img src="assets/hero image2.png"
-              onerror="this.style.background='linear-gradient(160deg,#00A8FF15,#020408)';this.style.minHeight='380px';this.src=''"
-              alt="Mahesh Thakur Portrait" />
-            <div class="about-portrait-accent"></div>
-          </div>
-        </div>
+        <!-- LARGE FEATURED HIGHLIGHT VIDEO SHOWCASE (30-35s) -->
+        <div class="about-highlight-showcase reveal-up" id="about-highlight-showcase">
+          <div class="highlight-showcase-glow" aria-hidden="true"></div>
 
-        <!-- Content -->
-        <div class="about-content-col">
-          <p class="about-bio reveal-up">
-            I'm <strong>Mahesh Thakur</strong>, a Video Editor from India with 2.5+ years of experience. I work across
-            video editing, motion graphics, color grading, and sound, with a focus on clean work, strong pacing, and
-            attention to detail. I'm looking for a team where I can put my skills to their best use, keep learning, take
-            on new challenges, and contribute to the growth of the work and the company along the way.
-          </p>
-
-          <div class="about-focus-grid">
-            <!-- Card 01: Video Editing -->
-            <div class="focus-card focus-card-v2 reveal-up">
-              <div class="focus-card-bg-layer focus-card-bg-editing"></div>
-              <div class="focus-card-top">
-                <div class="focus-icon-box">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="2" y="4" width="20" height="16" rx="2.5"></rect>
-                    <path d="m10 9 5 3-5 3V9Z" fill="currentColor"></path>
-                  </svg>
-                </div>
-                <div class="focus-card-num-wrap">
-                  <span class="focus-card-num">01</span>
-                  <span class="focus-card-num-line"></span>
-                </div>
+          <div class="highlight-player-card glass-card">
+            <!-- Player Header -->
+            <div class="highlight-player-header">
+              <div class="highlight-badge-pill">
+                <span class="highlight-live-dot"></span>
+                <span class="highlight-badge-text">FEATURED WORK • 30-35s HIGHLIGHT REEL</span>
               </div>
-
-              <h4 class="focus-card-title">VIDEO EDITING</h4>
-
-              <div class="focus-card-footer">
-                <div class="focus-card-tags">
-                  <span>PREMIERE PRO</span>
-                  <span class="tag-sep">|</span>
-                  <span>AFTER EFFECTS</span>
-                </div>
-                <div class="focus-card-arrow" aria-hidden="true">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                    <polyline points="12 5 19 12 12 19"></polyline>
+              <div class="highlight-player-meta">
+                <span class="highlight-work-title" id="about-highlight-title">DS Group Documentary & Narrative Motion Edit</span>
+              </div>
+              <div class="highlight-quick-actions">
+                <button class="highlight-control-btn" id="about-mute-btn" title="Toggle Audio" aria-label="Toggle Audio">
+                  <span class="audio-icon">🔇</span>
+                </button>
+                <button class="highlight-control-btn" id="about-fullscreen-btn" title="Fullscreen" aria-label="Fullscreen">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
                   </svg>
-                </div>
+                </button>
               </div>
             </div>
 
-            <!-- Card 02: Motion Graphics -->
-            <div class="focus-card focus-card-v2 reveal-up">
-              <div class="focus-card-bg-layer focus-card-bg-motion"></div>
-              <div class="focus-card-top">
-                <div class="focus-icon-box">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            <!-- Video Container -->
+            <div class="highlight-video-wrapper" id="about-video-container">
+              <video
+                id="about-highlight-video"
+                class="highlight-video-element"
+                src="https://res.cloudinary.com/esvwgoxe/video/upload/v1789416404/DS_Group_Documentry.mp4"
+                poster="assets/bg_editing.jpg"
+                playsinline
+                loop
+                muted
+                autoplay
+                preload="metadata"
+              ></video>
+
+              <!-- Play/Pause Overlay -->
+              <div class="highlight-overlay-play" id="about-play-overlay">
+                <div class="highlight-play-icon">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
                   </svg>
-                </div>
-                <div class="focus-card-num-wrap">
-                  <span class="focus-card-num">02</span>
-                  <span class="focus-card-num-line"></span>
                 </div>
               </div>
 
-              <h4 class="focus-card-title">MOTION GRAPHICS</h4>
-
-              <div class="focus-card-footer">
-                <div class="focus-card-tags">
-                  <span>AFTER EFFECTS</span>
-                  <span class="tag-sep">|</span>
-                  <span>CINEMA 4D</span>
-                </div>
-                <div class="focus-card-arrow" aria-hidden="true">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                    <polyline points="12 5 19 12 12 19"></polyline>
-                  </svg>
-                </div>
+              <!-- Live Progress Scrubber Bar -->
+              <div class="highlight-progress-bar">
+                <div class="highlight-progress-fill" id="about-video-progress"></div>
               </div>
             </div>
 
-            <!-- Card 03: Color Grading -->
-            <div class="focus-card focus-card-v2 reveal-up">
-              <div class="focus-card-bg-layer focus-card-bg-color"></div>
-              <div class="focus-card-top">
-                <div class="focus-icon-box">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="9"></circle>
-                    <path d="M12 3a9 9 0 0 1 9 9 9 9 0 0 1-9 9V3z" fill="currentColor" opacity="0.35"></path>
-                    <circle cx="12" cy="12" r="3"></circle>
-                  </svg>
-                </div>
-                <div class="focus-card-num-wrap">
-                  <span class="focus-card-num">03</span>
-                  <span class="focus-card-num-line"></span>
-                </div>
+            <!-- Player Footer Info -->
+            <div class="highlight-player-footer">
+              <div class="highlight-tags">
+                <span class="highlight-tag">PREMIERE PRO</span>
+                <span class="highlight-tag">AFTER EFFECTS</span>
+                <span class="highlight-tag">DAVINCI RESOLVE</span>
+                <span class="highlight-tag">CINEMATIC COLOR</span>
+                <span class="highlight-tag">4K MASTER</span>
               </div>
-
-              <h4 class="focus-card-title">COLOR GRADING</h4>
-
-              <div class="focus-card-footer">
-                <div class="focus-card-tags">
-                  <span>DAVINCI RESOLVE</span>
-                  <span class="tag-sep">|</span>
-                  <span>LOOK DEV</span>
-                </div>
-                <div class="focus-card-arrow" aria-hidden="true">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                    <polyline points="12 5 19 12 12 19"></polyline>
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            <!-- Card 04: Sound Design -->
-            <div class="focus-card focus-card-v2 reveal-up">
-              <div class="focus-card-bg-layer focus-card-bg-sound"></div>
-              <div class="focus-card-top">
-                <div class="focus-icon-box">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M2 10v4"></path>
-                    <path d="M6 7v10"></path>
-                    <path d="M10 4v16"></path>
-                    <path d="M14 8v8"></path>
-                    <path d="M18 6v12"></path>
-                    <path d="M22 11v2"></path>
-                  </svg>
-                </div>
-                <div class="focus-card-num-wrap">
-                  <span class="focus-card-num">04</span>
-                  <span class="focus-card-num-line"></span>
-                </div>
-              </div>
-
-              <h4 class="focus-card-title">SOUND DESIGN</h4>
-
-              <div class="focus-card-footer">
-                <div class="focus-card-tags">
-                  <span>AUDITION</span>
-                  <span class="tag-sep">|</span>
-                  <span>SOUND FX</span>
-                </div>
-                <div class="focus-card-arrow" aria-hidden="true">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                    <polyline points="12 5 19 12 12 19"></polyline>
-                  </svg>
-                </div>
-              </div>
+              <a href="#projects" class="highlight-explore-link">
+                <span>View Full Showcase</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </a>
             </div>
           </div>
         </div>
