@@ -868,7 +868,66 @@ section {
   position: relative;
   width: 100%;
   max-width: 1040px;
-  margin: 72px auto 0 auto;
+  margin: 64px auto 0 auto;
+}
+
+/* Stage Header Bar Above Video */
+.stage-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6px 14px 6px;
+  position: relative;
+  z-index: 3;
+}
+
+.stage-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stage-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--electric-blue);
+  box-shadow: 0 0 12px var(--electric-blue);
+  animation: stageDotPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes stageDotPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(0, 168, 255, 0.8);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.85);
+    box-shadow: 0 0 4px rgba(0, 168, 255, 0.3);
+  }
+}
+
+.stage-label-text {
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.stage-header-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--electric-blue);
+  background: rgba(0, 168, 255, 0.08);
+  border: 1px solid rgba(0, 168, 255, 0.22);
+  padding: 4px 12px;
+  border-radius: 100px;
 }
 
 /* Soft organic ambient haze behind the frame — NOT a rectangular box */
