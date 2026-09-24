@@ -1057,7 +1057,7 @@ function initAboutHighlightPlayer() {
   // Play/Pause on container click
   if (container) {
     container.addEventListener('click', (e) => {
-      if (e.target.closest('.highlight-progress-bar')) return;
+      if (e.target.closest('.media-timeline-bar') || e.target.closest('.media-corner-controls') || e.target.closest('.highlight-progress-bar')) return;
 
       if (video.paused) {
         video.play().then(() => {
@@ -1114,7 +1114,7 @@ function initAboutHighlightPlayer() {
   });
 
   // Progress bar scrub
-  const progressBar = document.querySelector('.highlight-progress-bar');
+  const progressBar = document.querySelector('.media-timeline-bar, .highlight-progress-bar');
   if (progressBar) {
     progressBar.addEventListener('click', (e) => {
       e.stopPropagation();
