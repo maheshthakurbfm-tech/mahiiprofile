@@ -164,7 +164,7 @@
         <div class="stage-ambient-light" aria-hidden="true"></div>
 
         <div class="cinematic-media-frame">
-          <!-- Video Container -->
+          <!-- Video Viewport with Native Controls -->
           <div class="media-frame-viewport" id="about-video-container">
             <video
               id="about-highlight-video"
@@ -173,36 +173,9 @@
               poster="assets/bg_editing.jpg"
               playsinline
               loop
-              muted
-              autoplay
+              controls
               preload="metadata"
             ></video>
-
-            <!-- Minimalist Floating Play/Pause State -->
-            <div class="media-overlay-play" id="about-play-overlay">
-              <div class="media-play-disc" aria-label="Play Video">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-                  <polygon points="6 4 20 12 6 20 6 4"></polygon>
-                </svg>
-              </div>
-            </div>
-
-            <!-- Subtle Timeline Scrubber -->
-            <div class="media-timeline-bar">
-              <div class="media-timeline-fill" id="about-video-progress"></div>
-            </div>
-
-            <!-- Discrete On-Video Quick Controls -->
-            <div class="media-corner-controls">
-              <button class="media-icon-btn" id="about-mute-btn" title="Toggle Sound" aria-label="Toggle Sound">
-                <span class="audio-icon">🔇</span>
-              </button>
-              <button class="media-icon-btn" id="about-fullscreen-btn" title="Fullscreen" aria-label="Fullscreen">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
-                </svg>
-              </button>
-            </div>
           </div>
 
           <!-- Editorial Meta Strip Below Frame -->

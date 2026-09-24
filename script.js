@@ -1032,13 +1032,43 @@ function applyHeroData() {
   }
 }
 
-/* ─── ABOUT FEATURED HIGHLIGHT VIDEO PLAYER ─── */
+/* ─── ABOUT FEATURED HIGHLIGHT VIDEO PLAYER (NATIVE CONTROLS + AUTO-PLAY + AUDIO UNLOCK) ─── */
+let userAudioUnlocked = false;
+let globalUserAudioState = {
+  muted: false,
+  volume: 1.0,
+  hasExplicitUserPreference: false
+};
+
+// Global audio unlock listener on first user interaction anywhere on the document
+function setupGlobalAudioUnlock() {
+  if (userAudioUnlocked) return;
+  const unlockEvents = ['click', 'pointerdown', 'keydown', 'touchstart'];
+
+  const handleFirstInteraction = () => {
+    userAudioUnlocked = true;
+    unlockEvents.forEach(evt => document.removeEventListener(evt, handleFirstInteraction, { capture: true }));
+
+    // If there is an active playing video in About section, unmute it smoothly if user hasn't explicitly muted
+    const activeVideo = document.getElementById('about-highlight-video');
+    if (activeVideo && !activeVideo.paused) {
+      if (!globalUserAudioState.hasExplicitUserPreference || !globalUserAudioState.muted) {
+        activeVideo.muted = false;
+        activeVideo.volume = globalUserAudioState.volume;
+        activeVideo.play().catch(() => {});
+      }
+    }
+  };
+
+  unlockEvents.forEach(evt => document.addEventListener(evt, handleFirstInteraction, { capture: true, once: false }));
+}
+
+// Ensure unlock listener is set up immediately
+setupGlobalAudioUnlock();
+
 function initAboutHighlightPlayer() {
   const container = document.getElementById('about-video-container');
   const video = document.getElementById('about-highlight-video');
-  const muteBtn = document.getElementById('about-mute-btn');
-  const fullscreenBtn = document.getElementById('about-fullscreen-btn');
-  const progressFill = document.getElementById('about-video-progress');
   const titleEl = document.getElementById('about-highlight-title');
 
   if (!video) return;
@@ -1054,93 +1084,76 @@ function initAboutHighlightPlayer() {
     }
   }
 
-  // Play/Pause on container click
-  if (container) {
-    container.addEventListener('click', (e) => {
-      if (e.target.closest('.media-timeline-bar') || e.target.closest('.media-corner-controls') || e.target.closest('.highlight-progress-bar')) return;
+  // Track manual user pauses so IntersectionObserver does not fight user intentions
+  let userManuallyPaused = false;
+  let isProgrammaticPause = false;
 
-      if (video.paused) {
-        video.play().then(() => {
-          container.classList.remove('is-paused');
-        }).catch(() => {});
-      } else {
-        video.pause();
-        container.classList.add('is-paused');
-      }
-    });
-  }
+  // Listen for native volume / mute changes to carry state forward
+  video.addEventListener('volumechange', () => {
+    globalUserAudioState.muted = video.muted;
+    globalUserAudioState.volume = video.volume;
+    globalUserAudioState.hasExplicitUserPreference = true;
+  });
 
+  // Listen for manual native play / pause events
   video.addEventListener('play', () => {
+    userManuallyPaused = false;
     if (container) container.classList.remove('is-paused');
   });
 
   video.addEventListener('pause', () => {
+    if (!isProgrammaticPause) {
+      userManuallyPaused = true;
+    }
     if (container) container.classList.add('is-paused');
   });
 
-  // Mute / Unmute Toggle
-  if (muteBtn) {
-    muteBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      video.muted = !video.muted;
-      const icon = muteBtn.querySelector('.audio-icon');
-      if (icon) {
-        icon.textContent = video.muted ? '🔇' : '🔊';
-      }
-      muteBtn.style.color = video.muted ? '' : 'var(--electric-blue)';
-      muteBtn.style.borderColor = video.muted ? '' : 'var(--electric-blue)';
-    });
-  }
-
-  // Fullscreen Toggle
-  if (fullscreenBtn) {
-    fullscreenBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (!document.fullscreenElement) {
-        if (container.requestFullscreen) container.requestFullscreen();
-        else if (video.requestFullscreen) video.requestFullscreen();
-      } else {
-        if (document.exitFullscreen) document.exitFullscreen();
-      }
-    });
-  }
-
-  // Progress update
-  video.addEventListener('timeupdate', () => {
-    if (progressFill && video.duration) {
-      const pct = (video.currentTime / video.duration) * 100;
-      progressFill.style.width = `${pct}%`;
-    }
-  });
-
-  // Progress bar scrub
-  const progressBar = document.querySelector('.media-timeline-bar, .highlight-progress-bar');
-  if (progressBar) {
-    progressBar.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const rect = progressBar.getBoundingClientRect();
-      const pos = (e.clientX - rect.left) / rect.width;
-      if (video.duration) {
-        video.currentTime = pos * video.duration;
-      }
-    });
-  }
-
-  // Auto play/pause with IntersectionObserver for smooth performance
+  // IntersectionObserver for 0.55 (55%) visibility threshold
   if ('IntersectionObserver' in window) {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          if (video.paused && !container.classList.contains('is-paused')) {
-            video.play().catch(() => {});
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.55) {
+          // If user manually paused while it was already in view, respect their pause
+          if (userManuallyPaused) return;
+
+          // Apply current audio unlock & user preference state
+          if (userAudioUnlocked) {
+            if (!globalUserAudioState.hasExplicitUserPreference || !globalUserAudioState.muted) {
+              video.muted = false;
+              video.volume = globalUserAudioState.volume;
+            } else {
+              video.muted = true;
+            }
+          } else {
+            // Must start muted if user hasn't interacted with page yet to satisfy autoplay policy
+            video.muted = true;
           }
-        } else {
+
+          const playPromise = video.play();
+          if (playPromise !== undefined) {
+            playPromise.then(() => {
+              if (container) container.classList.remove('is-paused');
+            }).catch((err) => {
+              // If unmuted autoplay was rejected by browser policy, fall back to muted and retry safely
+              if (!video.muted) {
+                video.muted = true;
+                video.play().catch(() => {});
+              }
+            });
+          }
+        } else if (entry.intersectionRatio < 0.2) {
+          // Reset manual pause latch when video leaves view so it can replay when scrolled back into view
+          userManuallyPaused = false;
           if (!video.paused) {
+            isProgrammaticPause = true;
             video.pause();
+            setTimeout(() => { isProgrammaticPause = false; }, 50);
           }
         }
       });
-    }, { threshold: 0.25 });
+    }, {
+      threshold: [0.0, 0.2, 0.55, 0.8]
+    });
 
     observer.observe(video);
   }
