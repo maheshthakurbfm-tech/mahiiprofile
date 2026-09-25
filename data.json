@@ -48,9 +48,7 @@
       "title": "YOUTUBE DOCUMENTRY STYLE EDITS",
       "description": "dited a short-form documentary story for DS Group, using narrative pacing, parallax effects and After Effects motion design to transform documentary footage into a cinematic visual experience.",
       "tools": [
-        "Premiere Pro",
-        "After Effects",
-        "DaVinci Resolve"
+        "Premiere Pro"
       ],
       "embedUrl": "https://res.cloudinary.com/esvwgoxe/video/upload/v1789416404/DS_Group_Documentry.mp4",
       "videoId": "tduu0lc9ianrp2ia6c4r",
@@ -538,7 +536,18 @@
       "isExternal": false,
       "hosted": "Cloudinary",
       "uploadDate": "Published"
+    },
+    {
+      "id": "proj_vid_3",
+      "publicId": "",
+      "name": "UI/UX motion graphic (Video)",
+      "type": "video/mp4",
+      "size": "Cloudinary Hosted",
+      "publicUrl": "https://youtu.be/XWL2aT_Rbbk?si=nlC5g4CZMF2wSTDm",
+      "isExternal": false,
+      "hosted": "Cloudinary",
+      "uploadDate": "Published"
     }
   ],
-  "updatedAt": "2026-09-14T20:57:33.762Z"
+  "updatedAt": "2026-09-25T03:00:46.008Z"
 }
