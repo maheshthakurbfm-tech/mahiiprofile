@@ -149,6 +149,14 @@ function loadAdminFields() {
   setVal('edit-bio', d.hero?.bio);
   setVal('edit-greeting', d.hero?.greeting);
 
+  // Recent Highlight tab
+  const fw = d.about?.featuredWork || {};
+  setVal('edit-highlight-title', fw.title || '');
+  setVal('edit-highlight-tag', Array.isArray(fw.tools) ? fw.tools.join(' · ') : (fw.tag || ''));
+  setVal('edit-highlight-video', fw.videoUrl || '');
+  setVal('edit-highlight-poster', fw.poster || '');
+  updateHighlightPreview();
+
   // Contact tab
   setVal('edit-email', d.contact?.email);
   setVal('edit-linkedin', d.contact?.linkedin);
@@ -158,6 +166,50 @@ function loadAdminFields() {
   renderAdminProjects(d.projects || []);
   loadAdminReels(d.showreelReels || []);
 }
+
+/* ─── RECENT HIGHLIGHT PREVIEW & PICKER HELPERS ─── */
+window.updateHighlightPreview = function() {
+  const videoEl = document.getElementById('highlight-preview-video');
+  const videoUrl = getVal('edit-highlight-video');
+  const posterUrl = getVal('edit-highlight-poster');
+  if (!videoEl) return;
+  if (videoUrl) {
+    videoEl.src = videoUrl;
+    if (posterUrl) videoEl.poster = posterUrl;
+  }
+};
+
+window.openMediaPickerForHighlight = function(targetType) {
+  const targetId = targetType === 'video' ? 'edit-highlight-video' : 'edit-highlight-poster';
+  openMediaPicker(targetId, targetType === 'video' ? 'video' : 'image');
+};
+
+window.uploadHighlightFile = async function(e, type) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  if (typeof MediaStorageService === 'undefined') {
+    showToast('Media Storage Service is not loaded.', 'error');
+    return;
+  }
+
+  showToast(`Uploading highlight ${type}... Please wait.`);
+  try {
+    const uploadRes = await MediaStorageService.uploadMedia(file, (progress) => {
+      console.log(`[HIGHLIGHT UPLOAD] ${type}: ${progress.percent}%`);
+    });
+
+    const publicUrl = uploadRes.publicUrl || uploadRes.secure_url || uploadRes.url;
+    const targetId = type === 'video' ? 'edit-highlight-video' : 'edit-highlight-poster';
+    setVal(targetId, publicUrl);
+    updateHighlightPreview();
+    showToast(`Highlight ${type} uploaded successfully!`);
+  } catch (err) {
+    showToast(`Upload failed: ${err.message}`, 'error');
+    console.error('Highlight upload error:', err);
+  }
+  e.target.value = '';
+};
 
 function setVal(id, val) {
   const el = document.getElementById(id);
@@ -731,6 +783,21 @@ function initSaveButton() {
     if (lastName) d.hero.lastName = lastName;
     if (bio) d.hero.bio = bio;
     if (greeting) d.hero.greeting = greeting;
+
+    // Recent Highlight tab fields
+    if (!d.about) d.about = {};
+    if (!d.about.featuredWork) d.about.featuredWork = {};
+    const hlTitle = getVal('edit-highlight-title');
+    const hlTag = getVal('edit-highlight-tag');
+    const hlVideo = getVal('edit-highlight-video');
+    const hlPoster = getVal('edit-highlight-poster');
+    if (hlTitle) d.about.featuredWork.title = hlTitle;
+    if (hlTag) {
+      d.about.featuredWork.tag = hlTag;
+      d.about.featuredWork.tools = hlTag.split(/[·•,]/).map(t => t.trim()).filter(Boolean);
+    }
+    if (hlVideo) d.about.featuredWork.videoUrl = hlVideo;
+    if (hlPoster !== undefined) d.about.featuredWork.poster = hlPoster;
 
     // Contact tab fields
     const email = getVal('edit-email');

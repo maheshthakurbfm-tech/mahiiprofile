@@ -750,6 +750,78 @@ section {
   mix-blend-mode: screen;
 }
 
+/* Beyond The Edit Atmospheric Glow */
+.beyond-compact-grid::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(100% + 160px);
+  height: calc(100% + 120px);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse 80% 60% at center,
+    var(--glow-primary) 0%,
+    var(--glow-secondary) 42%,
+    var(--glow-tertiary) 70%,
+    transparent 85%
+  );
+  filter: blur(110px);
+  opacity: 0.85;
+  pointer-events: none;
+  z-index: 0;
+  mix-blend-mode: screen;
+}
+
+/* Skills / Software Grid Atmospheric Glow */
+.software-grid::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(100% + 180px);
+  height: calc(100% + 130px);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse 75% 65% at center,
+    var(--glow-secondary) 0%,
+    var(--glow-primary) 45%,
+    var(--glow-tertiary) 70%,
+    transparent 85%
+  );
+  filter: blur(115px);
+  opacity: 0.82;
+  pointer-events: none;
+  z-index: 0;
+  mix-blend-mode: screen;
+}
+
+/* Contact Section Atmospheric Bloom */
+.contact-grid::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(100% + 200px);
+  height: calc(100% + 160px);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse 80% 65% at center,
+    var(--glow-primary) 0%,
+    var(--glow-secondary) 40%,
+    var(--glow-tertiary) 68%,
+    transparent 85%
+  );
+  filter: blur(125px);
+  opacity: 0.88;
+  pointer-events: none;
+  z-index: 0;
+  mix-blend-mode: screen;
+}
+
 .dev-card-glow {
   --card-glow-spread: 160px;
   --card-glow-blur: 95px;

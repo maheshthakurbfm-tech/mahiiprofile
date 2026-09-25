@@ -192,6 +192,17 @@ function applyCardGlowVariations(palette) {
     box.style.setProperty('--card-glow-blur', '55px');
     box.style.setProperty('--card-glow-opacity', '0.55');
   });
+
+  // 7. Skills / Software Cards
+  const softwareCards = document.querySelectorAll('.software-card');
+  softwareCards.forEach((card, i) => {
+    const isAlt = i % 2 === 1;
+    card.style.setProperty('--card-glow-primary', isAlt ? palette.secondary : palette.primary);
+    card.style.setProperty('--card-glow-secondary', isAlt ? palette.primary : palette.tertiary);
+    card.style.setProperty('--card-glow-spread', '80px');
+    card.style.setProperty('--card-glow-blur', '60px');
+    card.style.setProperty('--card-glow-opacity', '0.65');
+  });
 }
 
 // Immediate run on script parse
@@ -245,10 +256,10 @@ const soundAssets = {
   click4: new Audio('assets/click_4.mp3')
 };
 
-// Preload & setup volume
-soundAssets.repulsor.volume = 0.75;
-soundAssets.magnetic.volume = 0.18;
-soundAssets.click4.volume = 0.65;
+// Preload & setup gentle volume
+soundAssets.repulsor.volume = 0.38;
+soundAssets.magnetic.volume = 0.10;
+soundAssets.click4.volume = 0.32;
 
 /**
  * Play Click 4 SFX (assets/click_4.mp3) EXCLUSIVELY for opening Intro cards/boxes
@@ -258,7 +269,7 @@ function playCardOpenSFX() {
   if (!audioEnabled) return;
   try {
     const snd = soundAssets.click4.cloneNode();
-    snd.volume = 0.65;
+    snd.volume = 0.32;
     snd.play().catch(() => {});
   } catch (_) {}
 }
@@ -270,7 +281,7 @@ function playRepulsorLandingSFX() {
   if (!audioEnabled) return;
   try {
     soundAssets.repulsor.currentTime = 0;
-    soundAssets.repulsor.volume = 0.75;
+    soundAssets.repulsor.volume = 0.38;
     soundAssets.repulsor.play().catch(() => {});
   } catch (_) {}
 }
@@ -282,7 +293,7 @@ function playClickSFX() {
   if (!audioEnabled) return;
   try {
     const snd = soundAssets.magnetic.cloneNode();
-    snd.volume = 0.18;
+    snd.volume = 0.09;
     snd.play().catch(() => {});
   } catch (_) {}
 }
@@ -291,7 +302,7 @@ function playHoverSFX() {
   if (!audioEnabled) return;
   try {
     const snd = soundAssets.magnetic.cloneNode();
-    snd.volume = 0.22;
+    snd.volume = 0.10;
     snd.play().catch(() => {});
   } catch (_) {}
 }
@@ -324,7 +335,7 @@ function playWhooshSFX(type = 'in', velocity = 1.0) {
     subOsc.frequency.exponentialRampToValueAtTime(subEnd, now + duration);
     
     subGain.gain.setValueAtTime(0.0001, now);
-    subGain.gain.linearRampToValueAtTime(0.28, now + (duration * 0.35));
+    subGain.gain.linearRampToValueAtTime(0.12, now + (duration * 0.35));
     subGain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
     
     subOsc.connect(subGain);
@@ -355,7 +366,7 @@ function playWhooshSFX(type = 'in', velocity = 1.0) {
 
     const gain = ctx.createGain();
     gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.linearRampToValueAtTime(0.32, now + (duration * 0.4));
+    gain.gain.linearRampToValueAtTime(0.14, now + (duration * 0.4));
     gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
     noise.connect(filter);
@@ -1209,11 +1220,22 @@ function applyHeroData() {
     const fw = siteData.about.featuredWork;
     const video = document.getElementById('about-highlight-video');
     const titleEl = document.getElementById('about-highlight-title');
+    const tagEl = document.getElementById('about-highlight-tag');
     if (video && fw.videoUrl && video.src !== fw.videoUrl) {
       video.src = fw.videoUrl;
     }
+    if (video && fw.poster && video.poster !== fw.poster) {
+      video.poster = fw.poster;
+    }
     if (titleEl && fw.title) {
       titleEl.textContent = fw.title;
+    }
+    if (tagEl) {
+      if (Array.isArray(fw.tools) && fw.tools.length > 0) {
+        tagEl.textContent = fw.tools.join(' · ');
+      } else if (fw.tag) {
+        tagEl.textContent = fw.tag;
+      }
     }
   }
 }
@@ -1256,6 +1278,7 @@ function initAboutHighlightPlayer() {
   const container = document.getElementById('about-video-container');
   const video = document.getElementById('about-highlight-video');
   const titleEl = document.getElementById('about-highlight-title');
+  const tagEl = document.getElementById('about-highlight-tag');
 
   if (!video) return;
 
@@ -1265,8 +1288,18 @@ function initAboutHighlightPlayer() {
     if (fw.videoUrl && video.src !== fw.videoUrl) {
       video.src = fw.videoUrl;
     }
+    if (fw.poster && video.poster !== fw.poster) {
+      video.poster = fw.poster;
+    }
     if (fw.title && titleEl) {
       titleEl.textContent = fw.title;
+    }
+    if (tagEl) {
+      if (Array.isArray(fw.tools) && fw.tools.length > 0) {
+        tagEl.textContent = fw.tools.join(' · ');
+      } else if (fw.tag) {
+        tagEl.textContent = fw.tag;
+      }
     }
   }
 
