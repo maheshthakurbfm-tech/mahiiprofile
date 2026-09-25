@@ -654,13 +654,16 @@ section {
 
 /* Parent container isolation */
 .about-cinematic-stage,
+.showreel-carousel-wrapper,
+.accordion-wrap,
+.accordion-item,
+.passions-accordion-wrap,
+.passion-card,
 .dev-project-card,
 .contact-form-card,
 .stat-card,
 .ai-tool-item,
 .software-card,
-.accordion-item,
-.passion-card,
 .reel-card,
 .contact-detail-box,
 .ai-tools-subsection {
@@ -674,6 +677,77 @@ section {
   --card-glow-opacity: 0.95;
   width: calc(100% + 250px);
   height: calc(100% + 200px);
+}
+
+/* 3D Showreel Carousel Atmospheric Bloom behind active center reel */
+.showreel-carousel-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  width: 580px;
+  height: 520px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse 75% 65% at center,
+    var(--glow-primary) 0%,
+    var(--glow-secondary) 42%,
+    var(--glow-tertiary) 65%,
+    transparent 85%
+  );
+  filter: blur(110px);
+  opacity: 0.92;
+  pointer-events: none;
+  z-index: 0;
+  mix-blend-mode: screen;
+}
+
+/* Showreel Accordion Breakdown Items Bloom */
+.accordion-wrap::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 90%;
+  height: 100%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse 80% 60% at center,
+    var(--glow-secondary) 0%,
+    var(--glow-primary) 45%,
+    transparent 80%
+  );
+  filter: blur(120px);
+  opacity: 0.50;
+  pointer-events: none;
+  z-index: 0;
+  mix-blend-mode: screen;
+}
+
+/* Creative Passions Horizontal Stage Atmospheric Bloom */
+.passions-accordion-wrap::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(100% + 160px);
+  height: calc(100% + 140px);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse 80% 60% at center,
+    var(--glow-primary) 0%,
+    var(--glow-secondary) 40%,
+    var(--glow-tertiary) 65%,
+    transparent 85%
+  );
+  filter: blur(115px);
+  opacity: 0.88;
+  pointer-events: none;
+  z-index: 0;
+  mix-blend-mode: screen;
 }
 
 .dev-card-glow {
@@ -727,6 +801,15 @@ section {
     --card-glow-spread: 140px;
     --card-glow-blur: 85px;
   }
+  .showreel-carousel-wrapper::before {
+    width: 420px;
+    height: 380px;
+    filter: blur(85px);
+  }
+  .passions-accordion-wrap::before {
+    width: 100%;
+    filter: blur(85px);
+  }
   .contact-card-glow {
     --card-glow-spread: 130px;
   }
@@ -741,6 +824,11 @@ section {
   .stage-card-glow {
     --card-glow-spread: 90px;
     --card-glow-blur: 60px;
+  }
+  .showreel-carousel-wrapper::before {
+    width: 280px;
+    height: 260px;
+    filter: blur(60px);
   }
   .contact-card-glow {
     --card-glow-spread: 80px;

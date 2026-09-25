@@ -154,7 +154,18 @@ function applyCardGlowVariations(palette) {
     card.style.setProperty('--card-glow-y', '6px');
   });
 
-  // 4. Passion Cards (Interests Accordion)
+  // 4. Showreel Carousel & Accordion Items
+  const accordionItems = document.querySelectorAll('.accordion-item');
+  accordionItems.forEach((item, i) => {
+    const isAlt = i % 2 === 1;
+    item.style.setProperty('--card-glow-primary', isAlt ? palette.secondary : palette.primary);
+    item.style.setProperty('--card-glow-secondary', isAlt ? palette.primary : palette.tertiary);
+    item.style.setProperty('--card-glow-spread', '110px');
+    item.style.setProperty('--card-glow-blur', '75px');
+    item.style.setProperty('--card-glow-opacity', '0.60');
+  });
+
+  // 5. Passion Cards (Interests Accordion)
   const passionCards = document.querySelectorAll('.passion-card');
   passionCards.forEach((card, i) => {
     const shift = (i % 3);
@@ -165,7 +176,7 @@ function applyCardGlowVariations(palette) {
     card.style.setProperty('--card-glow-x', `${(shift - 1) * 8}px`);
   });
 
-  // 5. Contact Form Card & Details
+  // 6. Contact Form Card & Details
   const contactCard = document.querySelector('.contact-form-card');
   if (contactCard) {
     contactCard.style.setProperty('--card-glow-primary', palette.primary);
