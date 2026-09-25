@@ -612,97 +612,138 @@ section {
   padding: 120px 0;
 }
 
-/* ── REUSABLE SECTION AMBIENT NEON GLOW SYSTEM (BEHIND CARDS) ── */
-.section-ambient-glow {
+/* ── CINEMATIC AMBIENT BLOOM GLOW SYSTEM (BEHIND POST-HERO CARDS) ──
+   Soft environmental colored pool of light behind major cards.
+   Changes palette per page refresh via CSS variables.
+   Layered strictly behind cards (z-index: 0 / pointer-events: none).
+   Large blurred elliptical radial glow with gradual falloff.
+── */
+:root {
+  --glow-primary: rgba(30, 80, 200, 0.45);
+  --glow-secondary: rgba(110, 40, 180, 0.35);
+  --glow-tertiary: rgba(0, 168, 255, 0.20);
+  --glow-blur: 95px;
+  --glow-spread: 140px;
+  --glow-opacity: 0.85;
+}
+
+/* Dedicated Behind-Card Ambient Bloom Element */
+.card-ambient-glow {
   position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(100% + var(--card-glow-spread, var(--glow-spread)));
+  height: calc(100% + var(--card-glow-spread, var(--glow-spread)));
+  transform: translate(calc(-50% + var(--card-glow-x, 0px)), calc(-50% + var(--card-glow-y, 0px)));
   border-radius: 50%;
+  background: radial-gradient(
+    ellipse 75% 65% at center,
+    var(--card-glow-primary, var(--glow-primary)) 0%,
+    var(--card-glow-secondary, var(--glow-secondary)) 40%,
+    var(--card-glow-tertiary, var(--glow-tertiary)) 65%,
+    transparent 85%
+  );
+  filter: blur(var(--card-glow-blur, var(--glow-blur)));
+  opacity: var(--card-glow-opacity, var(--glow-opacity));
   pointer-events: none;
+  z-index: 0;
   mix-blend-mode: screen;
-  z-index: 1;
   will-change: transform, opacity;
-  transform: translate3d(0, 0, 0);
+  transition: opacity 0.5s ease;
 }
 
-.section-ambient-glow.glow-red {
-  background: radial-gradient(circle, rgba(235, 20, 60, 0.45) 0%, rgba(190, 10, 45, 0.20) 45%, rgba(130, 0, 30, 0) 70%);
-  filter: blur(100px);
+/* Parent container isolation */
+.about-cinematic-stage,
+.dev-project-card,
+.contact-form-card,
+.stat-card,
+.ai-tool-item,
+.software-card,
+.accordion-item,
+.passion-card,
+.reel-card,
+.contact-detail-box,
+.ai-tools-subsection {
+  position: relative;
 }
 
-.section-ambient-glow.glow-blue {
-  background: radial-gradient(circle, rgba(0, 150, 255, 0.45) 0%, rgba(0, 95, 225, 0.20) 45%, rgba(0, 55, 165, 0) 70%);
-  filter: blur(100px);
+/* Specific Card Glow Variations & Tunings */
+.stage-card-glow {
+  --card-glow-spread: 220px;
+  --card-glow-blur: 115px;
+  --card-glow-opacity: 0.95;
+  width: calc(100% + 250px);
+  height: calc(100% + 200px);
 }
 
-/* QUADRANT / CARD GROUP POSITIONS */
-.glow-top-left {
-  top: 5%;
-  left: 0%;
-  width: 550px;
-  height: 550px;
-  opacity: 0.40;
+.dev-card-glow {
+  --card-glow-spread: 160px;
+  --card-glow-blur: 95px;
+  --card-glow-opacity: 0.85;
 }
 
-.glow-top-right {
-  top: 5%;
-  right: 0%;
-  width: 550px;
-  height: 550px;
-  opacity: 0.40;
+.contact-card-glow {
+  --card-glow-spread: 200px;
+  --card-glow-blur: 110px;
+  --card-glow-opacity: 0.90;
 }
 
-.glow-bottom-left {
-  bottom: 5%;
-  left: 2%;
-  width: 580px;
-  height: 580px;
-  opacity: 0.42;
+.passion-card-glow {
+  --card-glow-spread: 140px;
+  --card-glow-blur: 85px;
+  --card-glow-opacity: 0.75;
 }
 
-.glow-bottom-right {
-  bottom: 5%;
-  right: 2%;
-  width: 580px;
-  height: 580px;
-  opacity: 0.42;
+.stat-card-glow {
+  --card-glow-spread: 100px;
+  --card-glow-blur: 70px;
+  --card-glow-opacity: 0.75;
 }
 
-.glow-center-right {
-  top: 40%;
-  right: -2%;
-  width: 550px;
-  height: 550px;
-  opacity: 0.38;
+.software-card-glow {
+  --card-glow-spread: 90px;
+  --card-glow-blur: 65px;
+  --card-glow-opacity: 0.65;
+}
+
+.reel-card-glow {
+  --card-glow-spread: 180px;
+  --card-glow-blur: 100px;
+  --card-glow-opacity: 0.95;
+}
+
+/* Clean up legacy fixed neon spots */
+.section-ambient-glow {
+  display: none !important;
 }
 
 @media (max-width: 992px) {
-  .section-ambient-glow {
-    filter: blur(75px);
+  :root {
+    --glow-blur: 75px;
+    --glow-spread: 100px;
+    --glow-opacity: 0.75;
   }
-
-  .glow-top-left,
-  .glow-top-right,
-  .glow-bottom-left,
-  .glow-bottom-right,
-  .glow-center-right {
-    width: 380px;
-    height: 380px;
-    opacity: 0.35;
+  .stage-card-glow {
+    --card-glow-spread: 140px;
+    --card-glow-blur: 85px;
+  }
+  .contact-card-glow {
+    --card-glow-spread: 130px;
   }
 }
 
 @media (max-width: 576px) {
-  .section-ambient-glow {
-    filter: blur(55px);
+  :root {
+    --glow-blur: 55px;
+    --glow-spread: 70px;
+    --glow-opacity: 0.65;
   }
-
-  .glow-top-left,
-  .glow-top-right,
-  .glow-bottom-left,
-  .glow-bottom-right,
-  .glow-center-right {
-    width: 260px;
-    height: 260px;
-    opacity: 0.30;
+  .stage-card-glow {
+    --card-glow-spread: 90px;
+    --card-glow-blur: 60px;
+  }
+  .contact-card-glow {
+    --card-glow-spread: 80px;
   }
 }
 
@@ -941,31 +982,46 @@ section {
   border-radius: 100px;
 }
 
-/* Soft organic ambient haze behind the frame — NOT a rectangular box */
+/* Soft organic ambient haze behind the frame — driven by cinematic palette */
 .stage-ambient-haze {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 120%;
-  height: 130%;
-  background: radial-gradient(ellipse 70% 55% at 50% 50%, rgba(15, 32, 60, 0.45) 0%, rgba(5, 12, 25, 0.25) 50%, transparent 80%);
-  filter: blur(70px);
+  width: calc(100% + 260px);
+  height: calc(100% + 220px);
+  background: radial-gradient(
+    ellipse 75% 65% at 50% 50%,
+    var(--glow-primary) 0%,
+    var(--glow-secondary) 42%,
+    var(--glow-tertiary) 65%,
+    transparent 85%
+  );
+  filter: blur(105px);
+  opacity: 0.92;
   pointer-events: none;
   z-index: 0;
+  mix-blend-mode: screen;
 }
 
 .stage-ambient-light {
   position: absolute;
-  top: 20%;
+  top: 45%;
   left: 48%;
   transform: translate(-50%, -50%);
-  width: 75%;
-  height: 65%;
-  background: radial-gradient(ellipse at center, rgba(0, 168, 255, 0.08) 0%, rgba(0, 90, 180, 0.03) 60%, transparent 85%);
-  filter: blur(90px);
+  width: 85%;
+  height: 75%;
+  background: radial-gradient(
+    ellipse at center,
+    var(--glow-primary) 0%,
+    var(--glow-secondary) 50%,
+    transparent 80%
+  );
+  filter: blur(85px);
+  opacity: 0.65;
   pointer-events: none;
   z-index: 0;
+  mix-blend-mode: screen;
 }
 
 /* ─── EDITORIAL CINEMATIC MEDIA FRAME ─── */

@@ -11,6 +11,181 @@ let audioEnabled = true;
 let audioCtx = null;
 let lenis = null;
 
+/* ─── CONTROLLED CINEMATIC PALETTES (CHANGES ON EVERY PAGE REFRESH) ─── */
+const CINEMATIC_PALETTES = [
+  // 1. Deep Blue + Violet
+  {
+    name: 'Deep Blue + Violet',
+    primary: 'rgba(25, 75, 200, 0.45)',
+    secondary: 'rgba(110, 45, 195, 0.35)',
+    tertiary: 'rgba(0, 168, 255, 0.18)',
+    blur: '105px',
+    spread: '150px'
+  },
+  // 2. Indigo + Cyan
+  {
+    name: 'Indigo + Cyan',
+    primary: 'rgba(35, 55, 190, 0.45)',
+    secondary: 'rgba(0, 180, 230, 0.32)',
+    tertiary: 'rgba(90, 40, 210, 0.20)',
+    blur: '100px',
+    spread: '145px'
+  },
+  // 3. Blue + Magenta
+  {
+    name: 'Blue + Magenta',
+    primary: 'rgba(20, 80, 210, 0.45)',
+    secondary: 'rgba(170, 35, 120, 0.30)',
+    tertiary: 'rgba(0, 150, 255, 0.20)',
+    blur: '110px',
+    spread: '155px'
+  },
+  // 4. Deep Purple + Blue
+  {
+    name: 'Deep Purple + Blue',
+    primary: 'rgba(95, 30, 180, 0.42)',
+    secondary: 'rgba(15, 90, 215, 0.38)',
+    tertiary: 'rgba(140, 50, 210, 0.18)',
+    blur: '105px',
+    spread: '150px'
+  },
+  // 5. Teal + Blue
+  {
+    name: 'Teal + Blue',
+    primary: 'rgba(0, 140, 185, 0.42)',
+    secondary: 'rgba(25, 70, 210, 0.35)',
+    tertiary: 'rgba(0, 200, 220, 0.18)',
+    blur: '98px',
+    spread: '140px'
+  },
+  // 6. Amber + Deep Blue
+  {
+    name: 'Amber + Deep Blue',
+    primary: 'rgba(195, 100, 20, 0.35)',
+    secondary: 'rgba(20, 60, 190, 0.42)',
+    tertiary: 'rgba(160, 60, 120, 0.20)',
+    blur: '110px',
+    spread: '155px'
+  },
+  // 7. Crimson + Violet
+  {
+    name: 'Crimson + Violet',
+    primary: 'rgba(180, 25, 65, 0.38)',
+    secondary: 'rgba(100, 30, 180, 0.35)',
+    tertiary: 'rgba(20, 60, 195, 0.22)',
+    blur: '105px',
+    spread: '145px'
+  },
+  // 8. Cyan + Purple
+  {
+    name: 'Cyan + Purple',
+    primary: 'rgba(0, 170, 225, 0.40)',
+    secondary: 'rgba(125, 40, 195, 0.35)',
+    tertiary: 'rgba(10, 75, 200, 0.20)',
+    blur: '100px',
+    spread: '145px'
+  }
+];
+
+let currentCinematicPalette = null;
+
+function initCinematicCardGlowSystem() {
+  try {
+    const lastIndexStr = sessionStorage.getItem('mt-last-glow-palette');
+    let lastIndex = lastIndexStr !== null ? parseInt(lastIndexStr, 10) : -1;
+
+    // Pick a new palette distinct from the immediately preceding refresh
+    let newIndex;
+    const total = CINEMATIC_PALETTES.length;
+    if (total > 1) {
+      do {
+        newIndex = Math.floor(Math.random() * total);
+      } while (newIndex === lastIndex);
+    } else {
+      newIndex = 0;
+    }
+
+    sessionStorage.setItem('mt-last-glow-palette', String(newIndex));
+    currentCinematicPalette = CINEMATIC_PALETTES[newIndex];
+
+    const root = document.documentElement;
+    root.style.setProperty('--glow-primary', currentCinematicPalette.primary);
+    root.style.setProperty('--glow-secondary', currentCinematicPalette.secondary);
+    root.style.setProperty('--glow-tertiary', currentCinematicPalette.tertiary);
+    root.style.setProperty('--glow-blur', currentCinematicPalette.blur);
+    root.style.setProperty('--glow-spread', currentCinematicPalette.spread);
+
+    // Apply individual card subtle variations
+    applyCardGlowVariations(currentCinematicPalette);
+  } catch (e) {
+    console.warn('Could not initialize cinematic card glow palette:', e);
+  }
+}
+
+function applyCardGlowVariations(palette) {
+  if (!palette) return;
+
+  // 1. Featured Highlights Stage
+  const stage = document.querySelector('.about-cinematic-stage');
+  if (stage) {
+    stage.style.setProperty('--card-glow-primary', palette.primary);
+    stage.style.setProperty('--card-glow-secondary', palette.secondary);
+    stage.style.setProperty('--card-glow-x', '0px');
+    stage.style.setProperty('--card-glow-y', '12px');
+  }
+
+  // 2. Stat Cards (alternating subtle primary / secondary balance)
+  const statCards = document.querySelectorAll('.stat-card');
+  statCards.forEach((card, i) => {
+    const isAlt = i % 2 === 1;
+    card.style.setProperty('--card-glow-primary', isAlt ? palette.secondary : palette.primary);
+    card.style.setProperty('--card-glow-secondary', isAlt ? palette.primary : palette.tertiary);
+    card.style.setProperty('--card-glow-x', isAlt ? '6px' : '-6px');
+    card.style.setProperty('--card-glow-y', '4px');
+  });
+
+  // 3. Dev Project Cards
+  const devCards = document.querySelectorAll('.dev-project-card');
+  devCards.forEach((card, i) => {
+    const isEven = i % 2 === 0;
+    card.style.setProperty('--card-glow-primary', isEven ? palette.primary : palette.secondary);
+    card.style.setProperty('--card-glow-secondary', isEven ? palette.secondary : palette.primary);
+    card.style.setProperty('--card-glow-x', isEven ? '-12px' : '12px');
+    card.style.setProperty('--card-glow-y', '6px');
+  });
+
+  // 4. Passion Cards (Interests Accordion)
+  const passionCards = document.querySelectorAll('.passion-card');
+  passionCards.forEach((card, i) => {
+    const shift = (i % 3);
+    const prim = shift === 0 ? palette.primary : (shift === 1 ? palette.secondary : palette.tertiary);
+    const sec = shift === 0 ? palette.secondary : (shift === 1 ? palette.tertiary : palette.primary);
+    card.style.setProperty('--card-glow-primary', prim);
+    card.style.setProperty('--card-glow-secondary', sec);
+    card.style.setProperty('--card-glow-x', `${(shift - 1) * 8}px`);
+  });
+
+  // 5. Contact Form Card & Details
+  const contactCard = document.querySelector('.contact-form-card');
+  if (contactCard) {
+    contactCard.style.setProperty('--card-glow-primary', palette.primary);
+    contactCard.style.setProperty('--card-glow-secondary', palette.secondary);
+    contactCard.style.setProperty('--card-glow-x', '10px');
+    contactCard.style.setProperty('--card-glow-y', '10px');
+  }
+
+  const contactDetails = document.querySelectorAll('.contact-detail-box');
+  contactDetails.forEach((box, i) => {
+    box.style.setProperty('--card-glow-primary', i % 2 === 0 ? palette.primary : palette.secondary);
+    box.style.setProperty('--card-glow-spread', '70px');
+    box.style.setProperty('--card-glow-blur', '55px');
+    box.style.setProperty('--card-glow-opacity', '0.55');
+  });
+}
+
+// Immediate run on script parse
+initCinematicCardGlowSystem();
+
 /* ─── BROWSER-COMPLIANT AUDIO UNLOCK SYSTEM (Safari & Modern Browsers) ─── */
 let sharedAudioCtx = null;
 let isAudioUnlocked = false;
@@ -1913,11 +2088,13 @@ async function boot() {
   }, 4000);
 
   try {
+    initCinematicCardGlowSystem();
     await loadData();
     try { applyHeroData(); } catch (e) { console.error('Error applying hero data:', e); }
     try { initAboutHighlightPlayer(); } catch (e) { console.error('Error init about highlight player:', e); }
     try { renderAccordion(); } catch (e) { console.error('Error rendering accordion:', e); }
     try { renderSoftware(); } catch (e) { console.error('Error rendering software grid:', e); }
+    try { applyCardGlowVariations(currentCinematicPalette); } catch (_) {}
     try { initSoundToggle(); } catch (e) { console.error('Error init sound toggle:', e); }
     try { initCursor(); } catch (e) { console.error('Error init cursor:', e); }
     try { initParticles(); } catch (e) { console.error('Error init particles:', e); }
