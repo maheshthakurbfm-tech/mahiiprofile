@@ -1587,69 +1587,188 @@ function initHeroAnimations() {
       });
     }
 
-    // Section reveals are independent from the hero composition.
-    gsap.utils.toArray('.reveal-up').forEach((el) => {
-      if (el.classList.contains('about-bio')) return; // Handled separately below for sentence-by-sentence reveal
-      gsap.fromTo(el,
-        { y: 48, opacity: 0 },
-        {
-          y: 0, opacity: 1, duration: 1.0, ease: 'power3.out',
-          scrollTrigger: {
-            trigger: el,
-            start: 'top 88%',
-            toggleActions: 'play none none reverse'
-          }
-        }
-      );
-    });
+    // ------------------------------------------------------------
+    // UNIFIED CINEMATIC IN + OUT ANIMATION SYSTEM (HERO-STYLE)
+    // Applied to individual visual units across all lower sections in BOTH scroll directions.
+    // IN:  opacity:0, blur: 14px, scale: 0.95, y: 24 -> sharp, full size, y: 0
+    // OUT: sharp, full size -> opacity:0, blur: 8px, scale: 0.98, y: -20 (subtle upward drift)
+    // ------------------------------------------------------------
+    const animatedElements = new Set();
+    const visualUnits = [];
 
-    // CINEMATIC BLUR + SCALE REVEAL WITH RANDOM SENTENCE TIMING FOR ABOUT BIO
-    const aboutBio = document.querySelector('.about-bio');
-    if (aboutBio) {
-      aboutBio.classList.remove('reveal-up'); // Prevent conflict with general reveal-up loop
-      gsap.set(aboutBio, { opacity: 1, y: 0 }); // Ensure parent container is visible
+    // Helper: Register a visual component unit or staggered group of elements
+    const registerVisualUnit = (triggerEl, elements, staggerTime = 0) => {
+      if (!triggerEl) return;
+      const targetList = Array.isArray(elements) ? elements.filter(Boolean) : (elements ? [elements] : []);
+      if (!targetList.length) return;
 
-      // Split paragraph into distinct sentences/clauses while preserving HTML tags
-      const sentences = [
-        `I'm <strong>Mahesh Thakur</strong>, a Video Editor from India with 2.5+ years of experience.`,
-        `I work across video editing, motion graphics, color grading, and sound, with a focus on clean work, strong pacing, and attention to detail.`,
-        `I'm looking for a team where I can put my skills to their best use, keep learning, take on new challenges, and contribute to the growth of the work and the company along the way.`
-      ];
-
-      aboutBio.innerHTML = sentences.map(s => `<span class="bio-sentence" style="display:inline-block; will-change:transform,filter,opacity; margin-right: 0.35em;">${s}</span>`).join(' ');
-
-      const sentenceElements = aboutBio.querySelectorAll('.bio-sentence');
-
-      // Random delay timing array for each sentence
-      const sentenceDelays = [0.00, 0.32, 0.16];
-
-      sentenceElements.forEach((el, index) => {
-        const delay = sentenceDelays[index % sentenceDelays.length];
-
-        gsap.fromTo(el,
-          {
-            opacity: 0,
-            filter: 'blur(12px)',
-            scale: 0.92,
-            y: 16
-          },
-          {
-            opacity: 1,
-            filter: 'blur(0px)',
-            scale: 1.0,
-            y: 0,
-            duration: 0.85,
-            delay: delay,
-            ease: 'power3.out',
-            scrollTrigger: {
-              trigger: aboutBio,
-              start: 'top 85%',
-              toggleActions: 'play none none reverse'
-            }
-          }
-        );
+      targetList.forEach(el => {
+        animatedElements.add(el);
+        gsap.set(el, {
+          autoAlpha: 0,
+          opacity: 0,
+          filter: 'blur(14px)',
+          scale: 0.95,
+          y: 24,
+          transformOrigin: '50% 50%',
+          willChange: 'transform, filter, opacity'
+        });
       });
+
+      const animateIn = () => {
+        gsap.to(targetList, {
+          autoAlpha: 1,
+          opacity: 1,
+          filter: 'blur(0px)',
+          scale: 1.0,
+          y: 0,
+          duration: 0.9,
+          stagger: staggerTime,
+          ease: 'power3.out',
+          overwrite: 'auto'
+        });
+      };
+
+      const animateOutTop = () => {
+        gsap.to(targetList, {
+          autoAlpha: 0,
+          opacity: 0,
+          filter: 'blur(8px)',
+          scale: 0.98,
+          y: -20,
+          duration: 0.55,
+          stagger: staggerTime ? 0.03 : 0,
+          ease: 'power2.in',
+          overwrite: 'auto'
+        });
+      };
+
+      const animateOutBottom = () => {
+        gsap.to(targetList, {
+          autoAlpha: 0,
+          opacity: 0,
+          filter: 'blur(14px)',
+          scale: 0.95,
+          y: 24,
+          duration: 0.55,
+          stagger: staggerTime ? 0.03 : 0,
+          ease: 'power2.in',
+          overwrite: 'auto'
+        });
+      };
+
+      ScrollTrigger.create({
+        trigger: triggerEl,
+        start: 'top 85%',
+        end: 'bottom 15%',
+        onEnter: () => animateIn(),
+        onLeave: () => animateOutTop(),
+        onEnterBack: () => animateIn(),
+        onLeaveBack: () => animateOutBottom()
+      });
+    };
+
+    // 1. ABOUT SECTION UNITS
+    const aboutSec = document.querySelector('#about');
+    if (aboutSec) {
+      const aboutHeader = aboutSec.querySelector('.about-editorial-header');
+      const aboutStage = aboutSec.querySelector('.about-cinematic-stage');
+      const aboutStats = aboutSec.querySelector('.stat-cards');
+      const statCards = aboutSec.querySelectorAll('.stat-card');
+
+      if (aboutHeader) registerVisualUnit(aboutHeader, aboutHeader);
+      if (aboutStage) registerVisualUnit(aboutStage, aboutStage);
+      if (aboutStats && statCards.length) registerVisualUnit(aboutStats, Array.from(statCards), 0.09);
     }
+
+    // 2. PROJECTS / SHOWREEL SECTION UNITS
+    const projSec = document.querySelector('#projects');
+    if (projSec) {
+      const projHeader = projSec.querySelector('.section-container > .reveal-up:first-of-type') || projSec.querySelector('.section-container > div:first-child');
+      const carouselWrap = projSec.querySelector('.showreel-carousel-wrapper');
+      const accordionWrap = projSec.querySelector('#accordion-wrap');
+      const accordionItems = projSec.querySelectorAll('.accordion-item');
+
+      if (projHeader) registerVisualUnit(projHeader, projHeader);
+      if (carouselWrap) registerVisualUnit(carouselWrap, carouselWrap);
+      if (accordionWrap) {
+        if (accordionItems.length) {
+          registerVisualUnit(accordionWrap, Array.from(accordionItems), 0.08);
+        } else {
+          registerVisualUnit(accordionWrap, accordionWrap);
+        }
+      }
+    }
+
+    // 3. BEYOND THE EDIT SECTION UNITS
+    const beyondSec = document.querySelector('#beyond-the-edit');
+    if (beyondSec) {
+      const beyondHeader = beyondSec.querySelector('.beyond-header') || beyondSec.querySelector('.section-container > .reveal-up:first-of-type');
+      const beyondGrid = beyondSec.querySelector('.beyond-compact-grid');
+      const devCards = beyondSec.querySelectorAll('.compact-dev-card, .dev-project-card');
+
+      if (beyondHeader) registerVisualUnit(beyondHeader, beyondHeader);
+      if (beyondGrid && devCards.length) {
+        registerVisualUnit(beyondGrid, Array.from(devCards), 0.1);
+      } else if (beyondGrid) {
+        registerVisualUnit(beyondGrid, beyondGrid);
+      }
+    }
+
+    // 4. INTERESTS / PASSIONS SECTION UNITS
+    const interestsSec = document.querySelector('#interests');
+    if (interestsSec) {
+      const interestsHeader = interestsSec.querySelector('.section-container > .reveal-up:first-of-type') || interestsSec.querySelector('.section-container > div:first-child');
+      const passionsWrap = interestsSec.querySelector('.passions-accordion-wrap');
+      const passionCards = interestsSec.querySelectorAll('.passion-card');
+
+      if (interestsHeader) registerVisualUnit(interestsHeader, interestsHeader);
+      if (passionsWrap && passionCards.length) {
+        registerVisualUnit(passionsWrap, Array.from(passionCards), 0.08);
+      } else if (passionsWrap) {
+        registerVisualUnit(passionsWrap, passionsWrap);
+      }
+    }
+
+    // 5. SOFTWARE / TECH STACK SECTION UNITS
+    const softSec = document.querySelector('#software');
+    if (softSec) {
+      const softHeader = softSec.querySelector('.section-container > .reveal-up:first-of-type') || softSec.querySelector('.section-container > div:first-child');
+      const softGrid = softSec.querySelector('.software-grid');
+      const softCards = softSec.querySelectorAll('.software-card');
+
+      if (softHeader) registerVisualUnit(softHeader, softHeader);
+      if (softGrid && softCards.length) {
+        registerVisualUnit(softGrid, Array.from(softCards), 0.05);
+      } else if (softGrid) {
+        registerVisualUnit(softGrid, softGrid);
+      }
+    }
+
+    // 6. CONTACT SECTION UNITS
+    const contactSec = document.querySelector('#contact');
+    if (contactSec) {
+      const contactHeader = contactSec.querySelector('.section-container > .reveal-up:first-of-type') || contactSec.querySelector('.section-container > div:first-child');
+      const contactGrid = contactSec.querySelector('.contact-grid');
+      const contactCol = contactSec.querySelector('.contact-info-col');
+      const contactForm = contactSec.querySelector('.contact-form-wrapper');
+
+      if (contactHeader) registerVisualUnit(contactHeader, contactHeader);
+      if (contactGrid) {
+        const cols = [contactCol, contactForm].filter(Boolean);
+        if (cols.length) {
+          registerVisualUnit(contactGrid, cols, 0.12);
+        } else {
+          registerVisualUnit(contactGrid, contactGrid);
+        }
+      }
+    }
+
+    // Fallback for any standalone .reveal-up elements not already in the main units
+    gsap.utils.toArray('.reveal-up').forEach((el) => {
+      if (animatedElements.has(el) || el.classList.contains('about-bio') || el.closest('#hero')) return;
+      registerVisualUnit(el, el);
+    });
 
     document.querySelectorAll('.skill-bar-fill').forEach(bar => {
       const level = bar.getAttribute('data-level');

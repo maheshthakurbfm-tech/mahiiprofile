@@ -387,18 +387,19 @@ body:has(button:hover) #cursor-ring {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   flex-wrap: nowrap;
-  margin-top: 6px;
+  margin-top: 60px;
 }
 
 .btn-primary {
-  padding: 14px 30px;
+  padding: 9px 20px;
+  min-height: 50px;
   border-radius: 100px;
   background: #0076ff;
   color: #ffffff;
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 0.84rem;
   letter-spacing: 0.02em;
   border: none;
   cursor: pointer;
@@ -406,11 +407,11 @@ body:has(button:hover) #cursor-ring {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   transition: all 0.3s var(--ease-smooth);
   position: relative;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 118, 255, 0.35);
+  box-shadow: 0 4px 16px rgba(0, 118, 255, 0.32);
 }
 
 .btn-primary::before {
@@ -425,7 +426,7 @@ body:has(button:hover) #cursor-ring {
 .btn-primary:hover {
   transform: translateY(-2px);
   background: #0084ff;
-  box-shadow: 0 8px 30px rgba(0, 118, 255, 0.55);
+  box-shadow: 0 6px 22px rgba(0, 118, 255, 0.52);
 }
 
 .btn-primary:hover::before {
@@ -434,22 +435,23 @@ body:has(button:hover) #cursor-ring {
 
 /* HIRE ME Solid Crisp White Pill Button (as in user screenshot) */
 .btn-hire-me {
-  padding: 14px 32px;
+  padding: 9px 20px;
+  min-height: 50px;
   border-radius: 100px;
   background: #ffffff;
   color: #0076ff;
   font-weight: 800;
-  font-size: 0.95rem;
-  letter-spacing: 0.04em;
+  font-size: 0.84rem;
+  letter-spacing: 0.03em;
   border: none;
   cursor: pointer;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   transition: all 0.3s var(--ease-smooth);
-  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.16);
 }
 
 .btn-hire-me .hire-icon {
@@ -460,7 +462,7 @@ body:has(button:hover) #cursor-ring {
 .btn-hire-me:hover {
   transform: translateY(-2px);
   background: #f0f7ff;
-  box-shadow: 0 8px 32px rgba(255, 255, 255, 0.35), 0 0 20px rgba(0, 118, 255, 0.3);
+  box-shadow: 0 6px 22px rgba(255, 255, 255, 0.28), 0 0 14px rgba(0, 118, 255, 0.2);
 }
 
 .btn-ghost {
@@ -670,13 +672,11 @@ section {
   height: calc(100% + var(--card-glow-spread, var(--glow-spread)));
   transform: translate(calc(-50% + var(--card-glow-x, 0px)), calc(-50% + var(--card-glow-y, 0px)));
   border-radius: 50%;
-  background: radial-gradient(
-    ellipse 75% 65% at center,
-    var(--card-glow-primary, var(--glow-primary)) 0%,
-    var(--card-glow-secondary, var(--glow-secondary)) 40%,
-    var(--card-glow-tertiary, var(--glow-tertiary)) 65%,
-    transparent 85%
-  );
+  background: radial-gradient(ellipse 75% 65% at center,
+      var(--card-glow-primary, var(--glow-primary)) 0%,
+      var(--card-glow-secondary, var(--glow-secondary)) 40%,
+      var(--card-glow-tertiary, var(--glow-tertiary)) 65%,
+      transparent 85%);
   filter: blur(var(--card-glow-blur, var(--glow-blur)));
   opacity: var(--card-glow-opacity, var(--glow-opacity));
   pointer-events: none;
@@ -723,13 +723,11 @@ section {
   height: 520px;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: radial-gradient(
-    ellipse 75% 65% at center,
-    var(--glow-primary) 0%,
-    var(--glow-secondary) 42%,
-    var(--glow-tertiary) 65%,
-    transparent 85%
-  );
+  background: radial-gradient(ellipse 75% 65% at center,
+      var(--glow-primary) 0%,
+      var(--glow-secondary) 42%,
+      var(--glow-tertiary) 65%,
+      transparent 85%);
   filter: blur(110px);
   opacity: 0.92;
   pointer-events: none;
@@ -747,12 +745,10 @@ section {
   height: 100%;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: radial-gradient(
-    ellipse 80% 60% at center,
-    var(--glow-secondary) 0%,
-    var(--glow-primary) 45%,
-    transparent 80%
-  );
+  background: radial-gradient(ellipse 80% 60% at center,
+      var(--glow-secondary) 0%,
+      var(--glow-primary) 45%,
+      transparent 80%);
   filter: blur(120px);
   opacity: 0.50;
   pointer-events: none;
@@ -770,13 +766,11 @@ section {
   height: calc(100% + 140px);
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: radial-gradient(
-    ellipse 80% 60% at center,
-    var(--glow-primary) 0%,
-    var(--glow-secondary) 40%,
-    var(--glow-tertiary) 65%,
-    transparent 85%
-  );
+  background: radial-gradient(ellipse 80% 60% at center,
+      var(--glow-primary) 0%,
+      var(--glow-secondary) 40%,
+      var(--glow-tertiary) 65%,
+      transparent 85%);
   filter: blur(115px);
   opacity: 0.88;
   pointer-events: none;
@@ -794,13 +788,11 @@ section {
   height: calc(100% + 120px);
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: radial-gradient(
-    ellipse 80% 60% at center,
-    var(--glow-primary) 0%,
-    var(--glow-secondary) 42%,
-    var(--glow-tertiary) 70%,
-    transparent 85%
-  );
+  background: radial-gradient(ellipse 80% 60% at center,
+      var(--glow-primary) 0%,
+      var(--glow-secondary) 42%,
+      var(--glow-tertiary) 70%,
+      transparent 85%);
   filter: blur(110px);
   opacity: 0.85;
   pointer-events: none;
@@ -818,13 +810,11 @@ section {
   height: calc(100% + 130px);
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: radial-gradient(
-    ellipse 75% 65% at center,
-    var(--glow-secondary) 0%,
-    var(--glow-primary) 45%,
-    var(--glow-tertiary) 70%,
-    transparent 85%
-  );
+  background: radial-gradient(ellipse 75% 65% at center,
+      var(--glow-secondary) 0%,
+      var(--glow-primary) 45%,
+      var(--glow-tertiary) 70%,
+      transparent 85%);
   filter: blur(115px);
   opacity: 0.82;
   pointer-events: none;
@@ -842,13 +832,11 @@ section {
   height: calc(100% + 160px);
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: radial-gradient(
-    ellipse 80% 65% at center,
-    var(--glow-primary) 0%,
-    var(--glow-secondary) 40%,
-    var(--glow-tertiary) 68%,
-    transparent 85%
-  );
+  background: radial-gradient(ellipse 80% 65% at center,
+      var(--glow-primary) 0%,
+      var(--glow-secondary) 40%,
+      var(--glow-tertiary) 68%,
+      transparent 85%);
   filter: blur(125px);
   opacity: 0.88;
   pointer-events: none;
@@ -903,19 +891,23 @@ section {
     --glow-spread: 100px;
     --glow-opacity: 0.75;
   }
+
   .stage-card-glow {
     --card-glow-spread: 140px;
     --card-glow-blur: 85px;
   }
+
   .showreel-carousel-wrapper::before {
     width: 420px;
     height: 380px;
     filter: blur(85px);
   }
+
   .passions-accordion-wrap::before {
     width: 100%;
     filter: blur(85px);
   }
+
   .contact-card-glow {
     --card-glow-spread: 130px;
   }
@@ -927,15 +919,18 @@ section {
     --glow-spread: 70px;
     --glow-opacity: 0.65;
   }
+
   .stage-card-glow {
     --card-glow-spread: 90px;
     --card-glow-blur: 60px;
   }
+
   .showreel-carousel-wrapper::before {
     width: 280px;
     height: 260px;
     filter: blur(60px);
   }
+
   .contact-card-glow {
     --card-glow-spread: 80px;
   }
@@ -1134,11 +1129,14 @@ section {
 }
 
 @keyframes stageDotPulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
     box-shadow: 0 0 10px rgba(0, 168, 255, 0.8);
   }
+
   50% {
     opacity: 0.45;
     transform: scale(0.85);
@@ -1184,13 +1182,11 @@ section {
   transform: translate(-50%, -50%);
   width: calc(100% + 260px);
   height: calc(100% + 220px);
-  background: radial-gradient(
-    ellipse 75% 65% at 50% 50%,
-    var(--glow-primary) 0%,
-    var(--glow-secondary) 42%,
-    var(--glow-tertiary) 65%,
-    transparent 85%
-  );
+  background: radial-gradient(ellipse 75% 65% at 50% 50%,
+      var(--glow-primary) 0%,
+      var(--glow-secondary) 42%,
+      var(--glow-tertiary) 65%,
+      transparent 85%);
   filter: blur(105px);
   opacity: 0.92;
   pointer-events: none;
@@ -1205,12 +1201,10 @@ section {
   transform: translate(-50%, -50%);
   width: 85%;
   height: 75%;
-  background: radial-gradient(
-    ellipse at center,
-    var(--glow-primary) 0%,
-    var(--glow-secondary) 50%,
-    transparent 80%
-  );
+  background: radial-gradient(ellipse at center,
+      var(--glow-primary) 0%,
+      var(--glow-secondary) 50%,
+      transparent 80%);
   filter: blur(85px);
   opacity: 0.65;
   pointer-events: none;
@@ -1226,7 +1220,7 @@ section {
   background: #070a10;
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 30px 80px -15px rgba(0, 0, 0, 0.8),
-              0 0 1px 1px rgba(255, 255, 255, 0.05);
+    0 0 1px 1px rgba(255, 255, 255, 0.05);
   overflow: hidden;
   transition: border-color 0.4s ease, box-shadow 0.4s ease;
 }
@@ -1234,7 +1228,7 @@ section {
 .cinematic-media-frame:hover {
   border-color: rgba(255, 255, 255, 0.16);
   box-shadow: 0 35px 95px -15px rgba(0, 0, 0, 0.9),
-              0 0 40px rgba(0, 168, 255, 0.07);
+    0 0 40px rgba(0, 168, 255, 0.07);
 }
 
 /* Viewport (16:9) with Native Browser Controls */
@@ -2006,9 +2000,9 @@ section {
   cursor: pointer;
   outline: none;
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 0.3s var(--ease-smooth),
-              box-shadow 0.35s var(--ease-smooth),
-              background 0.3s var(--ease-smooth);
+    border-color 0.3s var(--ease-smooth),
+    box-shadow 0.35s var(--ease-smooth),
+    background 0.3s var(--ease-smooth);
 }
 
 .compact-dev-card:hover,
@@ -2220,6 +2214,7 @@ section {
 .dev-projects-grid {
   display: contents;
 }
+
 .dev-project-card {
   display: none;
 }
@@ -3289,7 +3284,7 @@ footer {
 /* ── REVEAL ANIMATIONS (pre-load state) ── */
 .reveal-up {
   opacity: 0;
-  transform: translateY(40px);
+  will-change: transform, opacity, filter;
 }
 
 /* ── RESPONSIVE ── */
