@@ -1823,9 +1823,12 @@ section {
 /* ──────────────────────────────────────────────────────────── */
 /* ── BEYOND THE EDIT SECTION (COMPACT ONE-VIEW COMPOSITION) ── */
 /* ──────────────────────────────────────────────────────────── */
+/* ──────────────────────────────────────────────────────────── */
+/* ── BEYOND THE EDIT SECTION (COMPACT 3-CARD LAYOUT) ───────── */
+/* ──────────────────────────────────────────────────────────── */
 #beyond-the-edit {
   position: relative;
-  padding: 90px 0 80px;
+  padding: 80px 0 70px;
   overflow: hidden;
   background: linear-gradient(180deg, rgba(4, 10, 24, 0.4) 0%, rgba(2, 6, 17, 0.8) 100%);
 }
@@ -1842,21 +1845,21 @@ section {
   --mouse-y: 0px;
   --scroll-x: 0vw;
   position: absolute;
-  top: 40%;
+  top: 35%;
   left: 50%;
   transform: translate(calc(-50% + var(--mouse-x) + var(--scroll-x)), calc(-50% + var(--mouse-y)));
   font-family: var(--font-display);
-  font-size: clamp(90px, 65vw, 200px);
+  font-size: clamp(80px, 45vw, 180px);
   font-weight: 900;
   letter-spacing: -0.03em;
   background: linear-gradient(to bottom,
-      rgba(0, 168, 255, 0.1) 0%,
-      rgba(0, 66, 255, 0.04) 60%,
+      rgba(0, 168, 255, 0.08) 0%,
+      rgba(0, 66, 255, 0.03) 60%,
       rgba(0, 1, 36, 0.01) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.05);
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.04);
   white-space: nowrap;
   pointer-events: none;
   user-select: none;
@@ -1864,248 +1867,255 @@ section {
   will-change: transform;
 }
 
-.dev-projects-grid {
+.beyond-header {
+  margin-bottom: 26px;
+  position: relative;
+  z-index: 2;
+}
+
+/* 3-Card Grid Row: Small/compact proportion matching user screenshot */
+.beyond-compact-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
-  margin-top: 36px;
+  grid-template-columns: 1fr 1fr 1.3fr;
+  gap: 18px;
   position: relative;
   z-index: 2;
   width: 100%;
+  align-items: stretch;
 }
 
-/* Adapting Creative Passions interaction / easing / glass aesthetics */
-.dev-project-card {
-  padding: 30px 32px;
-  border-radius: 22px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  background: rgba(12, 20, 36, 0.65);
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(14px);
-  cursor: pointer;
-  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s var(--ease-smooth), box-shadow 0.4s var(--ease-smooth);
-}
-
-.dev-project-card:hover {
-  transform: translateY(-5px);
-  border-color: rgba(0, 168, 255, 0.55);
-  box-shadow: 0 20px 48px rgba(0, 168, 255, 0.18);
-}
-
-.dev-project-badge-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.dev-project-num {
-  font-family: var(--font-display);
-  font-size: 0.76rem;
-  font-weight: 800;
-  color: var(--electric-blue);
-  letter-spacing: 0.08em;
-  background: rgba(8, 14, 26, 0.7);
-  border: 1px solid var(--glass-border);
-  padding: 4px 12px;
-  border-radius: 100px;
-}
-
-.dev-status-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 11px;
-  border-radius: 100px;
-  background: rgba(0, 255, 150, 0.1);
-  border: 1px solid rgba(0, 255, 150, 0.25);
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: #00ff96;
-}
-
-.status-indicator-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #00ff96;
-  box-shadow: 0 0 8px #00ff96;
-  animation: pulseDot 2s infinite ease-in-out;
-}
-
-.dev-project-header {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.dev-project-title {
-  font-family: var(--font-heading);
-  font-size: 1.55rem;
-  font-weight: 700;
-  color: #ffffff;
-  letter-spacing: -0.01em;
-  transition: color 0.3s var(--ease-smooth);
-}
-
-.dev-project-card:hover .dev-project-title {
-  color: var(--electric-blue);
-}
-
-.dev-project-label {
-  font-size: 0.84rem;
-  font-weight: 600;
-  color: var(--electric-blue);
-}
-
-.dev-project-desc {
-  font-size: 0.92rem;
-  color: var(--text-secondary);
-  line-height: 1.6;
-  flex: 1;
-}
-
-.dev-project-tech-stack {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding-top: 14px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.tech-tag {
-  padding: 4px 12px;
-  border-radius: 100px;
-  background: rgba(0, 168, 255, 0.08);
-  border: 1px solid rgba(0, 168, 255, 0.22);
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-
-/* ── AI TOOLS & WORKFLOW SUBSECTION ── */
-.ai-tools-subsection {
-  margin-top: 40px;
+/* Base Card Style: Small compact glass card */
+.compact-dev-card {
   position: relative;
-  z-index: 2;
-  background: rgba(10, 16, 28, 0.5);
-  border: 1px solid var(--glass-border);
-  border-radius: 22px;
-  padding: 26px 30px;
-  width: 100%;
-}
-
-.ai-tools-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 22px;
-}
-
-.ai-tools-tag {
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: var(--electric-blue);
-  text-transform: uppercase;
-  margin-bottom: 0;
-}
-
-.ai-tools-title {
-  font-family: var(--font-heading);
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #ffffff;
-  margin-bottom: 0;
-}
-
-.ai-tools-sub {
-  font-size: 0.82rem;
-  color: var(--text-muted);
-}
-
-.ai-tools-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 16px;
-  width: 100%;
-  justify-content: center;
-}
-
-.ai-tool-item {
-  padding: 16px 18px;
+  padding: 18px 20px;
   border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 148px;
+  background: rgba(10, 16, 28, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  cursor: pointer;
+  outline: none;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.3s var(--ease-smooth),
+              box-shadow 0.35s var(--ease-smooth),
+              background 0.3s var(--ease-smooth);
+}
+
+.compact-dev-card:hover,
+.compact-dev-card:focus-visible {
+  transform: translateY(-3px);
+  border-color: rgba(0, 168, 255, 0.45);
+  background: rgba(12, 22, 38, 0.85);
+  box-shadow: 0 12px 30px rgba(0, 168, 255, 0.14);
+}
+
+/* Card Top Row */
+.compact-card-top {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: rgba(12, 20, 36, 0.65);
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(10px);
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s var(--ease-smooth), box-shadow 0.3s var(--ease-smooth);
-  cursor: pointer;
+  width: 100%;
 }
 
-.ai-tool-item:hover {
-  transform: translateY(-4px);
-  border-color: rgba(0, 168, 255, 0.5);
-  box-shadow: 0 12px 28px rgba(0, 168, 255, 0.15);
-}
-
-.ai-tool-icon-wrap {
-  width: 40px;
-  height: 40px;
+/* Icon Boxes */
+.compact-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   flex-shrink: 0;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--glass-border);
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  transition: transform 0.3s var(--ease-smooth), box-shadow 0.3s var(--ease-smooth);
 }
 
-.ai-tool-icon-wrap svg,
-.ai-tool-icon-wrap img {
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
+.compact-icon-box.icon-crm {
+  background: radial-gradient(circle at center, rgba(0, 168, 255, 0.28) 0%, rgba(0, 90, 200, 0.18) 70%, rgba(4, 15, 30, 0.6) 100%);
+  border-color: rgba(0, 168, 255, 0.3);
+  color: #38bdf8;
 }
 
-.ai-tool-info {
+.compact-icon-box.icon-portfolio {
+  background: radial-gradient(circle at center, rgba(168, 85, 247, 0.3) 0%, rgba(126, 34, 206, 0.18) 70%, rgba(20, 8, 35, 0.6) 100%);
+  border-color: rgba(168, 85, 247, 0.32);
+  color: #c084fc;
+}
+
+.compact-dev-card:hover .compact-icon-box {
+  transform: scale(1.04);
+}
+
+/* Card Headings */
+.compact-card-headings {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  flex: 1;
   min-width: 0;
 }
 
-.ai-tool-name {
+.compact-card-title {
   font-family: var(--font-heading);
-  font-size: 0.9rem;
-  font-weight: 700;
+  font-size: 0.96rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
   color: #ffffff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  text-transform: uppercase;
+  margin: 0;
+  line-height: 1.2;
 }
 
-.ai-tool-role {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  line-height: 1.35;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.ai-tool-role {
-  font-size: 0.65rem;
-  color: var(--text-muted);
+.compact-card-sub {
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: #94a3b8;
   line-height: 1.25;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Arrow Button */
+.compact-card-arrow {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  flex-shrink: 0;
+  transition: all 0.3s var(--ease-smooth);
+}
+
+.compact-dev-card:hover .compact-card-arrow {
+  background: rgba(0, 168, 255, 0.15);
+  border-color: rgba(0, 168, 255, 0.35);
+  color: #38bdf8;
+  transform: translateX(2px);
+}
+
+/* Description text */
+.compact-card-desc {
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: #94a3b8;
+  margin: 12px 0 0 0;
+}
+
+/* Card 3: AI & Digital Workflow Card */
+.compact-ai-card {
+  padding: 16px 20px;
+}
+
+.compact-ai-header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 12px;
+}
+
+.compact-ai-title {
+  font-family: var(--font-heading);
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+  text-transform: uppercase;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.compact-ai-sub {
+  font-size: 0.74rem;
+  color: #94a3b8;
+  margin: 0;
+  line-height: 1.25;
+}
+
+/* AI Icons Row */
+.compact-ai-icons-row {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  width: 100%;
+  align-items: center;
+}
+
+.compact-tool-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: transform 0.25s var(--ease-smooth);
+  text-align: center;
+}
+
+.compact-tool-item:hover {
+  transform: translateY(-2px);
+}
+
+.compact-tool-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all 0.25s var(--ease-smooth);
+}
+
+.compact-tool-icon img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+}
+
+.compact-tool-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.compact-tool-icon.ai-sparkle {
+  color: #4285f4;
+}
+
+.compact-tool-item:hover .compact-tool-icon {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 168, 255, 0.15);
+}
+
+.compact-tool-label {
+  font-size: 0.64rem;
+  font-weight: 500;
+  color: #94a3b8;
+  line-height: 1.1;
+  white-space: nowrap;
+  transition: color 0.25s var(--ease-smooth);
+}
+
+.compact-tool-item:hover .compact-tool-label {
+  color: #ffffff;
+}
+
+/* Fallback support for legacy dev card classes */
+.dev-projects-grid {
+  display: contents;
+}
+.dev-project-card {
+  display: none;
 }
 
 /* ── SOFTWARE GRID ── */
@@ -3526,26 +3536,19 @@ footer {
     font-size: clamp(50px, 18vw, 90px) !important;
   }
 
-  .dev-projects-grid {
+  .beyond-compact-grid {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 14px;
   }
 
-  .dev-project-card {
-    padding: 20px 18px;
+  .compact-dev-card {
+    padding: 16px 18px;
+    min-height: auto;
   }
 
-  .dev-project-title {
-    font-size: 1.2rem;
-  }
-
-  .ai-tools-subsection {
-    padding: 16px 16px;
-  }
-
-  .ai-tools-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+  .compact-ai-icons-row {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px 8px;
   }
 
   /* 9. MOBILE CREATIVE PASSIONS */

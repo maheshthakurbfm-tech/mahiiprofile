@@ -144,8 +144,8 @@ function applyCardGlowVariations(palette) {
     card.style.setProperty('--card-glow-y', '4px');
   });
 
-  // 3. Dev Project Cards
-  const devCards = document.querySelectorAll('.dev-project-card');
+  // 3. Beyond The Edit Cards (Dev & AI Workflow)
+  const devCards = document.querySelectorAll('.compact-dev-card, .dev-project-card');
   devCards.forEach((card, i) => {
     const isEven = i % 2 === 0;
     card.style.setProperty('--card-glow-primary', isEven ? palette.primary : palette.secondary);
