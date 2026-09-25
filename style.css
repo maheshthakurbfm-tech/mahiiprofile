@@ -393,40 +393,74 @@ body:has(button:hover) #cursor-ring {
 }
 
 .btn-primary {
-  padding: 13px 28px;
-  border-radius: var(--radius-pill);
-  background: linear-gradient(135deg, var(--electric-blue), var(--blue-glow));
-  color: #fff;
-  font-weight: 600;
-  font-size: 0.85rem;
-  letter-spacing: 0.04em;
+  padding: 14px 30px;
+  border-radius: 100px;
+  background: #0076ff;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
   border: none;
   cursor: pointer;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  gap: 10px;
   transition: all 0.3s var(--ease-smooth);
   position: relative;
   overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 118, 255, 0.35);
 }
 
 .btn-primary::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.18);
   opacity: 0;
   transition: opacity 0.2s;
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(0, 102, 255, 0.45);
+  background: #0084ff;
+  box-shadow: 0 8px 30px rgba(0, 118, 255, 0.55);
 }
 
 .btn-primary:hover::before {
   opacity: 1;
+}
+
+/* HIRE ME Solid Crisp White Pill Button (as in user screenshot) */
+.btn-hire-me {
+  padding: 14px 32px;
+  border-radius: 100px;
+  background: #ffffff;
+  color: #0076ff;
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s var(--ease-smooth);
+  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.2);
+}
+
+.btn-hire-me .hire-icon {
+  color: #0076ff;
+  fill: #0076ff;
+}
+
+.btn-hire-me:hover {
+  transform: translateY(-2px);
+  background: #f0f7ff;
+  box-shadow: 0 8px 32px rgba(255, 255, 255, 0.35), 0 0 20px rgba(0, 118, 255, 0.3);
 }
 
 .btn-ghost {
@@ -3492,9 +3526,10 @@ footer {
   }
 
   .hero-cta-group .btn-primary,
+  .hero-cta-group .btn-hire-me,
   .hero-cta-group .btn-ghost {
     padding: 10px 18px;
-    font-size: 0.78rem;
+    font-size: 0.8rem;
   }
 
   .role-pill {
