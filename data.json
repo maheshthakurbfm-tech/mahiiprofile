@@ -15,13 +15,13 @@
     "bio": "I'm Mahesh Thakur, a Video Editor from India with 2.5+ years of experience. I work across video editing, motion graphics, color grading, and sound, with a focus on clean work, strong pacing, and attention to detail. I'm looking for a team where I can put my skills to their best use, keep learning, take on new challenges, and contribute to the growth of the work and the company along the way.",
     "featuredWork": {
       "title": "DS Group Documentary & Narrative Motion Edit",
-      "tag": "FEATURED WORK • 30-35s HIGHLIGHT REEL",
+      "tag": "Premiere Pro · After Effects ·",
       "videoUrl": "https://res.cloudinary.com/esvwgoxe/video/upload/v1789416404/DS_Group_Documentry.mp4",
       "tools": [
         "Premiere Pro",
-        "After Effects",
-        "DaVinci Resolve"
-      ]
+        "After Effects"
+      ],
+      "poster": ""
     },
     "stats": [
       {
@@ -549,5 +549,5 @@
       "uploadDate": "Published"
     }
   ],
-  "updatedAt": "2026-09-25T03:00:46.008Z"
+  "updatedAt": "2026-09-25T04:28:23.880Z"
 }
