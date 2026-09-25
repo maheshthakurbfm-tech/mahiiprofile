@@ -3281,8 +3281,12 @@ footer {
   cursor: pointer;
 }
 
-/* ── REVEAL ANIMATIONS (pre-load state) ── */
+/* ── REVEAL ANIMATIONS (pre-load state for JS environments) ── */
 .reveal-up {
+  opacity: 1;
+}
+
+html.js-ready:not(.no-gsap) .reveal-up {
   opacity: 0;
   will-change: transform, opacity, filter;
 }
@@ -3985,4 +3989,24 @@ body::before {
   background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
   margin: 0 auto;
   max-width: 1200px;
+}
+
+/* ── ACCESSIBILITY & PREFERS-REDUCED-MOTION / LOW POWER ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .reveal-up {
+    opacity: 1 !important;
+    filter: none !important;
+    transform: none !important;
+  }
+
+  #custom-cursor, #cursor-ring, #ambient-particles, #magnetic-grid {
+    display: none !important;
+  }
 }

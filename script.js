@@ -460,29 +460,37 @@ function initCursor() {
 function initParticles() {
   const canvas = document.getElementById('ambient-particles');
   if (!canvas) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
   const ctx = canvas.getContext('2d');
   const particles = [];
-  const COUNT = 55;
+  const isLowPower = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) ||
+                     (navigator.deviceMemory && navigator.deviceMemory <= 4);
+  const COUNT = isLowPower ? 24 : 50;
 
   function resize() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
   }
   resize();
-  window.addEventListener('resize', resize);
+  window.addEventListener('resize', resize, { passive: true });
 
   for (let i = 0; i < COUNT; i++) {
     particles.push({
       x: Math.random() * window.innerWidth,
       y: Math.random() * window.innerHeight,
-      r: Math.random() * 1.4 + 0.3,
-      vx: (Math.random() - 0.5) * 0.25,
-      vy: (Math.random() - 0.5) * 0.25,
-      alpha: Math.random() * 0.4 + 0.08,
+      r: Math.random() * 1.3 + 0.3,
+      vx: (Math.random() - 0.5) * 0.2,
+      vy: (Math.random() - 0.5) * 0.2,
+      alpha: Math.random() * 0.35 + 0.08,
     });
   }
 
+  let isPaused = false;
+  let animId = null;
+
   function draw() {
+    if (isPaused) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     particles.forEach((p) => {
       p.x += p.vx;
@@ -498,45 +506,66 @@ function initParticles() {
       ctx.fill();
     });
 
-    // Draw connecting lines
-    for (let i = 0; i < particles.length; i++) {
-      for (let j = i + 1; j < particles.length; j++) {
-        const dx = particles[i].x - particles[j].x;
-        const dy = particles[i].y - particles[j].y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 110) {
-          ctx.beginPath();
-          ctx.moveTo(particles[i].x, particles[i].y);
-          ctx.lineTo(particles[j].x, particles[j].y);
-          ctx.strokeStyle = `rgba(0,168,255,${0.055 * (1 - dist / 110)})`;
-          ctx.lineWidth = 0.5;
-          ctx.stroke();
+    // Draw connecting lines only on standard/high-power devices to save CPU
+    if (!isLowPower) {
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 100) {
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.strokeStyle = `rgba(0,168,255,${0.05 * (1 - dist / 100)})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
         }
       }
     }
-    requestAnimationFrame(draw);
+    animId = requestAnimationFrame(draw);
   }
   draw();
+
+  // Pause canvas rendering when tab is inactive
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      isPaused = true;
+      if (animId) cancelAnimationFrame(animId);
+    } else {
+      isPaused = false;
+      draw();
+    }
+  });
 }
 
 /* ─── MAGNETIC GRID CANVAS (mouse glow) ─── */
 function initMagneticGrid() {
   const canvas = document.getElementById('magnetic-grid');
   if (!canvas) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  if (isTouchDevice) return; // Touch devices don't have mouse hover; avoid wasting CPU
+
   const ctx = canvas.getContext('2d');
   let mx = -9999, my = -9999;
+  let isPaused = false;
+  let animId = null;
 
   function resize() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
   }
   resize();
-  window.addEventListener('resize', resize);
-  document.addEventListener('mousemove', (e) => { mx = e.clientX; my = e.clientY; });
+  window.addEventListener('resize', resize, { passive: true });
+  document.addEventListener('mousemove', (e) => { mx = e.clientX; my = e.clientY; }, { passive: true });
 
-  const COLS = 28, ROWS = 18;
+  const COLS = 24, ROWS = 16;
 
   function draw() {
+    if (isPaused) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const cw = canvas.width / COLS;
     const ch = canvas.height / ROWS;
@@ -548,9 +577,9 @@ function initMagneticGrid() {
         const dx = px - mx;
         const dy = py - my;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        const radius = 200;
+        const radius = 180;
         if (dist < radius) {
-          const alpha = (1 - dist / radius) * 0.18;
+          const alpha = (1 - dist / radius) * 0.16;
           ctx.beginPath();
           ctx.arc(px, py, 1.5, 0, Math.PI * 2);
           ctx.fillStyle = `rgba(0,168,255,${alpha})`;
@@ -558,9 +587,19 @@ function initMagneticGrid() {
         }
       }
     }
-    requestAnimationFrame(draw);
+    animId = requestAnimationFrame(draw);
   }
   draw();
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      isPaused = true;
+      if (animId) cancelAnimationFrame(animId);
+    } else {
+      isPaused = false;
+      draw();
+    }
+  });
 }
 
 /* ─── LOAD DATA ─── */
@@ -1596,22 +1635,39 @@ function initHeroAnimations() {
     const animatedElements = new Set();
     const visualUnits = [];
 
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isLowPowerDevice = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) ||
+                             (navigator.deviceMemory && navigator.deviceMemory <= 4) ||
+                             /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
     // Helper: Register a visual component unit or staggered group of elements
     const registerVisualUnit = (triggerEl, elements, staggerTime = 0) => {
       if (!triggerEl) return;
       const targetList = Array.isArray(elements) ? elements.filter(Boolean) : (elements ? [elements] : []);
       if (!targetList.length) return;
 
+      // If user prefers reduced motion, ensure elements are immediately visible and return
+      if (prefersReducedMotion) {
+        targetList.forEach(el => {
+          animatedElements.add(el);
+          gsap.set(el, { autoAlpha: 1, opacity: 1, filter: 'none', scale: 1, y: 0 });
+        });
+        return;
+      }
+
+      const initialBlur = isLowPowerDevice ? 'none' : 'blur(12px)';
+      const exitBlur = isLowPowerDevice ? 'none' : 'blur(6px)';
+
       targetList.forEach(el => {
         animatedElements.add(el);
         gsap.set(el, {
           autoAlpha: 0,
           opacity: 0,
-          filter: 'blur(14px)',
+          filter: initialBlur,
           scale: 0.95,
-          y: 24,
+          y: 20,
           transformOrigin: '50% 50%',
-          willChange: 'transform, filter, opacity'
+          willChange: 'transform, opacity'
         });
       });
 
@@ -1619,10 +1675,10 @@ function initHeroAnimations() {
         gsap.to(targetList, {
           autoAlpha: 1,
           opacity: 1,
-          filter: 'blur(0px)',
+          filter: 'none',
           scale: 1.0,
           y: 0,
-          duration: 0.9,
+          duration: 0.85,
           stagger: staggerTime,
           ease: 'power3.out',
           overwrite: 'auto'
@@ -1633,11 +1689,11 @@ function initHeroAnimations() {
         gsap.to(targetList, {
           autoAlpha: 0,
           opacity: 0,
-          filter: 'blur(8px)',
+          filter: exitBlur,
           scale: 0.98,
-          y: -20,
-          duration: 0.55,
-          stagger: staggerTime ? 0.03 : 0,
+          y: -16,
+          duration: 0.5,
+          stagger: staggerTime ? 0.02 : 0,
           ease: 'power2.in',
           overwrite: 'auto'
         });
@@ -1647,11 +1703,11 @@ function initHeroAnimations() {
         gsap.to(targetList, {
           autoAlpha: 0,
           opacity: 0,
-          filter: 'blur(14px)',
+          filter: initialBlur,
           scale: 0.95,
-          y: 24,
-          duration: 0.55,
-          stagger: staggerTime ? 0.03 : 0,
+          y: 20,
+          duration: 0.5,
+          stagger: staggerTime ? 0.02 : 0,
           ease: 'power2.in',
           overwrite: 'auto'
         });
@@ -2272,7 +2328,19 @@ async function boot() {
     hideLoader();
   }
 
-  // GSAP & Lenis init after scripts load
+  // GSAP & Lenis init after scripts load with robust failure fallback
+  let gsapAttempts = 0;
+  const maxGsapAttempts = 30; // ~2.4 seconds max wait
+
+  const fallbackRevealAll = () => {
+    document.documentElement.classList.add('no-gsap');
+    document.querySelectorAll('.reveal-up').forEach(el => {
+      el.style.opacity = '1';
+      el.style.filter = 'none';
+      el.style.transform = 'none';
+    });
+  };
+
   const waitForGSAP = () => {
     if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
       try {
@@ -2281,13 +2349,21 @@ async function boot() {
         initStatCounters();
       } catch (e) {
         console.error('Error initializing GSAP/ScrollTrigger:', e);
+        fallbackRevealAll();
       }
     } else {
-      setTimeout(waitForGSAP, 80);
+      gsapAttempts++;
+      if (gsapAttempts < maxGsapAttempts) {
+        setTimeout(waitForGSAP, 80);
+      } else {
+        console.warn('GSAP/ScrollTrigger load timeout. Falling back to native visible state.');
+        fallbackRevealAll();
+      }
     }
   };
   waitForGSAP();
 
+  let lenisAttempts = 0;
   const waitForLenis = () => {
     if (typeof Lenis !== 'undefined') {
       try {
@@ -2296,7 +2372,10 @@ async function boot() {
         console.error('Error initializing Lenis:', e);
       }
     } else {
-      setTimeout(waitForLenis, 80);
+      lenisAttempts++;
+      if (lenisAttempts < maxGsapAttempts) {
+        setTimeout(waitForLenis, 80);
+      }
     }
   };
   waitForLenis();
