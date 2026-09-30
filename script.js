@@ -604,7 +604,29 @@ function initMagneticGrid() {
 
 /* ─── LOAD DATA ─── */
 async function loadData() {
-  // 1. Try server API endpoint first for real-time global site data
+  // 1. First check localStorage for immediate browser/admin edits
+  try {
+    const localDataStr = localStorage.getItem('mt-portfolio-data');
+    if (localDataStr) {
+      const parsed = JSON.parse(localDataStr);
+      if (parsed && parsed.projects && parsed.projects.length > 0) {
+        siteData = parsed;
+        // Background sync check with server in case server has fresh updates
+        fetch('/api/site-data', { cache: 'no-cache' }).then(res => res.ok ? res.json() : null).then(apiData => {
+          if (apiData && apiData.updatedAt && (!parsed.updatedAt || apiData.updatedAt > parsed.updatedAt)) {
+            siteData = apiData;
+            try { localStorage.setItem('mt-portfolio-data', JSON.stringify(apiData)); } catch (_) {}
+            if (typeof renderAccordion === 'function') renderAccordion();
+          }
+        }).catch(() => {});
+        return;
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to parse local siteData:', e);
+  }
+
+  // 2. Try server API endpoint next for real-time global site data
   try {
     const apiResp = await fetch('/api/site-data', { cache: 'no-cache' });
     if (apiResp.ok) {
@@ -619,7 +641,7 @@ async function loadData() {
     console.warn('API /api/site-data unreachable, falling back to static data.json:', err);
   }
 
-  // 2. Try static data.json file from server
+  // 3. Try static data.json file from server
   try {
     const res = await fetch('data.json', { cache: 'no-cache' });
     if (res.ok) {
@@ -631,20 +653,6 @@ async function loadData() {
       }
     }
   } catch (_) {}
-
-  // 3. Fall back to localStorage if offline/local cache exists
-  try {
-    const localDataStr = localStorage.getItem('mt-portfolio-data');
-    if (localDataStr) {
-      const parsed = JSON.parse(localDataStr);
-      if (parsed && parsed.projects && parsed.projects.length > 0) {
-        siteData = parsed;
-        return;
-      }
-    }
-  } catch (e) {
-    console.warn('Failed to parse local siteData:', e);
-  }
 
   // 4. Default fallback memory data structure
   siteData = getFallbackData();
@@ -1176,12 +1184,17 @@ function renderVideoArea(p) {
 
   if (p.thumbnail && p.thumbnail.trim()) {
     return `
-      <img 
-        src="${escAttr(p.thumbnail)}" 
-        alt="${escAttr(p.title)}" 
-        style="width:100%;height:100%;object-fit:cover;border-radius:12px;" 
-        onerror="this.style.display='none'; const fb = this.nextElementSibling; if (fb) fb.style.display='flex';"
-      />
+      <div style="position:relative;width:100%;height:100%;border-radius:12px;overflow:hidden;">
+        <img 
+          src="${escAttr(p.thumbnail)}" 
+          alt="${escAttr(p.title)}" 
+          style="width:100%;height:100%;object-fit:cover;border-radius:12px;" 
+          onerror="this.parentElement.style.display='none'; const fb = this.parentElement.nextElementSibling; if (fb) fb.style.display='flex';"
+        />
+        <div style="position:absolute;inset:0;background:rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;pointer-events:none;">
+          <div style="width:36px;height:36px;border-radius:50%;background:rgba(0,168,255,0.88);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;color:#ffffff;font-size:0.85rem;box-shadow:0 0 16px rgba(0,168,255,0.6);padding-left:2px;">▶</div>
+        </div>
+      </div>
       <div class="video-placeholder" style="display:none;">
         <div class="play-icon">▶</div>
         <span>${escHtml(p.title)}</span>
@@ -1199,24 +1212,42 @@ function renderVideoArea(p) {
 
 /* ─── RENDER SOFTWARE GRID ─── */
 function renderSoftware() {
-  const grid = document.getElementById('software-grid');
-  if (!grid || !siteData) return;
+  const coreGrid = document.getElementById('software-grid-core');
+  const secondaryGrid = document.getElementById('software-grid-secondary');
+  const fallbackGrid = document.getElementById('software-grid');
+  
+  if (!siteData) return;
   const software = Array.isArray(siteData.software) ? siteData.software : [];
-  grid.innerHTML = software.map(s => {
+
+  const coreItems = software.filter(s => s.category === 'core' || ['Premiere Pro', 'After Effects', 'DaVinci Resolve', 'Photoshop'].includes(s.name));
+  const secondaryItems = software.filter(s => s.category === 'secondary' || !coreItems.includes(s));
+
+  const renderCard = (s, isCore) => {
     const isImg = s.icon && (s.icon.includes('/') || s.icon.endsWith('.svg') || s.icon.endsWith('.png'));
     const iconMarkup = isImg
       ? `<img class="software-icon-img" src="${escAttr(s.icon)}" alt="${escAttr(s.name)}" />`
       : s.icon;
+    const taglineMarkup = s.tagline ? `<div class="software-tagline">${escHtml(s.tagline)}</div>` : '';
+    
     return `
-      <div class="software-card glass-card reveal-up">
+      <div class="software-card ${isCore ? 'software-card-core' : 'software-card-secondary'} glass-card reveal-up">
         <span class="software-icon">${iconMarkup}</span>
         <div class="software-name">${escHtml(s.name)}</div>
+        ${taglineMarkup}
         <div class="skill-bar">
           <div class="skill-bar-fill" data-level="${s.level || 0}"></div>
         </div>
       </div>
     `;
-  }).join('');
+  };
+
+  if (coreGrid && secondaryGrid) {
+    coreGrid.innerHTML = coreItems.map(s => renderCard(s, true)).join('');
+    secondaryGrid.innerHTML = secondaryItems.map(s => renderCard(s, false)).join('');
+  } else if (fallbackGrid) {
+    fallbackGrid.style.display = 'grid';
+    fallbackGrid.innerHTML = software.map(s => renderCard(s, s.category === 'core')).join('');
+  }
 }
 
 /* ─── UPDATE HERO FROM DATA ─── */
@@ -1641,7 +1672,7 @@ function initHeroAnimations() {
                              /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
     // Helper: Register a visual component unit or staggered group of elements
-    const registerVisualUnit = (triggerEl, elements, staggerTime = 0) => {
+    const registerVisualUnit = (triggerEl, elements, staggerTime = 0, hasOutAnimation = true) => {
       if (!triggerEl) return;
       const targetList = Array.isArray(elements) ? elements.filter(Boolean) : (elements ? [elements] : []);
       if (!targetList.length) return;
@@ -1686,6 +1717,7 @@ function initHeroAnimations() {
       };
 
       const animateOutTop = () => {
+        if (!hasOutAnimation) return; // Stays fully visible and leaves naturally with normal scroll
         gsap.to(targetList, {
           autoAlpha: 0,
           opacity: 0,
@@ -1700,6 +1732,7 @@ function initHeroAnimations() {
       };
 
       const animateOutBottom = () => {
+        if (!hasOutAnimation) return; // Stays fully visible and leaves naturally with normal scroll
         gsap.to(targetList, {
           autoAlpha: 0,
           opacity: 0,
@@ -1763,7 +1796,8 @@ function initHeroAnimations() {
       const beyondGrid = beyondSec.querySelector('.beyond-compact-grid');
       const devCards = beyondSec.querySelectorAll('.compact-dev-card, .dev-project-card');
 
-      if (beyondHeader) registerVisualUnit(beyondHeader, beyondHeader);
+      // Header "Beyond The Edit": IN animation preserved, OUT animation disabled (leaves naturally with scroll)
+      if (beyondHeader) registerVisualUnit(beyondHeader, beyondHeader, 0, false);
       if (beyondGrid && devCards.length) {
         registerVisualUnit(beyondGrid, Array.from(devCards), 0.1);
       } else if (beyondGrid) {
@@ -1778,7 +1812,8 @@ function initHeroAnimations() {
       const passionsWrap = interestsSec.querySelector('.passions-accordion-wrap');
       const passionCards = interestsSec.querySelectorAll('.passion-card');
 
-      if (interestsHeader) registerVisualUnit(interestsHeader, interestsHeader);
+      // Header "Creative Passions": IN animation preserved, OUT animation disabled (leaves naturally with scroll)
+      if (interestsHeader) registerVisualUnit(interestsHeader, interestsHeader, 0, false);
       if (passionsWrap && passionCards.length) {
         registerVisualUnit(passionsWrap, Array.from(passionCards), 0.08);
       } else if (passionsWrap) {
@@ -1793,7 +1828,8 @@ function initHeroAnimations() {
       const softGrid = softSec.querySelector('.software-grid');
       const softCards = softSec.querySelectorAll('.software-card');
 
-      if (softHeader) registerVisualUnit(softHeader, softHeader);
+      // Header "Tools of the Craft": IN animation preserved, OUT animation disabled (leaves naturally with scroll)
+      if (softHeader) registerVisualUnit(softHeader, softHeader, 0, false);
       if (softGrid && softCards.length) {
         registerVisualUnit(softGrid, Array.from(softCards), 0.05);
       } else if (softGrid) {
@@ -1809,7 +1845,8 @@ function initHeroAnimations() {
       const contactCol = contactSec.querySelector('.contact-info-col');
       const contactForm = contactSec.querySelector('.contact-form-wrapper');
 
-      if (contactHeader) registerVisualUnit(contactHeader, contactHeader);
+      // Header "Ready to Make Something Great?": IN animation preserved, OUT animation disabled (leaves naturally with scroll)
+      if (contactHeader) registerVisualUnit(contactHeader, contactHeader, 0, false);
       if (contactGrid) {
         const cols = [contactCol, contactForm].filter(Boolean);
         if (cols.length) {
@@ -2415,3 +2452,63 @@ document.addEventListener('click', (e) => {
     toggleContactChooser(false);
   }
 });
+
+/* ── MOBILE MENU SYSTEM ── */
+function openMobileMenu() {
+  const overlay = document.getElementById('mobile-menu-overlay');
+  const btn = document.getElementById('nav-hamburger');
+  if (overlay) {
+    overlay.classList.add('is-open');
+    overlay.setAttribute('aria-hidden', 'false');
+  }
+  if (btn) {
+    btn.classList.add('is-active');
+    btn.setAttribute('aria-expanded', 'true');
+  }
+  document.body.classList.add('mobile-menu-open');
+}
+
+function closeMobileMenu() {
+  const overlay = document.getElementById('mobile-menu-overlay');
+  const btn = document.getElementById('nav-hamburger');
+  if (overlay) {
+    overlay.classList.remove('is-open');
+    overlay.setAttribute('aria-hidden', 'true');
+  }
+  if (btn) {
+    btn.classList.remove('is-active');
+    btn.setAttribute('aria-expanded', 'false');
+  }
+  document.body.classList.remove('mobile-menu-open');
+}
+
+function toggleMobileMenu() {
+  const overlay = document.getElementById('mobile-menu-overlay');
+  if (overlay && overlay.classList.contains('is-open')) {
+    closeMobileMenu();
+  } else {
+    openMobileMenu();
+  }
+}
+
+window.openMobileMenu = openMobileMenu;
+window.closeMobileMenu = closeMobileMenu;
+window.toggleMobileMenu = toggleMobileMenu;
+
+document.addEventListener('DOMContentLoaded', () => {
+  const hamburger = document.getElementById('nav-hamburger');
+  if (hamburger) {
+    hamburger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleMobileMenu();
+    });
+  }
+
+  // Close mobile menu on escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeMobileMenu();
+    }
+  });
+});
+
