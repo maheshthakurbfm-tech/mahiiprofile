@@ -88,7 +88,7 @@ function initPasswordGate() {
                           window.location.protocol === 'file:' ||
                           !window.location.hostname;
 
-      if ((isLocalEnv || true) && (enteredPw === 'admin123' || (adminAuthToken && enteredPw === adminAuthToken))) {
+      if (isLocalEnv && (enteredPw === 'admin123' || (adminAuthToken && enteredPw === adminAuthToken))) {
         unlockSuccess(enteredPw);
       } else {
         showAuthError();
@@ -406,6 +406,14 @@ window.uploadReelFile = async function(e, slotIdx, fieldType) {
   const file = e.target.files?.[0];
   if (!file) return;
 
+  const btnLabel = e.target.parentElement;
+  const originalText = btnLabel ? btnLabel.childNodes[0].nodeValue : '⬆ Upload Reel Video';
+  
+  if (btnLabel) {
+    btnLabel.style.opacity = '0.7';
+    btnLabel.style.pointerEvents = 'none';
+  }
+
   showToast(`Uploading Reel 0${slotIdx + 1} (${file.name})...`);
 
   try {
@@ -413,12 +421,14 @@ window.uploadReelFile = async function(e, slotIdx, fieldType) {
       file,
       'portfolio-reels',
       (percent, loaded, total) => {
-        showToast(`Uploading Reel 0${slotIdx + 1}: ${percent}%`);
+        if (btnLabel) {
+          btnLabel.childNodes[0].nodeValue = `⏳ Uploading ${percent}%... `;
+        }
       }
     );
 
-    const publicUrl = uploadRes.url;
-    const assetId = uploadRes.assetId;
+    const publicUrl = uploadRes.url || uploadRes.secure_url;
+    const assetId = uploadRes.assetId || uploadRes.publicId;
 
     if (fieldType === 'video') {
       setVal(`reel-url-${slotIdx}`, publicUrl);
@@ -459,10 +469,16 @@ window.uploadReelFile = async function(e, slotIdx, fieldType) {
     showToast(`Reel 0${slotIdx + 1} uploaded & attached successfully!`);
     playClickSFX();
   } catch (err) {
-    showToast(`Upload failed: ${err.message}`);
+    showToast(`Upload failed: ${err.message}`, 'error');
     console.error('Reel upload error:', err);
+  } finally {
+    if (btnLabel) {
+      btnLabel.style.opacity = '1';
+      btnLabel.style.pointerEvents = 'auto';
+      if (btnLabel.childNodes[0]) btnLabel.childNodes[0].nodeValue = originalText;
+    }
+    e.target.value = '';
   }
-  e.target.value = '';
 };
 
 /* ─── ADMIN PROJECT LIST ─── */

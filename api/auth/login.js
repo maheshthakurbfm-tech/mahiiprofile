@@ -14,8 +14,10 @@ module.exports = (req, res) => {
   try {
     const body = req.body || {};
     const password = body.password || '';
-    if (password === 'admin123') {
-      return res.status(200).json({ success: true, token: 'admin123' });
+    const expectedPassword = process.env.ADMIN_PASSWORD || 'admin123';
+
+    if (password && password === expectedPassword) {
+      return res.status(200).json({ success: true, token: expectedPassword });
     } else {
       return res.status(401).json({ success: false, error: 'Invalid security key' });
     }

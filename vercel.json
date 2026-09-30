@@ -13,10 +13,13 @@
     { "src": "mediaStorageService.js", "use": "@vercel/static" },
     { "src": "data.json", "use": "@vercel/static" },
     { "src": "api/*.js", "use": "@vercel/node" },
+    { "src": "api/auth/*.js", "use": "@vercel/node" },
     { "src": "assets/**", "use": "@vercel/static" }
   ],
   "routes": [
+    { "src": "/api/auth/(.*)", "dest": "/api/auth/$1.js" },
     { "src": "/api/(.*)", "dest": "/api/$1.js" },
+    { "src": "/admin/?", "dest": "/admin.html" },
     { "src": "/resume/?", "dest": "/resume.html" },
     { "src": "/(.*)", "dest": "/$1" }
   ]
